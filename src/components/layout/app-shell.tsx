@@ -18,10 +18,10 @@ export function AppShell({
   className,
 }: AppShellProps) {
   return (
-    <div className="app-backdrop min-h-screen w-full bg-bg">
+    <div className="app-backdrop min-h-screen w-full bg-bg flex justify-center">
       <div
         className={cn(
-          'mx-auto grid min-h-screen w-full max-w-[1436px] grid-cols-1',
+          'grid min-h-screen w-full max-w-[1436px] grid-cols-1',
           'lg:grid-cols-[224px_minmax(0,1fr)] lg:gap-5 lg:px-4',
           showRightSidebar
             ? '2xl:grid-cols-[224px_minmax(0,820px)_296px] 2xl:gap-6 2xl:px-6'
