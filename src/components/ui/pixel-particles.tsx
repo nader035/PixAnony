@@ -32,17 +32,22 @@ const defaultColors = [
   'rgba(236, 72, 153, 0.3)',   // faint pink
 ];
 
+function seededRandom(seed: number) {
+  const value = Math.sin(seed * 9301 + 49297) * 233280;
+  return value - Math.floor(value);
+}
+
 function generateParticles(count: number, colors: string[]): Particle[] {
   return Array.from({ length: count }, (_, i) => ({
     id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 4 + 2,
-    color: colors[Math.floor(Math.random() * colors.length)],
-    duration: Math.random() * 8 + 6,
-    delay: Math.random() * 5,
-    driftX: (Math.random() - 0.5) * 60,
-    driftY: -(Math.random() * 80 + 40),
+    x: seededRandom(i + 1) * 100,
+    y: seededRandom(i + 11) * 100,
+    size: seededRandom(i + 21) * 4 + 2,
+    color: colors[Math.floor(seededRandom(i + 31) * colors.length)],
+    duration: seededRandom(i + 41) * 8 + 6,
+    delay: seededRandom(i + 51) * 5,
+    driftX: (seededRandom(i + 61) - 0.5) * 60,
+    driftY: -(seededRandom(i + 71) * 80 + 40),
   }));
 }
 
@@ -63,10 +68,10 @@ export function PixelParticles({
           key={particle.id}
           className="absolute"
           style={{
-            left: `${particle.x}%`,
-            top: `${particle.y}%`,
-            width: particle.size,
-            height: particle.size,
+            left: `${particle.x.toFixed(4)}%`,
+            top: `${particle.y.toFixed(4)}%`,
+            width: `${particle.size.toFixed(3)}px`,
+            height: `${particle.size.toFixed(3)}px`,
             backgroundColor: particle.color,
           }}
           initial={{ opacity: 0, scale: 0 }}

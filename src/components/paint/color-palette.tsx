@@ -58,19 +58,19 @@ export default function ColorPalette({ compact = false }: { compact?: boolean })
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, delay: 0.2 }}
       className={cn(
-        'bg-surface border border-border',
-        compact ? 'flex items-center gap-2 overflow-x-auto rounded-xl p-1.5 hide-scrollbar' : 'flex flex-col gap-3 p-3 rounded-xl'
+        'editor-panel border border-border/80 bg-surface/95',
+        compact ? 'flex items-center gap-2 overflow-x-auto rounded-2xl p-1.5 hide-scrollbar' : 'flex flex-col gap-3 rounded-2xl p-3'
       )}
     >
       {/* Header */}
-      <div className={cn('text-[10px] font-semibold text-text-muted uppercase tracking-wider', compact && 'hidden')}>
+      <div className={cn('font-pixel text-[10px] font-semibold uppercase tracking-wider text-text-muted', compact && 'hidden')}>
         Colors
       </div>
 
       {/* Current Color + Hex */}
       <div className={cn('flex items-center gap-2', compact && 'flex-shrink-0')}>
         <div
-          className={cn('rounded-lg border-2 border-border shadow-inner flex-shrink-0', compact ? 'h-10 w-10' : 'w-10 h-10')}
+          className={cn('shrink-0 rounded-xl border-2 border-border shadow-inner', compact ? 'h-10 w-10' : 'h-10 w-10')}
           style={{ backgroundColor: color === 'transparent' ? '#000' : color }}
         >
           {color === 'transparent' && (
@@ -84,14 +84,14 @@ export default function ColorPalette({ compact = false }: { compact?: boolean })
             onChange={(e) => handleHexChange(e.target.value)}
             onBlur={handleHexBlur}
             onKeyDown={(e) => e.key === 'Enter' && handleHexBlur()}
-            className="w-full px-2 py-1.5 text-xs font-mono bg-card border border-border rounded-md
+            className="w-full rounded-xl border border-border bg-card px-2 py-1.5 font-mono text-xs
                        text-text focus:outline-none focus:border-primary transition-colors"
             placeholder="#000000"
             maxLength={7}
           />
         </div>
         {/* Native color picker */}
-        <label className={cn('relative w-8 h-8 rounded-md overflow-hidden border border-border cursor-pointer flex-shrink-0', compact && 'hidden')}>
+        <label className={cn('relative h-8 w-8 shrink-0 cursor-pointer overflow-hidden rounded-xl border border-border', compact && 'hidden')}>
           <input
             type="color"
             value={color === 'transparent' ? '#ffffff' : color}
@@ -111,8 +111,7 @@ export default function ColorPalette({ compact = false }: { compact?: boolean })
       <div className={cn('relative', compact && 'hidden')}>
         <button
           onClick={() => setShowPaletteDropdown(!showPaletteDropdown)}
-          className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs bg-card border border-border
-                     rounded-md text-text hover:bg-card-hover transition-colors"
+          className="flex w-full items-center justify-between rounded-xl border border-border bg-card px-2.5 py-1.5 text-xs text-text transition-colors hover:bg-card-hover"
         >
           <span className="font-medium">{activePalette}</span>
           <ChevronDown size={12} className={`transition-transform ${showPaletteDropdown ? 'rotate-180' : ''}`} />
@@ -123,7 +122,7 @@ export default function ColorPalette({ compact = false }: { compact?: boolean })
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            className="absolute z-20 top-full left-0 right-0 mt-1 bg-card border border-border rounded-md
+            className="absolute z-20 left-0 right-0 top-full mt-1 overflow-hidden rounded-xl border border-border bg-card
                        shadow-lg overflow-hidden"
           >
             {PALETTES.map(p => (
@@ -166,7 +165,7 @@ export default function ColorPalette({ compact = false }: { compact?: boolean })
               key={`${c}-${i}`}
               onClick={() => handleColorClick(c)}
               className={`
-                rounded-md border-2 transition-all duration-100
+                rounded-lg border-2 transition-all duration-100
                 ${compact ? 'h-9 w-9 flex-shrink-0' : 'w-full aspect-square'}
                 hover:scale-110 hover:z-10 relative
                 ${isSelected
@@ -214,8 +213,7 @@ export default function ColorPalette({ compact = false }: { compact?: boolean })
       {/* Add Custom Color Button */}
       <button
         onClick={handleAddCustomColor}
-        className="flex items-center justify-center gap-1.5 px-2 py-1.5 text-[10px] font-medium
-                   bg-card border border-dashed border-border rounded-md text-text-muted
+        className="flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-border bg-card px-2 py-1.5 text-[10px] font-medium text-text-muted
                    hover:border-primary hover:text-primary transition-colors"
         hidden={compact}
       >

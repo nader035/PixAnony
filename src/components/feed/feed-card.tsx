@@ -26,6 +26,11 @@ import type { Artwork } from '@/lib/types';
 interface FeedCardProps {
   artwork: Artwork & { profile?: { username: string; display_name: string; avatar_url: string | null; is_verified: boolean; is_pro: boolean } };
   className?: string;
+  repostContext?: {
+    displayName: string;
+    username: string;
+    createdAt: string;
+  };
 }
 
 // Heart burst particles for like animation
@@ -64,7 +69,7 @@ function HeartBurstParticles() {
   );
 }
 
-export function FeedCard({ artwork, className }: FeedCardProps) {
+export function FeedCard({ artwork, className, repostContext }: FeedCardProps) {
   const supabase = useMemo(() => createClient(), []);
   const [liked, setLiked] = useState(artwork.liked_by_user ?? false);
   const [likesCount, setLikesCount] = useState(artwork.likes_count);
@@ -162,6 +167,17 @@ export function FeedCard({ artwork, className }: FeedCardProps) {
         className
       )}
     >
+      {repostContext && (
+        <div className="flex items-center gap-2 border-b border-border/55 bg-primary/[0.07] px-4 py-2.5 text-xs font-semibold text-text-muted sm:px-5">
+          <Repeat2 size={13} className="text-green" />
+          <Link href={`/@${repostContext.username}`} className="truncate text-text transition-colors hover:text-primary">
+            Reposted by {repostContext.displayName}
+          </Link>
+          <span className="text-text-muted/60">·</span>
+          <time className="shrink-0">{formatTimeAgo(repostContext.createdAt)}</time>
+        </div>
+      )}
+
       {/* ===== HEADER ===== */}
       <div className="flex items-center gap-3 px-4 pt-4 pb-2 sm:px-5 sm:pt-5">
         <Link href={isAnonymous ? '#' : `/@${username}`}>

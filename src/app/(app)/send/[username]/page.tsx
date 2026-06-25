@@ -6,9 +6,11 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Grid3X3, RotateCcw,
-  RotateCw, Eye, EyeOff, Send, Sparkles, User, Loader2
+  RotateCw, Eye, EyeOff, Send, Sparkles, User, Loader2,
+  Check, Copy, Lock, LogIn, Shield
 } from '@/components/ui/icons';
 import { usePaintStore } from '@/stores/paint-store';
+import { usePaintKeyboardShortcuts } from '@/hooks/use-paint-keyboard-shortcuts';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
@@ -23,6 +25,7 @@ import { AnimatedButton } from '@/components/ui/animated-button';
 import { Logo } from '@/components/ui/logo';
 import { GridSize } from '@/lib/types';
 import { PixelAvatar } from '@/components/ui/pixel-avatar';
+import { BorderGlow } from '@/components/react-bits/border-glow';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface RecipientProfile {
@@ -30,6 +33,11 @@ interface RecipientProfile {
   username: string;
   display_name: string | null;
   avatar_url: string | null;
+}
+
+interface SenderProfile {
+  username: string;
+  display_name: string | null;
 }
 
 
@@ -61,23 +69,34 @@ export default function SendToUserPage() {
 
   // UI state
   const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
+  const [currentProfile, setCurrentProfile] = useState<SenderProfile | null>(null);
   const [recipient, setRecipient] = useState<RecipientProfile | null>(null);
   const [loadingRecipient, setLoadingRecipient] = useState(true);
   const [showSendModal, setShowSendModal] = useState(false);
   const [caption, setCaption] = useState('');
+  const [sendAnonymously, setSendAnonymously] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  const [copiedShareLink, setCopiedShareLink] = useState(false);
+
+  usePaintKeyboardShortcuts({
+    disabled: showSendModal,
+    onEscape: () => setShowSendModal(false),
+  });
 
   // Initialize canvas on mount & Fetch recipient
   useEffect(() => {
     initializeCanvas(16);
     
-    // Fetch auth user
-    supabase.auth.getUser().then(({ data }) => {
+    // Fetch auth user without blocking the public recipient link.
+    supabase.auth.getUser().then(async ({ data }) => {
       if (data?.user) {
         setCurrentUser(data.user);
-      } else {
-        toast.error('Sign in to send artwork.');
-        router.replace('/login');
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('username, display_name')
+          .eq('id', data.user.id)
+          .single();
+        setCurrentProfile(profileData ?? null);
       }
     });
 
@@ -112,34 +131,23 @@ export default function SendToUserPage() {
     };
   }, [initializeCanvas, resetState, router, supabase, username]);
 
-  // Keyboard shortcut listener
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
-        e.preventDefault();
-        undo();
-      }
-      if (
-        ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && e.shiftKey) ||
-        ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y')
-      ) {
-        e.preventDefault();
-        redo();
-      }
-      if (e.key.toLowerCase() === 'g' && !e.ctrlKey && !e.metaKey && document.activeElement?.tagName !== 'INPUT') {
-        e.preventDefault();
-        toggleGrid();
-      }
-    };
+  const loginHref = `/login?next=${encodeURIComponent(`/send/${username}`)}`;
+  const shareUrl = typeof window === 'undefined'
+    ? `/send/${username}`
+    : `${window.location.origin}/send/${username}`;
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo, toggleGrid]);
+  const copyShareLink = async () => {
+    await navigator.clipboard.writeText(shareUrl);
+    setCopiedShareLink(true);
+    toast.success('Send link copied.');
+    window.setTimeout(() => setCopiedShareLink(false), 1600);
+  };
 
-  const handleSendAnonymousPixel = async () => {
+  const handleSendPixel = async () => {
     if (!recipient) return;
     if (!currentUser) {
-      router.push('/login');
+      toast.error('Sign in to deliver your pixel art.');
+      router.push(loginHref);
       return;
     }
 
@@ -157,23 +165,30 @@ export default function SendToUserPage() {
         }
       }
 
+      const senderName = currentProfile?.username ?? 'creator';
+      const captionText = caption.trim() || (
+        sendAnonymously
+          ? 'A surprise pixel gift!'
+          : `A signed pixel gift from @${senderName}.`
+      );
+
       const { error } = await supabase.from('artworks').insert({
         user_id: currentUser.id,
         receiver_id: recipient.id,
-        title: 'Anonymous Pixel Message',
-        caption: caption.trim() || 'A surprise pixel gift! 🎁',
+        title: sendAnonymously ? 'Anonymous Pixel Message' : `Pixel message from @${senderName}`,
+        caption: captionText,
         grid_size: gridSize,
         pixel_data: compositePixels,
         layers: layers,
-        visibility: 'anonymous',
-        is_anonymous: true
+        visibility: sendAnonymously ? 'anonymous' : 'private',
+        is_anonymous: sendAnonymously
       });
 
       if (error) throw error;
 
-      toast.success('Your pixel art is sent successfully!');
+      toast.success(sendAnonymously ? 'Anonymous pixel art delivered.' : 'Signed private pixel art delivered.');
       setShowSendModal(false);
-      router.push('/confirm');
+      router.push(`/confirm?mode=${sendAnonymously ? 'anonymous' : 'signed'}`);
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Failed to send pixel art.');
     } finally {
@@ -193,7 +208,7 @@ export default function SendToUserPage() {
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-bg text-text select-none">
       {/* Top Navigation Bar */}
-      <header className="z-20 flex min-h-16 items-center justify-between gap-2 border-b border-border/80 bg-bg/88 px-2 backdrop-blur-xl sm:px-4">
+      <header className="z-20 flex min-h-16 items-center justify-between gap-2 border-b border-border/80 bg-bg/88 px-2 shadow-[0_16px_42px_rgba(0,0,0,.18)] backdrop-blur-xl sm:px-4">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <Link href={`/@${username}`} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/70 text-text-muted transition-colors hover:bg-card-hover hover:text-text">
             <ArrowLeft className="w-5 h-5" />
@@ -272,25 +287,30 @@ export default function SendToUserPage() {
             onClick={() => setShowSendModal(true)}
             className="h-10 px-3 text-xs font-semibold glow-primary sm:px-4"
           >
-            <Send className="w-3.5 h-3.5 mr-1.5" />
-            <span className="hidden md:inline">Send to @{recipient?.username}</span>
-            <span className="md:hidden">Send</span>
+            {currentUser ? <Send className="w-3.5 h-3.5 mr-1.5" /> : <LogIn className="w-3.5 h-3.5 mr-1.5" />}
+            <span className="hidden md:inline">{currentUser ? `Send to @${recipient?.username}` : 'Sign in to send'}</span>
+            <span className="md:hidden">{currentUser ? 'Send' : 'Sign in'}</span>
           </AnimatedButton>
         </div>
       </header>
 
       {/* Main Workspace Layout */}
-      <div className="flex-1 flex overflow-hidden relative">
-        <aside className="z-10 hidden w-[248px] flex-col gap-3 overflow-y-auto border-r border-border bg-sidebar/40 p-3 lg:flex">
+      <div className="relative flex flex-1 overflow-hidden">
+        <aside className="z-10 hidden w-[260px] flex-col gap-3 overflow-y-auto border-r border-border/80 bg-sidebar/70 p-3 hide-scrollbar lg:flex">
           <ToolPanel />
           <ColorPalette />
         </aside>
 
-        <main className="relative flex h-full flex-1 items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.06),transparent_36%),var(--surface)]">
+        <main className="relative flex h-full flex-1 items-center justify-center overflow-hidden bg-bg">
+          {!currentUser && (
+            <div className="pointer-events-none absolute left-3 right-3 top-3 z-10 mx-auto max-w-xl rounded-2xl border border-primary/20 bg-bg/82 px-4 py-3 text-xs leading-5 text-text-muted shadow-float backdrop-blur-xl">
+              <strong className="text-text">You can draw first.</strong> Sign in when you are ready to deliver it to @{recipient?.username}.
+            </div>
+          )}
           <PaintCanvas />
         </main>
 
-        <aside className="z-10 hidden w-[260px] flex-col gap-3 overflow-y-auto border-l border-border bg-sidebar/40 p-3 lg:flex">
+        <aside className="z-10 hidden w-[286px] flex-col gap-3 overflow-y-auto border-l border-border/80 bg-sidebar/70 p-3 hide-scrollbar lg:flex">
           <PreviewPanel />
           <LayerPanel />
           <ActionsPanel />
@@ -320,21 +340,72 @@ export default function SendToUserPage() {
             >
               <h3 className="font-pixel text-lg text-primary mb-2 flex items-center gap-2">
                 <Sparkles className="w-5 h-5" />
-                Send Anonymously
+                Deliver pixel art
               </h3>
               <p className="text-xs text-text-muted mb-4">
-                Your drawing will be sent to <strong>@{recipient?.display_name || recipient?.username}</strong> anonymously.
+                Send this drawing to <strong>@{recipient?.display_name || recipient?.username}</strong>. You choose whether your profile is shown.
               </p>
 
               <div className="space-y-4">
                 {/* Display recipient metadata card */}
-                <div className="flex items-center gap-3 bg-surface border border-border p-3 rounded-xl">
-                  <PixelAvatar username={recipient?.username || 'recipient'} src={recipient?.avatar_url} size="md" showBadge={false} />
-                  <div>
-                    <h4 className="font-semibold text-sm text-text">{recipient?.display_name}</h4>
-                    <p className="text-xs text-text-muted">@{recipient?.username}</p>
+                <BorderGlow animated className="rounded-2xl" borderRadius={16} glowRadius={24} fillOpacity={0.24}>
+                  <div className="flex items-center justify-between gap-3 bg-surface/78 p-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <PixelAvatar username={recipient?.username || 'recipient'} src={recipient?.avatar_url} size="md" showBadge={false} />
+                      <div className="min-w-0">
+                        <h4 className="truncate font-semibold text-sm text-text">{recipient?.display_name || recipient?.username}</h4>
+                        <p className="text-xs text-text-muted">@{recipient?.username}</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void copyShareLink()}
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-bg/70 text-text-muted hover:text-text"
+                      aria-label="Copy recipient send link"
+                    >
+                      {copiedShareLink ? <Check className="h-3.5 w-3.5 text-green" /> : <Copy className="h-3.5 w-3.5" />}
+                    </button>
                   </div>
+                </BorderGlow>
+
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() => setSendAnonymously(true)}
+                    className={`rounded-2xl border p-3 text-left transition-all ${
+                      sendAnonymously
+                        ? 'border-primary bg-primary/12 text-text shadow-glow'
+                        : 'border-border bg-surface text-text-muted hover:text-text'
+                    }`}
+                  >
+                    <span className="mb-2 flex h-8 w-8 items-center justify-center rounded-xl bg-primary/15 text-primary">
+                      <Shield className="h-3.5 w-3.5" />
+                    </span>
+                    <strong className="block text-xs text-text">Anonymous</strong>
+                    <span className="mt-1 block text-[11px] leading-4 text-text-muted">Hide your profile from the recipient.</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSendAnonymously(false)}
+                    className={`rounded-2xl border p-3 text-left transition-all ${
+                      !sendAnonymously
+                        ? 'border-cyan bg-cyan/10 text-text shadow-[0_0_24px_rgba(34,211,238,.12)]'
+                        : 'border-border bg-surface text-text-muted hover:text-text'
+                    }`}
+                  >
+                    <span className="mb-2 flex h-8 w-8 items-center justify-center rounded-xl bg-cyan/15 text-cyan">
+                      <User className="h-3.5 w-3.5" />
+                    </span>
+                    <strong className="block text-xs text-text">Signed</strong>
+                    <span className="mt-1 block text-[11px] leading-4 text-text-muted">Show your profile privately with the art.</span>
+                  </button>
                 </div>
+
+                {!currentUser && (
+                  <div className="rounded-2xl border border-yellow/20 bg-yellow/10 p-3 text-xs leading-5 text-text-muted">
+                    <strong className="text-yellow">Sign-in required:</strong> PixAnony requires an account before delivery so private sends stay rate-limitable and abuse-resistant.
+                  </div>
+                )}
 
                 {/* Message */}
                 <div className="space-y-1">
@@ -359,11 +430,21 @@ export default function SendToUserPage() {
                   Cancel
                 </button>
                 <button
-                  onClick={handleSendAnonymousPixel}
+                  onClick={() => currentUser ? void handleSendPixel() : router.push(loginHref)}
                   disabled={isSending}
                   className="flex-[2] py-2.5 bg-gradient-primary text-white rounded-xl text-sm font-semibold shadow-glow hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                 >
-                  {isSending ? 'Sending...' : 'Confirm & Send'}
+                  {isSending ? 'Sending...' : currentUser ? (
+                    <>
+                      <Lock className="h-3.5 w-3.5" />
+                      {sendAnonymously ? 'Send anonymous' : 'Send signed'}
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="h-3.5 w-3.5" />
+                      Sign in to deliver
+                    </>
+                  )}
                 </button>
               </div>
             </motion.div>

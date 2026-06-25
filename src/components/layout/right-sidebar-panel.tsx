@@ -61,7 +61,7 @@ export function RightSidebarPanel() {
   }, [supabase]);
 
   return (
-    <aside className="page-enter sticky top-0 hidden h-svh min-w-0 overflow-y-auto py-5 2xl:flex 2xl:flex-col 2xl:gap-4">
+    <aside className="page-enter sticky top-0 hidden h-svh min-w-0 overflow-y-auto border-l border-border/60 bg-bg/30 px-4 py-5 2xl:flex 2xl:flex-col 2xl:gap-4">
       <section className="surface-panel rounded-2xl p-4">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">

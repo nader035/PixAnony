@@ -1,6 +1,7 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Home, Paintbrush, CheckCircle2, Sparkles } from '@/components/ui/icons';
 import { PixelParticles } from '@/components/ui/pixel-particles';
@@ -85,8 +86,11 @@ function PixelEnvelopeAnimation() {
 }
 
 /* ===== MAIN CONFIRMATION PAGE ===== */
-export default function ConfirmPage() {
+function ConfirmPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const mode = searchParams.get('mode');
+  const signed = mode === 'signed';
 
   return (
     <div className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden bg-bg px-4">
@@ -106,7 +110,7 @@ export default function ConfirmPage() {
           className="bg-green/10 text-green border border-green/30 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-semibold tracking-wide mb-6 uppercase"
         >
           <CheckCircle2 className="w-4 h-4" />
-          Pixel Art Dispatched
+          {signed ? 'Signed Pixel Delivered' : 'Pixel Art Dispatched'}
         </motion.div>
 
         {/* Message */}
@@ -116,7 +120,7 @@ export default function ConfirmPage() {
           transition={{ delay: 0.6 }}
           className="text-2xl sm:text-3xl font-bold font-pixel tracking-wide text-text mb-3"
         >
-          Your Pixel is on its way! ✨
+          Your pixel is on its way.
         </motion.h1>
         
         <motion.p
@@ -125,7 +129,9 @@ export default function ConfirmPage() {
           transition={{ delay: 0.7 }}
           className="text-sm text-text-muted leading-relaxed mb-10 max-w-sm"
         >
-          It has been delivered to their private collection anonymously. They can view and like the artwork, while your identity remains hidden.
+          {signed
+            ? 'It has been delivered to their private collection with your profile attached.'
+            : 'It has been delivered to their private collection anonymously. They can view the artwork while your identity remains hidden.'}
         </motion.p>
 
         {/* Call to Actions */}
@@ -155,5 +161,13 @@ export default function ConfirmPage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function ConfirmPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[100svh] bg-bg" />}>
+      <ConfirmPageContent />
+    </Suspense>
   );
 }

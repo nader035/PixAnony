@@ -131,8 +131,8 @@ export default function ActionsPanel({ compact = false }: { compact?: boolean })
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, delay: 0.4 }}
       className={cn(
-        'bg-surface border border-border',
-        compact ? 'flex gap-1 rounded-xl p-1.5' : 'flex flex-col gap-3 p-3 rounded-xl'
+        'editor-panel border border-border/80 bg-surface/95',
+        compact ? 'flex gap-1 rounded-2xl p-1.5' : 'flex flex-col gap-3 rounded-2xl p-3'
       )}
     >
       {/* Header */}
@@ -147,7 +147,7 @@ export default function ActionsPanel({ compact = false }: { compact?: boolean })
           disabled={!canUndo}
           aria-label="Undo"
           className={`flex-1 flex items-center justify-center gap-1.5 ${compact ? 'h-10 w-10 px-0' : 'px-2 py-1.5'} text-[10px] font-medium
-                     rounded-md border transition-colors
+                     rounded-xl border transition-colors
                      ${canUndo
                        ? 'bg-card border-border text-text-muted hover:text-text hover:bg-card-hover'
                        : 'bg-card/50 border-border/50 text-text-muted/30 cursor-not-allowed'
@@ -160,7 +160,7 @@ export default function ActionsPanel({ compact = false }: { compact?: boolean })
           disabled={!canRedo}
           aria-label="Redo"
           className={`flex-1 flex items-center justify-center gap-1.5 ${compact ? 'h-10 w-10 px-0' : 'px-2 py-1.5'} text-[10px] font-medium
-                     rounded-md border transition-colors
+                     rounded-xl border transition-colors
                      ${canRedo
                        ? 'bg-card border-border text-text-muted hover:text-text hover:bg-card-hover'
                        : 'bg-card/50 border-border/50 text-text-muted/30 cursor-not-allowed'
@@ -175,7 +175,7 @@ export default function ActionsPanel({ compact = false }: { compact?: boolean })
         <button
           onClick={flipHorizontal}
           className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] font-medium
-                     bg-card border border-border rounded-md text-text-muted
+                     bg-card border border-border rounded-xl text-text-muted
                      hover:text-text hover:bg-card-hover transition-colors"
           title="Flip Horizontal"
         >
@@ -184,7 +184,7 @@ export default function ActionsPanel({ compact = false }: { compact?: boolean })
         <button
           onClick={flipVertical}
           className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] font-medium
-                     bg-card border border-border rounded-md text-text-muted
+                     bg-card border border-border rounded-xl text-text-muted
                      hover:text-text hover:bg-card-hover transition-colors"
           title="Flip Vertical"
         >
@@ -196,7 +196,7 @@ export default function ActionsPanel({ compact = false }: { compact?: boolean })
       <button
         onClick={clearCanvas}
         className={cn(
-          'flex items-center justify-center gap-1.5 px-2 py-1.5 text-[10px] font-medium bg-red/10 border border-red/20 rounded-md text-red hover:bg-red/20 transition-colors',
+          'flex items-center justify-center gap-1.5 rounded-xl border border-red/20 bg-red/10 px-2 py-1.5 text-[10px] font-medium text-red transition-colors hover:bg-red/20',
           compact && 'hidden'
         )}
       >
@@ -213,7 +213,7 @@ export default function ActionsPanel({ compact = false }: { compact?: boolean })
             <button
               key={opt.mode}
               onClick={() => setSymmetryMode(opt.mode)}
-              className={`flex-1 px-1.5 py-1 text-[9px] font-medium rounded-md border transition-all
+              className={`flex-1 rounded-xl border px-1.5 py-1 text-[9px] font-medium transition-all
                 ${symmetryMode === opt.mode
                   ? 'bg-primary/20 border-primary/30 text-primary'
                   : 'bg-card border-border text-text-muted hover:text-text hover:bg-card-hover'
@@ -234,7 +234,7 @@ export default function ActionsPanel({ compact = false }: { compact?: boolean })
           <button
             onClick={exportPNG}
             className="flex items-center justify-center gap-1.5 px-2 py-1.5 text-[10px] font-medium
-                       bg-card border border-border rounded-md text-text-muted
+                       bg-card border border-border rounded-xl text-text-muted
                        hover:text-text hover:bg-card-hover transition-colors"
           >
             <Download size={11} /> Download PNG
@@ -242,7 +242,7 @@ export default function ActionsPanel({ compact = false }: { compact?: boolean })
           <button
             onClick={exportSVG}
             className="flex items-center justify-center gap-1.5 px-2 py-1.5 text-[10px] font-medium
-                       bg-card border border-border rounded-md text-text-muted
+                       bg-card border border-border rounded-xl text-text-muted
                        hover:text-text hover:bg-card-hover transition-colors"
           >
             <ImageIcon size={11} /> Download SVG
@@ -250,7 +250,7 @@ export default function ActionsPanel({ compact = false }: { compact?: boolean })
           <button
             onClick={copyImage}
             className="flex items-center justify-center gap-1.5 px-2 py-1.5 text-[10px] font-medium
-                       bg-card border border-border rounded-md text-text-muted
+                       bg-card border border-border rounded-xl text-text-muted
                        hover:text-text hover:bg-card-hover transition-colors"
           >
             <Copy size={11} /> Copy Image

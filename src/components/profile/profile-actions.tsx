@@ -50,7 +50,7 @@ export function ProfileActions({
     <div className="flex gap-2">
       <Link href={`/send/${username}`} className="flex items-center gap-2 rounded-xl border border-border bg-bg/80 px-4 py-2.5 text-sm font-semibold text-text hover:bg-card">
         <Send size={16} />
-        Send art
+        Send pixel
       </Link>
       <button
         onClick={() => void toggleFollow()}

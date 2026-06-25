@@ -74,8 +74,8 @@ export default async function HomePage({
   }
 
   return (
-    <div className="page-enter mx-auto w-full max-w-[760px] px-4 pb-10 sm:px-6">
-      <header className="sticky top-16 z-30 -mx-4 border-b border-border/70 bg-bg/88 px-4 pt-5 backdrop-blur-2xl sm:-mx-6 sm:px-6 lg:top-0">
+    <div className="page-enter w-full max-w-[760px] px-4 pb-10 sm:px-5 xl:px-6">
+      <header className="sticky top-16 z-30 -mx-4 border-b border-border/70 bg-bg/88 px-4 pt-5 backdrop-blur-2xl sm:-mx-5 sm:px-5 lg:top-0 xl:-mx-6 xl:px-6">
         <div className="mb-4 flex items-end justify-between">
           <div>
             <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Community feed</p>

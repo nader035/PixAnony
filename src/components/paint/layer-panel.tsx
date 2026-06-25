@@ -75,16 +75,16 @@ export default function LayerPanel() {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, delay: 0.3 }}
-      className="flex flex-col gap-2 p-3 bg-surface rounded-xl border border-border"
+      className="editor-panel flex flex-col gap-2 rounded-2xl border border-border/80 bg-surface/95 p-3"
     >
       {/* Header */}
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
+        <span className="font-pixel text-[10px] font-semibold uppercase tracking-wider text-text-muted">
           Layers
         </span>
         <button
           onClick={addLayer}
-          className="p-1 rounded-md hover:bg-card-hover text-text-muted hover:text-primary transition-colors"
+          className="rounded-lg p-1 text-text-muted transition-colors hover:bg-card-hover hover:text-primary"
           title="Add Layer"
         >
           <Plus size={14} />
@@ -106,10 +106,10 @@ export default function LayerPanel() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.15 }}
               className={`
-                flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs cursor-pointer transition-all
+                flex cursor-pointer items-center gap-1.5 rounded-xl px-2 py-1.5 text-xs transition-all
                 ${isActive
-                  ? 'bg-primary/15 border border-primary/30'
-                  : 'bg-card/50 border border-transparent hover:bg-card-hover hover:border-border'
+                  ? 'border border-primary/35 bg-primary/15'
+                  : 'border border-border/45 bg-card/50 hover:border-primary/25 hover:bg-card-hover'
                 }
               `}
               onClick={() => setActiveLayer(layer.id)}
@@ -159,7 +159,7 @@ export default function LayerPanel() {
                       if (e.key === 'Enter') handleFinishRename();
                       if (e.key === 'Escape') { setEditingId(null); setEditName(''); }
                     }}
-                    className="w-full px-1 py-0.5 text-[11px] bg-card border border-primary rounded
+                    className="w-full rounded-lg border border-primary bg-card px-1 py-0.5 text-[11px]
                                text-text focus:outline-none"
                     onClick={(e) => e.stopPropagation()}
                   />
@@ -222,7 +222,7 @@ export default function LayerPanel() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="p-2 bg-card border border-red/30 rounded-lg"
+          className="rounded-xl border border-red/30 bg-card p-2"
         >
           <p className="text-[10px] text-text-muted mb-2">
             This layer has content. Delete anyway?
@@ -231,14 +231,14 @@ export default function LayerPanel() {
             <button
               onClick={confirmDelete}
               className="flex-1 px-2 py-1 text-[10px] font-medium bg-red/20 text-red
-                         rounded-md hover:bg-red/30 transition-colors"
+                         rounded-lg hover:bg-red/30 transition-colors"
             >
               Delete
             </button>
             <button
               onClick={() => setConfirmDeleteId(null)}
               className="flex-1 px-2 py-1 text-[10px] font-medium bg-card-hover text-text-muted
-                         rounded-md hover:text-text transition-colors"
+                         rounded-lg hover:text-text transition-colors"
             >
               Cancel
             </button>

@@ -18,14 +18,12 @@ export function AppShell({
   className,
 }: AppShellProps) {
   return (
-    <div className="app-backdrop min-h-screen w-full bg-bg flex justify-center">
+    <div className="app-backdrop min-h-screen w-full bg-bg">
+      <div className="pointer-events-none fixed inset-0 z-0 pixel-grid-plane opacity-[0.16]" aria-hidden="true" />
       <div
         className={cn(
-          'grid min-h-screen w-full max-w-[1436px] grid-cols-1',
-          'lg:grid-cols-[224px_minmax(0,1fr)] lg:gap-5 lg:px-4',
-          showRightSidebar
-            ? '2xl:grid-cols-[224px_minmax(0,820px)_296px] 2xl:gap-6 2xl:px-6'
-            : '2xl:grid-cols-[224px_minmax(0,1040px)] 2xl:gap-7 2xl:px-6',
+          'app-shell-grid relative z-10 min-h-screen w-full',
+          showRightSidebar ? 'app-shell-grid--right' : 'app-shell-grid--plain',
         )}
       >
         <Sidebar />

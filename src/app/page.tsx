@@ -18,7 +18,10 @@ import {
   X as XIcon,
 } from '@/components/ui/icons';
 import { Logo } from '@/components/ui/logo';
+import { PixelAvatar } from '@/components/ui/pixel-avatar';
 import { PixelParticles } from '@/components/ui/pixel-particles';
+import { BorderGlow } from '@/components/react-bits/border-glow';
+import { PixelBlast } from '@/components/react-bits/pixel-blast';
 import { BRAND } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
@@ -27,6 +30,7 @@ const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 const navLinks = [
   { label: 'Features', href: '/#features' },
   { label: 'Workflow', href: '/#workflow' },
+  { label: 'Team', href: '/#team' },
   { label: 'Explore', href: '/explore' },
 ] as const;
 
@@ -263,7 +267,8 @@ function PixelStudioVisual() {
       className="relative mx-auto w-full max-w-[600px]"
     >
       <div className="absolute -inset-8 rounded-full bg-primary/16 blur-3xl" />
-      <div className="surface-panel relative overflow-hidden rounded-[2rem] p-3 shadow-float sm:p-4">
+      <BorderGlow animated className="rounded-[2rem]" borderRadius={32} glowRadius={44} fillOpacity={0.28}>
+      <div className="relative overflow-hidden rounded-[2rem] bg-card p-3 shadow-float sm:p-4">
         <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border border-border/70 bg-surface/80 px-3 py-2.5">
           <div className="flex items-center gap-2 text-xs font-semibold text-text">
             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/15 text-primary">
@@ -323,6 +328,7 @@ function PixelStudioVisual() {
           ))}
         </div>
       </div>
+      </BorderGlow>
     </motion.div>
   );
 }
@@ -333,6 +339,28 @@ function PixelStudioVisual() {
 function Hero() {
   return (
     <section className="relative flex min-h-[calc(100svh-4rem)] items-center overflow-hidden bg-gradient-hero pt-16">
+      <div className="absolute inset-0 opacity-55">
+        <PixelBlast
+          variant="circle"
+          pixelSize={6}
+          color="#EC4899"
+          patternScale={3.2}
+          patternDensity={1.08}
+          pixelSizeJitter={0.4}
+          enableRipples
+          rippleSpeed={0.36}
+          rippleThickness={0.12}
+          rippleIntensityScale={1.35}
+          liquid
+          liquidStrength={0.09}
+          liquidRadius={1.2}
+          liquidWobbleSpeed={5}
+          speed={0.45}
+          edgeFade={0.2}
+          transparent
+        />
+      </div>
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--bg)_0%,rgba(5,7,17,.86)_42%,rgba(5,7,17,.56)_100%)]" />
       <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-bg to-transparent" />
       <div className="site-container grid items-center gap-10 py-14 lg:grid-cols-[minmax(0,.82fr)_minmax(500px,1.18fr)] lg:gap-14 xl:gap-16">
         <motion.div initial={false} animate="visible" variants={stagger} className="relative z-10 max-w-[560px]">
@@ -341,7 +369,7 @@ function Hero() {
             Private-first pixel art
           </motion.p>
           <motion.h1 variants={fadeUp} className="font-pixel text-[clamp(2.6rem,5.2vw,4.9rem)] leading-[1.01] tracking-[-0.055em] text-text">
-            Express in
+            Express in{' '}
             <span className="mt-2 block bg-gradient-to-r from-pink via-primary to-cyan bg-clip-text text-transparent">
               pixels.
             </span>
@@ -553,6 +581,56 @@ function ProductDepth() {
               <p className="mt-2 text-sm leading-6 text-text-muted">{description}</p>
             </motion.div>
           ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Team                                                              */
+/* ------------------------------------------------------------------ */
+function TeamSection() {
+  return (
+    <section id="team" className="relative py-20 sm:py-28">
+      <div className="site-container">
+        <motion.div
+          initial={{ opacity: 0, y: 22 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.56, ease }}
+          className="relative overflow-hidden rounded-[2rem] border border-border bg-card/55 p-6 shadow-float sm:p-8 lg:grid lg:grid-cols-[0.72fr_1fr] lg:gap-10"
+        >
+          <div className="absolute inset-0 opacity-60 [background-image:radial-gradient(circle_at_20%_20%,rgba(236,72,153,.18),transparent_24rem),radial-gradient(circle_at_85%_25%,rgba(139,92,246,.22),transparent_22rem),linear-gradient(transparent_31px,rgba(148,163,184,.07)_32px),linear-gradient(90deg,transparent_31px,rgba(148,163,184,.07)_32px)] [background-size:auto,auto,32px_32px,32px_32px]" />
+          <div className="relative">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Team</p>
+            <h2 className="font-pixel text-2xl leading-tight text-text sm:text-4xl">
+              Built by the person who cares about every pixel.
+            </h2>
+            <p className="mt-4 max-w-xl text-sm leading-6 text-text-muted sm:text-base">
+              PixAnony is shaped as a focused creator tool: private delivery, public galleries, and a board that feels good to use.
+            </p>
+          </div>
+
+          <div className="relative mt-8 rounded-[1.75rem] border border-border bg-bg/72 p-5 lg:mt-0">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+              <PixelAvatar username="Nader Mohamed" size="xl" showBadge={false} />
+              <div className="min-w-0">
+                <p className="font-pixel text-xl text-text">Nader Mohamed</p>
+                <p className="mt-1 text-sm font-semibold text-primary">Founder & Product Builder</p>
+                <p className="mt-3 max-w-md text-sm leading-6 text-text-muted">
+                  Designing PixAnony around crisp boards, honest privacy, and a community feed that rewards real pixel work.
+                </p>
+              </div>
+            </div>
+            <div className="mt-5 grid gap-2 sm:grid-cols-3">
+              {['Product design', 'Frontend polish', 'Pixel systems'].map((skill) => (
+                <span key={skill} className="rounded-xl border border-border bg-surface/70 px-3 py-2 text-center text-xs font-semibold text-text-muted">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>
@@ -823,6 +901,7 @@ export default function LandingPage() {
       <Hero />
       <Workflow />
       <ProductDepth />
+      <TeamSection />
       <Pricing />
       <Changelog />
       <FinalCta />

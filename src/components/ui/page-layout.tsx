@@ -23,7 +23,7 @@ export function PageFrame({
   return (
     <div
       className={cn(
-        'page-enter mx-auto w-full min-w-0 px-4 pb-10 pt-5 sm:px-6 sm:pt-7',
+        'page-enter w-full min-w-0 px-4 pb-10 pt-5 sm:px-5 sm:pt-7 xl:px-6',
         pageWidths[width],
         className,
       )}
@@ -64,6 +64,7 @@ export function PageHeader({
         <h1 className="text-2xl font-bold tracking-[-0.045em] text-text sm:text-3xl">
           {title}
         </h1>
+        <span className="mt-3 block h-px w-24 bg-gradient-to-r from-primary via-pink to-transparent animate-pixel-flicker" aria-hidden="true" />
         {description && (
           <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">
             {description}
@@ -74,4 +75,3 @@ export function PageHeader({
     </header>
   );
 }
-

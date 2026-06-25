@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { Inbox, LockKeyhole, Sparkles } from '@/components/ui/icons';
+import { BadgeCheck, Inbox, LockKeyhole, Sparkles } from '@/components/ui/icons';
 import { PixelArtRenderer } from '@/components/ui/pixel-art-renderer';
+import { PixelAvatar } from '@/components/ui/pixel-avatar';
 import { PageFrame, PageHeader } from '@/components/ui/page-layout';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { formatTimeAgo } from '@/lib/utils';
@@ -21,9 +22,8 @@ export default async function ReceivedPage({
 
   const { data: artworks } = await supabase
     .from('artworks')
-    .select('id, title, caption, pixel_data, grid_size, created_at')
+    .select('id, title, caption, pixel_data, grid_size, created_at, is_anonymous, profile:profiles!artworks_user_id_fkey(username, display_name, avatar_url, is_verified)')
     .eq('receiver_id', user.id)
-    .eq('is_anonymous', true)
     .order('created_at', { ascending: false });
 
   return (
@@ -31,7 +31,7 @@ export default async function ReceivedPage({
       <PageHeader
         eyebrow="Private collection"
         title="Received artwork"
-        description="Anonymous artwork sent directly to you. Sender identities are never exposed in this view."
+        description="Pixel art sent directly to you. Anonymous deliveries stay hidden, signed deliveries show the sender profile."
         actions={<span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/12 text-primary"><Inbox size={21} /></span>}
       />
 
@@ -55,8 +55,21 @@ export default async function ReceivedPage({
               <div className="p-4">
                 <h2 className="truncate text-sm font-semibold text-text">{artwork.title || 'Anonymous artwork'}</h2>
                 {artwork.caption && <p className="mt-1 line-clamp-2 text-xs leading-5 text-text-muted">{artwork.caption}</p>}
-                <div className="mt-3 flex items-center justify-between text-[11px] text-text-muted">
-                  <span className="flex items-center gap-1"><LockKeyhole size={12} />Anonymous</span>
+                <div className="mt-3 flex items-center justify-between gap-3 text-[11px] text-text-muted">
+                  {artwork.is_anonymous ? (
+                    <span className="flex items-center gap-1"><LockKeyhole size={12} />Anonymous</span>
+                  ) : (() => {
+                    const profile = Array.isArray(artwork.profile) ? artwork.profile[0] : artwork.profile;
+                    return (
+                      <span className="flex min-w-0 items-center gap-2">
+                        <PixelAvatar username={profile?.username || 'sender'} src={profile?.avatar_url ?? null} size="xs" showBadge={false} />
+                        <span className="min-w-0 truncate">
+                          {profile?.display_name || profile?.username || 'Signed sender'}
+                        </span>
+                        {profile?.is_verified && <BadgeCheck size={11} className="shrink-0 text-primary" />}
+                      </span>
+                    );
+                  })()}
                   <span>{formatTimeAgo(artwork.created_at ?? new Date().toISOString())}</span>
                 </div>
               </div>
@@ -68,7 +81,7 @@ export default async function ReceivedPage({
           <Inbox size={30} className="mb-4 text-primary" />
           <h2 className="text-lg font-semibold text-text">Your private inbox is empty</h2>
           <p className="mt-2 max-w-sm text-sm leading-6 text-text-muted">
-            Share your profile link so other creators can send you anonymous pixel art.
+            Share your profile link so other creators can send anonymous or signed pixel art.
           </p>
           <Link href={`/@${username}`} className="mt-6 rounded-xl border border-border bg-card px-5 py-3 text-sm font-semibold text-text">Back to profile</Link>
         </div>

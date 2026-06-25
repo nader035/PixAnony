@@ -79,7 +79,7 @@ export default function NotificationsPage() {
     if (item.type === 'repost') return { icon: Repeat2, text: 'reposted your artwork' };
     if (item.type === 'follow') return { icon: UserPlus, text: 'started following you' };
     if (item.type === 'comment') return { icon: MessageSquare, text: 'commented on your artwork' };
-    return { icon: Inbox, text: 'sent you anonymous pixel art' };
+    return { icon: Inbox, text: item.actor ? 'sent you signed pixel art' : 'sent you anonymous pixel art' };
   };
 
   return (

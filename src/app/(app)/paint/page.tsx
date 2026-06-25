@@ -6,9 +6,11 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Grid3X3, ZoomIn, ZoomOut, RotateCcw,
-  RotateCw, Eye, EyeOff, Send, HelpCircle, Search, Sparkles, UserCheck, Upload
+  RotateCw, Eye, EyeOff, Send, HelpCircle, Search, Sparkles, UserCheck, Upload,
+  Shield, User
 } from '@/components/ui/icons';
 import { usePaintStore } from '@/stores/paint-store';
+import { usePaintKeyboardShortcuts } from '@/hooks/use-paint-keyboard-shortcuts';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
@@ -23,13 +25,19 @@ import { AnimatedButton } from '@/components/ui/animated-button';
 import { Logo } from '@/components/ui/logo';
 import { PixelAvatar } from '@/components/ui/pixel-avatar';
 import { GridSize } from '@/lib/types';
-import type { User } from '@supabase/supabase-js';
+import { PAINT_SHORTCUT_HELP } from '@/lib/paint-shortcuts';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface RecipientProfile {
   id: string;
   username: string;
   display_name: string | null;
   avatar_url: string | null;
+}
+
+interface SenderProfile {
+  username: string;
+  display_name: string | null;
 }
 
 
@@ -57,7 +65,8 @@ export default function PaintPage() {
   } = usePaintStore();
 
   // UI state
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
+  const [currentProfile, setCurrentProfile] = useState<SenderProfile | null>(null);
   const [showSendModal, setShowSendModal] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [recipientSearch, setRecipientSearch] = useState('');
@@ -65,17 +74,34 @@ export default function PaintPage() {
   const [selectedRecipient, setSelectedRecipient] = useState<RecipientProfile | null>(null);
   const [caption, setCaption] = useState('');
   const [publishTitle, setPublishTitle] = useState('');
+  const [sendAnonymously, setSendAnonymously] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+
+  usePaintKeyboardShortcuts({
+    disabled: showSendModal || showPublishModal || showHelp,
+    onHelp: () => setShowHelp(true),
+    onEscape: () => {
+      setShowHelp(false);
+      setShowSendModal(false);
+      setShowPublishModal(false);
+    },
+  });
 
   // Initialize canvas on mount
   useEffect(() => {
     initializeCanvas(16);
     
     // Fetch auth user
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (data?.user) {
         setCurrentUser(data.user);
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('username, display_name')
+          .eq('id', data.user.id)
+          .single();
+        setCurrentProfile(profileData ?? null);
       } else {
         toast.error('Sign in to create and send artwork.');
         router.replace('/login');
@@ -86,33 +112,6 @@ export default function PaintPage() {
       resetState();
     };
   }, [initializeCanvas, resetState, router, supabase]);
-
-  // Keyboard shortcut listener
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Undo: Ctrl+Z
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
-        e.preventDefault();
-        undo();
-      }
-      // Redo: Ctrl+Shift+Z or Ctrl+Y
-      if (
-        ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && e.shiftKey) ||
-        ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y')
-      ) {
-        e.preventDefault();
-        redo();
-      }
-      // Toggle Grid: G
-      if (e.key.toLowerCase() === 'g' && !e.ctrlKey && !e.metaKey && document.activeElement?.tagName !== 'INPUT') {
-        e.preventDefault();
-        toggleGrid();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo, toggleGrid]);
 
   // Recipient search
   useEffect(() => {
@@ -136,7 +135,7 @@ export default function PaintPage() {
     return () => clearTimeout(timer);
   }, [recipientSearch, supabase]);
 
-  const handleSendAnonymousPixel = async () => {
+  const handleSendPixel = async () => {
     if (!selectedRecipient) {
       toast.error('Please select a recipient first.');
       return;
@@ -164,25 +163,32 @@ export default function PaintPage() {
         }
       }
 
+      const senderName = currentProfile?.username ?? 'creator';
+      const captionText = caption.trim() || (
+        sendAnonymously
+          ? 'A surprise pixel gift!'
+          : `A signed pixel gift from @${senderName}.`
+      );
+
       const { error } = await supabase.from('artworks').insert({
         user_id: currentUser.id,
         receiver_id: selectedRecipient.id,
-        title: 'Anonymous Pixel Message',
-        caption: caption.trim() || 'A surprise pixel gift! 🎁',
+        title: sendAnonymously ? 'Anonymous Pixel Message' : `Pixel message from @${senderName}`,
+        caption: captionText,
         grid_size: gridSize,
         pixel_data: compositePixels,
         layers: layers,
-        visibility: 'anonymous',
-        is_anonymous: true
+        visibility: sendAnonymously ? 'anonymous' : 'private',
+        is_anonymous: sendAnonymously
       });
 
       if (error) throw error;
 
-      toast.success('Your pixel art is sent successfully!');
+      toast.success(sendAnonymously ? 'Anonymous pixel art delivered.' : 'Signed private pixel art delivered.');
       setShowSendModal(false);
       
       // Route to confirmation screen
-      router.push('/confirm');
+      router.push(`/confirm?mode=${sendAnonymously ? 'anonymous' : 'signed'}`);
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Failed to send pixel art message.');
     } finally {
@@ -235,9 +241,9 @@ export default function PaintPage() {
   };
 
   return (
-    <div className="h-[100dvh] flex flex-col bg-bg overflow-hidden select-none text-text">
+    <div className="flex h-[100dvh] select-none flex-col overflow-hidden bg-bg text-text">
       {/* Top Navigation Bar */}
-      <header className="min-h-16 border-b border-border/80 bg-bg/88 backdrop-blur-xl px-2 sm:px-4 flex items-center justify-between gap-2 z-20">
+      <header className="z-20 flex min-h-16 items-center justify-between gap-2 border-b border-border/80 bg-bg/88 px-2 shadow-[0_16px_42px_rgba(0,0,0,.18)] backdrop-blur-xl sm:px-4">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <Link href="/home" aria-label="Back to feed" className="flex h-10 w-10 items-center justify-center hover:bg-card-hover rounded-xl border border-border/70 text-text-muted hover:text-text transition-colors">
             <ArrowLeft className="w-5 h-5" />
@@ -343,27 +349,27 @@ export default function PaintPage() {
             className="h-10 px-3 sm:px-4 text-xs font-semibold glow-primary"
           >
             <Send className="w-3.5 h-3.5 mr-1.5" />
-            <span className="hidden sm:inline">Send Anonymous</span>
+            <span className="hidden sm:inline">Send</span>
             <span className="sm:hidden">Send</span>
           </AnimatedButton>
         </div>
       </header>
 
       {/* Main Workspace Layout */}
-      <div className="flex-1 flex overflow-hidden relative">
+      <div className="relative flex flex-1 overflow-hidden">
         {/* Left Side: Tools & Palettes */}
-        <aside className="w-[248px] border-r border-border bg-sidebar/40 flex flex-col p-3 gap-3 overflow-y-auto hide-scrollbar z-10 hidden lg:flex">
+        <aside className="z-10 hidden w-[260px] flex-col gap-3 overflow-y-auto border-r border-border/80 bg-sidebar/70 p-3 hide-scrollbar lg:flex">
           <ToolPanel />
           <ColorPalette />
         </aside>
 
         {/* Center: Interactive Canvas */}
-        <main className="flex-1 relative flex items-center justify-center overflow-hidden h-full bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.06),transparent_36%),var(--surface)]">
+        <main className="relative flex h-full flex-1 items-center justify-center overflow-hidden bg-bg">
           <PaintCanvas />
         </main>
 
         {/* Right Side: Layers & Live Preview */}
-        <aside className="w-[260px] border-l border-border bg-sidebar/40 flex flex-col p-3 gap-3 overflow-y-auto hide-scrollbar z-10 hidden lg:flex">
+        <aside className="z-10 hidden w-[286px] flex-col gap-3 overflow-y-auto border-l border-border/80 bg-sidebar/70 p-3 hide-scrollbar lg:flex">
           <PreviewPanel />
           <LayerPanel />
           <ActionsPanel />
@@ -392,15 +398,14 @@ export default function PaintPage() {
               aria-modal="true"
               aria-labelledby="paint-help-title"
             >
-              <h3 id="paint-help-title" className="font-pixel text-lg text-primary mb-4">Keyboard Shortcuts</h3>
-              <ul className="space-y-2.5 text-sm font-medium text-text-muted">
-                <li className="flex justify-between border-b border-border/40 pb-1.5"><span>Pencil Tool</span> <kbd className="bg-surface px-1.5 py-0.5 rounded border border-border font-mono text-xs">1</kbd></li>
-                <li className="flex justify-between border-b border-border/40 pb-1.5"><span>Eraser Tool</span> <kbd className="bg-surface px-1.5 py-0.5 rounded border border-border font-mono text-xs">2</kbd></li>
-                <li className="flex justify-between border-b border-border/40 pb-1.5"><span>Fill Bucket</span> <kbd className="bg-surface px-1.5 py-0.5 rounded border border-border font-mono text-xs">3</kbd></li>
-                <li className="flex justify-between border-b border-border/40 pb-1.5"><span>Symmetry Toggle</span> <kbd className="bg-surface px-1.5 py-0.5 rounded border border-border font-mono text-xs">S</kbd></li>
-                <li className="flex justify-between border-b border-border/40 pb-1.5"><span>Undo Action</span> <kbd className="bg-surface px-1.5 py-0.5 rounded border border-border font-mono text-xs">Ctrl + Z</kbd></li>
-                <li className="flex justify-between border-b border-border/40 pb-1.5"><span>Redo Action</span> <kbd className="bg-surface px-1.5 py-0.5 rounded border border-border font-mono text-xs">Ctrl + Y</kbd></li>
-                <li className="flex justify-between border-b border-border/40 pb-1.5"><span>Toggle Grid</span> <kbd className="bg-surface px-1.5 py-0.5 rounded border border-border font-mono text-xs">G</kbd></li>
+              <h3 id="paint-help-title" className="mb-4 font-pixel text-lg text-primary">Keyboard Shortcuts</h3>
+              <ul className="grid gap-2 text-sm font-medium text-text-muted sm:grid-cols-2">
+                {PAINT_SHORTCUT_HELP.map((item) => (
+                  <li key={`${item.label}-${item.shortcut}`} className="flex items-center justify-between gap-3 rounded-xl border border-border/50 bg-surface/70 px-3 py-2">
+                    <span>{item.label}</span>
+                    <kbd className="rounded-lg border border-border bg-bg px-2 py-1 font-mono text-[11px] text-text">{item.shortcut}</kbd>
+                  </li>
+                ))}
               </ul>
               <button onClick={() => setShowHelp(false)} className="w-full mt-6 py-2.5 bg-card hover:bg-card-hover border border-border rounded-xl font-semibold text-sm transition-all">
                 Dismiss Help
@@ -425,10 +430,10 @@ export default function PaintPage() {
             >
               <h3 id="send-pixel-title" className="font-pixel text-lg text-primary mb-2 flex items-center gap-2">
                 <Sparkles className="w-5 h-5" />
-                Send Anonymously
+                Send pixel art
               </h3>
               <p className="text-xs text-text-muted mb-4">
-                Your drawing will appear in their private inbox, but your identity will be hidden.
+                Your drawing will appear in their private inbox. Choose whether your profile is hidden or shown.
               </p>
 
               <div className="space-y-4">
@@ -480,6 +485,39 @@ export default function PaintPage() {
                   )}
                 </div>
 
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() => setSendAnonymously(true)}
+                    className={`rounded-2xl border p-3 text-left transition-all ${
+                      sendAnonymously
+                        ? 'border-primary bg-primary/12 text-text shadow-glow'
+                        : 'border-border bg-surface text-text-muted hover:text-text'
+                    }`}
+                  >
+                    <span className="mb-2 flex h-8 w-8 items-center justify-center rounded-xl bg-primary/15 text-primary">
+                      <Shield className="h-3.5 w-3.5" />
+                    </span>
+                    <strong className="block text-xs text-text">Anonymous</strong>
+                    <span className="mt-1 block text-[11px] leading-4 text-text-muted">Hide your profile from the recipient.</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSendAnonymously(false)}
+                    className={`rounded-2xl border p-3 text-left transition-all ${
+                      !sendAnonymously
+                        ? 'border-cyan bg-cyan/10 text-text shadow-[0_0_24px_rgba(34,211,238,.12)]'
+                        : 'border-border bg-surface text-text-muted hover:text-text'
+                    }`}
+                  >
+                    <span className="mb-2 flex h-8 w-8 items-center justify-center rounded-xl bg-cyan/15 text-cyan">
+                      <User className="h-3.5 w-3.5" />
+                    </span>
+                    <strong className="block text-xs text-text">Signed</strong>
+                    <span className="mt-1 block text-[11px] leading-4 text-text-muted">Show your profile privately with the art.</span>
+                  </button>
+                </div>
+
                 {/* Caption */}
                 <div className="space-y-1">
                   <label className="text-[10px] font-semibold text-text/80 uppercase tracking-wider">Optional Caption</label>
@@ -503,11 +541,11 @@ export default function PaintPage() {
                   Cancel
                 </button>
                 <button
-                  onClick={handleSendAnonymousPixel}
+                  onClick={handleSendPixel}
                   disabled={!selectedRecipient || isSending}
                   className="flex-[2] py-2.5 bg-gradient-primary text-white rounded-xl text-sm font-semibold shadow-glow hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
                 >
-                  {isSending ? 'Sending...' : 'Confirm & Send'}
+                  {isSending ? 'Sending...' : sendAnonymously ? 'Send anonymous' : 'Send signed'}
                 </button>
               </div>
             </motion.div>

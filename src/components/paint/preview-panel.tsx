@@ -63,7 +63,7 @@ export default function PreviewPanel() {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, delay: 0.15 }}
-      className="flex flex-col gap-2 p-3 bg-surface rounded-xl border border-border"
+      className="editor-panel flex flex-col gap-2 rounded-2xl border border-border/80 bg-surface/95 p-3"
     >
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -72,7 +72,7 @@ export default function PreviewPanel() {
         </span>
         <button
           onClick={() => setIsFullscreen(!isFullscreen)}
-          className="p-1 rounded-md hover:bg-card-hover text-text-muted hover:text-text transition-colors"
+          className="rounded-lg p-1 text-text-muted transition-colors hover:bg-card-hover hover:text-text"
           title={isFullscreen ? 'Minimize' : 'Fullscreen'}
         >
           {isFullscreen ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
@@ -82,7 +82,7 @@ export default function PreviewPanel() {
       {/* Preview Canvas */}
       <div
         className={`
-          relative mx-auto border border-border rounded-lg overflow-hidden bg-card
+          relative mx-auto overflow-hidden rounded-2xl border border-border bg-card
           ${isFullscreen ? 'w-full aspect-square' : 'w-full max-w-[140px] aspect-square'}
         `}
       >
@@ -94,7 +94,7 @@ export default function PreviewPanel() {
       </div>
 
       {/* Info */}
-      <div className="text-center text-[9px] text-text-muted/60 font-mono">
+      <div className="text-center font-mono text-[9px] text-text-muted/60">
         {gridSize}×{gridSize} px
       </div>
     </motion.div>

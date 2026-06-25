@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Google, Github, ArrowLeft, ArrowRight, Lock, User, Eye, EyeOff, Loader2 } from '@/components/ui/icons';
 import { Logo } from '@/components/ui/logo';
@@ -149,9 +149,14 @@ function PixelHeartPortal() {
 }
 
 /* ===== LOGIN PAGE ===== */
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = useMemo(() => createClient(), []);
+  const nextPath = useMemo(() => {
+    const next = searchParams.get('next');
+    return next?.startsWith('/') && !next.startsWith('//') ? next : '/home';
+  }, [searchParams]);
   
   const [authMethod, setAuthMethod] = useState<'social' | 'email'>('social');
   const [mode, setMode] = useState<'login' | 'signup'>('login');
@@ -170,7 +175,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
         },
       });
       if (error) throw error;
@@ -201,7 +206,7 @@ export default function LoginPage() {
         });
         if (error) throw error;
         toast.success('Successfully logged in! Redirecting...');
-        router.push('/home');
+        router.push(nextPath);
       } else {
         const { error } = await supabase.auth.signUp({
           email,
@@ -211,7 +216,7 @@ export default function LoginPage() {
               preferred_username: username.toLowerCase().trim(),
               full_name: displayName.trim() || username.trim(),
             },
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
           },
         });
         if (error) throw error;
@@ -446,5 +451,13 @@ export default function LoginPage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[100svh] bg-bg" />}>
+      <LoginPageContent />
+    </Suspense>
   );
 }

@@ -3,6 +3,7 @@
 import { useRef, useEffect, useCallback, useState } from 'react';
 import { usePaintStore } from '@/stores/paint-store';
 import { floodFill, drawLine, drawRectangle, drawCircle } from '@/lib/utils';
+import { PAINT_TOOL_SHORTCUTS } from '@/lib/paint-shortcuts';
 
 // ===== CONSTANTS =====
 const CHECKER_LIGHT = '#2a2a3e';
@@ -43,6 +44,7 @@ export default function PaintCanvas() {
   // ===== COMPUTED =====
   const zoomFactor = zoom / 100;
   const cellSize = canvasSize.width / gridSize;
+  const activeToolLabel = PAINT_TOOL_SHORTCUTS.find((item) => item.tool === tool)?.label ?? tool;
 
   // ===== ACTIVE LAYER =====
   const activeLayer = layers.find(l => l.id === activeLayerId);
@@ -505,10 +507,15 @@ export default function PaintCanvas() {
   return (
     <div
       ref={containerRef}
-      className="relative flex-1 flex items-center justify-center overflow-hidden bg-bg"
+      className="relative flex flex-1 items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_50%_10%,rgba(139,92,246,.14),transparent_34rem),linear-gradient(transparent_23px,rgba(148,163,184,.045)_24px),linear-gradient(90deg,transparent_23px,rgba(148,163,184,.045)_24px),var(--bg)] bg-[length:auto,24px_24px,24px_24px,auto] p-3 sm:p-5"
     >
+      <div className="pointer-events-none absolute left-4 top-4 z-20 hidden items-center gap-2 rounded-2xl border border-border/70 bg-bg/72 px-3 py-2 text-xs font-semibold text-text shadow-float backdrop-blur-xl md:flex">
+        <span className="font-pixel text-primary">Board {gridSize} x {gridSize}</span>
+        <span className="h-1 w-1 rounded-full bg-text-muted/50" />
+        <span className="text-text-muted">{activeToolLabel}</span>
+      </div>
       <div
-        className="relative"
+        className="relative overflow-hidden rounded-[28px] border border-border/80 bg-[#080d19] shadow-[0_26px_80px_rgba(0,0,0,.42),inset_0_1px_0_rgba(255,255,255,.06)]"
         style={{
           width: canvasSize.width,
           height: canvasSize.height,
@@ -570,7 +577,10 @@ export default function PaintCanvas() {
       </div>
 
       {/* Zoom indicator */}
-      <div className="absolute bottom-3 right-3 px-2 py-1 rounded bg-surface/80 text-xs text-text-muted font-mono backdrop-blur-sm">
+      <div className="pointer-events-none absolute bottom-4 left-1/2 hidden -translate-x-1/2 rounded-2xl border border-border/70 bg-bg/72 px-3 py-2 text-[11px] font-medium text-text-muted shadow-float backdrop-blur-xl md:block">
+        <span className="text-yellow">Tip:</span> Hold mouse to draw · Right click erases · Press ? for shortcuts
+      </div>
+      <div className="absolute bottom-4 right-4 rounded-xl border border-border/70 bg-bg/76 px-2.5 py-1.5 font-mono text-xs text-text-muted backdrop-blur-xl">
         {zoom}%
       </div>
     </div>
