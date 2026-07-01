@@ -58,7 +58,6 @@ export function UserMenu({ profile, signOut, compact = false, className }: UserM
     setOpen(false);
     await signOut();
     router.push('/login');
-    router.refresh();
   };
 
   return (

@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Sidebar } from './sidebar';
 import { RightSidebarPanel } from './right-sidebar-panel';
 import { MobileNav } from './mobile-nav';
@@ -14,12 +14,31 @@ interface AppShellProps {
   className?: string;
 }
 
+/* Lightweight content transition — respects prefers-reduced-motion. */
+const contentVariants = {
+  initial: { opacity: 0.92, y: 6 },
+  animate: { opacity: 1, y: 0 },
+};
+
+const reducedMotionVariants = {
+  initial: { opacity: 1, y: 0 },
+  animate: { opacity: 1, y: 0 },
+};
+
 export function AppShell({
   children,
   showRightSidebar = true,
   className,
 }: AppShellProps) {
   const pathname = usePathname();
+
+  /* Detect prefers-reduced-motion on client.
+     Falls back to false during SSR so the animation markup is always present. */
+  const prefersReduced =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+  const variants = prefersReduced ? reducedMotionVariants : contentVariants;
 
   return (
     <div className="app-backdrop min-h-screen w-full bg-bg">
@@ -39,18 +58,28 @@ export function AppShell({
           )}
         >
           <TopBar />
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={pathname}
-              initial={{ opacity: 0.85, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0.85, y: -4 }}
-              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="w-full min-w-0"
-            >
-              {children}
-            </motion.div>
-          </AnimatePresence>
+          {/*
+           * Replaced AnimatePresence mode="wait" + key={pathname} with a
+           * simple motion.div that uses `key={pathname}` for enter-only
+           * animation. AnimatePresence mode="wait" was causing a fatal
+           * "removeChild" crash when server-side redirects produced rapid
+           * key changes with no rendered DOM content in between (e.g. the
+           * /drops page redirect). This approach:
+           *  - Keeps smooth fade/slide entrance on route change
+           *  - Sidebar & shell never remount
+           *  - No DOM manipulation conflicts
+           *  - Respects prefers-reduced-motion
+           */}
+          <motion.div
+            key={pathname}
+            variants={variants}
+            initial="initial"
+            animate="animate"
+            transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+            className="w-full min-w-0"
+          >
+            {children}
+          </motion.div>
         </main>
 
         {showRightSidebar && <RightSidebarPanel />}
