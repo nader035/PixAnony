@@ -1,63 +1,88 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { Home, Compass, Plus, Bell, User, LogIn } from '@/components/ui/icons';
-import { createClient } from '@/lib/supabase/client';
+import { PixelAvatar } from '@/components/ui/pixel-avatar';
+import { useAuthProfile } from '@/hooks/use-auth-profile';
 import { cn } from '@/lib/utils';
 
 export function MobileNav() {
   const pathname = usePathname();
-  const supabase = useMemo(() => createClient(), []);
-  const [username, setUsername] = useState<string | null>(null);
-
-  useEffect(() => {
-    void (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase.from('profiles').select('username').eq('id', user.id).single();
-      setUsername(data?.username ?? null);
-    })();
-  }, [supabase]);
+  const { profile, isAuthenticated } = useAuthProfile();
 
   const items = [
     { label: 'Home', href: '/home', icon: Home },
     { label: 'Explore', href: '/explore', icon: Compass },
-    { label: 'Create', href: '/paint', icon: Plus, center: true },
-    { label: 'Alerts', href: '/notifications', icon: Bell },
-    { label: username ? 'Profile' : 'Sign in', href: username ? `/@${username}` : '/login', icon: username ? User : LogIn },
+    { label: 'Create', href: isAuthenticated ? '/paint' : '/login?next=%2Fpaint', icon: Plus, center: true },
+    { label: 'Alerts', href: isAuthenticated ? '/notifications' : '/login?next=%2Fnotifications', icon: Bell },
+    {
+      label: profile ? 'Profile' : 'Sign in',
+      href: profile ? `/profile/${profile.username}` : '/login',
+      icon: profile ? User : LogIn,
+      avatar: Boolean(profile),
+    },
   ];
 
   return (
-    <nav className="safe-area-bottom fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-[var(--glass-bg)] backdrop-blur-2xl lg:hidden">
+    <nav
+      className={cn(
+        'safe-area-bottom fixed inset-x-0 bottom-0 z-50 lg:hidden',
+        'border-t border-border/70 bg-[var(--glass-bg)] backdrop-blur-3xl',
+        'shadow-[0_-12px_36px_rgba(58,42,92,0.1)]',
+      )}
+    >
       <div className="mx-auto flex h-[4.25rem] max-w-lg items-center justify-around px-2">
         {items.map((item) => {
           const Icon = item.icon;
-          const active = pathname === item.href || pathname?.startsWith(`${item.href}/`);
+          const active = pathname === item.href || (!item.href.includes('?') && pathname?.startsWith(`${item.href}/`));
           return (
             <Link
               key={item.href}
               href={item.href}
               aria-current={active ? 'page' : undefined}
               className={cn(
-                'flex min-w-14 flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-[10px] font-medium',
-                item.center && '-mt-5'
+                'relative flex min-h-[48px] min-w-[48px] flex-col items-center justify-center gap-1 rounded-2xl px-2 py-1.5 text-[10px] font-medium',
+                'transition-all duration-200',
+                item.center && '-mt-5',
               )}
             >
               <span
                 className={cn(
-                  'flex items-center justify-center transition-all',
+                  'relative flex items-center justify-center transition-all duration-200',
                   item.center
-                    ? 'h-14 w-14 rounded-[18px] bg-gradient-to-br from-primary to-pink text-white shadow-[0_10px_28px_rgba(139,92,246,.34)]'
+                    ? cn(
+                        'h-14 w-14 rounded-[18px] bg-primary text-white',
+                        'shadow-[0_12px_30px_rgba(124,58,237,0.24)]',
+                        'hover:scale-105 active:scale-95',
+                      )
                     : active
-                      ? 'text-primary'
-                      : 'text-text-muted'
+                      ? 'scale-105 text-primary'
+                      : 'text-text-muted hover:text-text',
                 )}
               >
-                <Icon size={item.center ? 24 : 21} strokeWidth={active ? 2.5 : 2} />
+                {item.avatar && profile ? (
+                  <PixelAvatar username={profile.username} src={profile.avatar_url} size="xs" isVerified={profile.is_verified} showBadge={false} />
+                ) : (
+                  <Icon size={item.center ? 24 : 21} strokeWidth={active ? 2.5 : 2} />
+                )}
               </span>
-              {!item.center && <span className={active ? 'text-primary' : 'text-text-muted'}>{item.label}</span>}
+
+              {!item.center && (
+                <span className={cn('transition-colors duration-200', active ? 'text-primary' : 'text-text-muted')}>
+                  {item.label}
+                </span>
+              )}
+
+              {/* Animated active indicator dot */}
+              {active && !item.center && (
+                <motion.span
+                  layoutId="mobile-nav-dot"
+                  className="absolute -bottom-0.5 h-1 w-1 rounded-full bg-primary"
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                />
+              )}
             </Link>
           );
         })}

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Pixelify_Sans, Press_Start_2P } from 'next/font/google';
+import { Inter, Pixelify_Sans } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'sonner';
 import { BRAND } from '@/lib/constants';
@@ -18,15 +18,8 @@ const pixelifySans = Pixelify_Sans({
   display: 'swap',
 });
 
-const pressStart2P = Press_Start_2P({
-  subsets: ['latin'],
-  variable: '--font-press-start',
-  weight: '400',
-  display: 'swap',
-});
-
 export const metadata: Metadata = {
-  title: 'PixAnony — Express in Pixels Anonymously',
+  title: 'PixAnony - Express in Pixels Anonymously',
   description: BRAND.description,
   icons: { icon: '/favicon.ico' },
 };
@@ -39,15 +32,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${pixelifySans.variable} ${pressStart2P.variable} h-full`}
+      className={`${inter.variable} ${pixelifySans.variable} h-full`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col antialiased bg-bg text-text font-sans">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           {children}
           <Toaster
             position="bottom-right"
-            theme="system"
+            theme="light"
             richColors
             toastOptions={{
               style: {

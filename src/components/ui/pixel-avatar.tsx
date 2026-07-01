@@ -54,6 +54,7 @@ export function PixelAvatar({
   const [imgError, setImgError] = useState(false);
   const config = sizeConfig[size];
   const showImg = src && !imgError;
+  const isDataImage = Boolean(src?.startsWith('data:image'));
   const letter = username?.charAt(0)?.toUpperCase() || '?';
   const gradientColor = getAvatarColor(username);
 
@@ -64,23 +65,30 @@ export function PixelAvatar({
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
     >
-      {/* Glow ring */}
       <div
         className={cn(
-          'rounded-full p-[2px]',
-          'bg-gradient-to-br from-primary via-[#A855F7] to-pink',
-          'shadow-[0_0_10px_rgba(139,92,246,0.3)]',
-          onClick && 'cursor-pointer hover:shadow-[0_0_16px_rgba(139,92,246,0.5)] transition-shadow'
+          'rounded-2xl p-[2px]',
+          'bg-gradient-to-br from-primary/70 via-pink/60 to-cyan/60',
+          'shadow-[0_12px_26px_rgba(124,58,237,0.16)]',
+          onClick && 'cursor-pointer transition-transform hover:-translate-y-0.5'
         )}
       >
         <div
           className={cn(
-            'rounded-full overflow-hidden flex items-center justify-center',
+            'overflow-hidden rounded-[14px] flex items-center justify-center',
             'ring-2 ring-bg',
             config.container
           )}
         >
-          {showImg ? (
+          {showImg && isDataImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={src}
+              alt={username}
+              className="h-full w-full bg-surface object-cover pixel-art"
+              onError={() => setImgError(true)}
+            />
+          ) : showImg ? (
             <Image
               src={src}
               alt={username}
@@ -94,13 +102,26 @@ export function PixelAvatar({
           ) : (
             <div
               className={cn(
-                'h-full w-full flex items-center justify-center',
-                'bg-gradient-to-br font-pixel font-bold text-white',
+                'grid h-full w-full grid-cols-4 gap-px bg-bg p-1',
                 gradientColor,
                 config.text
               )}
             >
-              {letter}
+              {Array.from({ length: 16 }).map((_, index) => (
+                <span
+                  key={index}
+                  className={cn(
+                    'rounded-[2px]',
+                    (index + letter.charCodeAt(0)) % 5 === 0
+                      ? 'bg-pink'
+                      : (index + letter.charCodeAt(0)) % 3 === 0
+                        ? 'bg-primary'
+                        : (index + letter.charCodeAt(0)) % 2 === 0
+                          ? 'bg-cyan'
+                          : 'bg-surface',
+                  )}
+                />
+              ))}
             </div>
           )}
         </div>

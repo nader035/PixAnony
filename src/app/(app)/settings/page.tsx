@@ -5,18 +5,18 @@ import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { motion } from 'framer-motion';
 import { 
-  User, Palette, Shield, Save, Upload, Loader2, 
+  User, Palette, Shield, Save, Loader2,
   Settings, UserCheck, Moon, Sun, Monitor
 } from '@/components/ui/icons';
 import { createClient } from '@/lib/supabase/client';
-import { PixelAvatar } from '@/components/ui/pixel-avatar';
+import { DrawnAvatarEditor } from '@/components/ui/drawn-avatar-editor';
 import { PageFrame, PageHeader } from '@/components/ui/page-layout';
 import { toast } from 'sonner';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 const themeOptions = [
-  { value: 'dark', label: 'Dark', icon: Moon },
   { value: 'light', label: 'Light', icon: Sun },
+  { value: 'dark', label: 'Dark', icon: Moon },
   { value: 'system', label: 'System', icon: Monitor },
 ] as const;
 
@@ -116,45 +116,11 @@ export default function SettingsPage() {
     }
   };
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      setSaving(true);
-      
-      if (!sessionUser) return;
-
-      // Real upload to Supabase Storage
-      const fileExt = file.name.split('.').pop();
-      const filePath = `${sessionUser.id}/avatar.${fileExt}`;
-
-      // Upload file
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      setAvatarUrl(publicUrl);
-      toast.success('Avatar uploaded successfully!');
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Failed to upload avatar image.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-text">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="font-pixel text-xs text-text-muted">Loading settings...</p>
+        <p className="text-xs font-semibold text-text-muted">Loading settings...</p>
       </div>
     );
   }
@@ -215,34 +181,24 @@ export default function SettingsPage() {
               onSubmit={handleSaveProfile}
               className="space-y-5"
             >
-              {/* Avatar Uploader UI */}
-              <div className="surface-panel flex items-center gap-4 rounded-2xl p-4">
-                <div className="relative">
-                  <PixelAvatar
-                    username={username || 'guest'}
-                    src={avatarUrl}
-                    size="lg"
-                  />
-                  <label className="absolute -bottom-1 -right-1 bg-primary border border-border/80 p-1.5 rounded-full cursor-pointer hover:scale-105 active:scale-95 transition-all flex items-center justify-center text-white">
-                    <Upload className="w-3.5 h-3.5" />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAvatarUpload}
-                      disabled={saving}
-                      className="hidden"
-                    />
-                  </label>
+              <div className="surface-panel rounded-2xl p-4">
+                <div className="mb-4">
+                  <h3 className="text-sm font-semibold text-text">Drawn profile avatar</h3>
+                  <p className="mt-1 text-xs leading-5 text-text-muted">
+                    Build a small pixel avatar directly in PixAnony. Profile photo uploads are intentionally disabled.
+                  </p>
                 </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-text">Profile Avatar</h3>
-                  <p className="text-xs text-text-muted mt-0.5">Upload a clean square avatar PNG/JPG image.</p>
-                </div>
+                <DrawnAvatarEditor
+                  username={username || 'guest'}
+                  value={avatarUrl}
+                  disabled={saving}
+                  onChange={setAvatarUrl}
+                />
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-semibold uppercase tracking-wider text-text/80">Username</label>
+                  <label className="text-[10px] font-semibold uppercase text-text/80">Username</label>
                   <input
                     type="text"
                     required
@@ -253,7 +209,7 @@ export default function SettingsPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-semibold uppercase tracking-wider text-text/80">Display name</label>
+                  <label className="text-[10px] font-semibold uppercase text-text/80">Display name</label>
                   <input
                     type="text"
                     value={displayName}
@@ -266,7 +222,7 @@ export default function SettingsPage() {
 
               {/* Bio */}
               <div className="space-y-1">
-                <label className="text-[10px] font-semibold text-text/80 uppercase tracking-wider">Biography</label>
+                <label className="text-[10px] font-semibold uppercase text-text/80">Biography</label>
                 <textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
@@ -278,7 +234,7 @@ export default function SettingsPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-semibold uppercase tracking-wider text-text/80">Website URL</label>
+                  <label className="text-[10px] font-semibold uppercase text-text/80">Website URL</label>
                   <input
                     type="url"
                     value={website}
@@ -288,7 +244,7 @@ export default function SettingsPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-semibold uppercase tracking-wider text-text/80">Location</label>
+                  <label className="text-[10px] font-semibold uppercase text-text/80">Location</label>
                   <input
                     type="text"
                     value={location}
@@ -303,7 +259,7 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-primary py-3 text-sm font-semibold text-white shadow-glow transition-all hover:brightness-110 active:scale-[0.98]"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(124,58,237,0.22)] transition-all hover:brightness-105 active:scale-[0.98]"
               >
                 {saving ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -354,7 +310,7 @@ export default function SettingsPage() {
               <h2 className="text-lg font-semibold text-text">Account credentials</h2>
               
               <div className="space-y-1">
-                <label className="text-[10px] font-semibold text-text/80 uppercase tracking-wider">Auth Email Address</label>
+                <label className="text-[10px] font-semibold uppercase text-text/80">Auth email address</label>
                 <input
                   type="email"
                   disabled

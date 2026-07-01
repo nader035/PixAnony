@@ -21,15 +21,15 @@ interface AnimatedButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    'bg-gradient-to-r from-primary to-[#A855F7] text-white hover:from-[#7C3AED] hover:to-primary shadow-lg',
+    'bg-primary text-white hover:bg-primary-glow shadow-[0_14px_34px_rgba(124,58,237,0.2)] border border-transparent',
   secondary:
-    'bg-card text-text border border-border hover:bg-card-hover',
+    'bg-card text-text border border-border hover:border-primary/25 hover:bg-card-hover',
   ghost:
     'bg-transparent text-text-muted hover:text-text hover:bg-card',
   danger:
-    'bg-red text-white hover:bg-[#DC2626] shadow-lg',
+    'bg-red text-white hover:brightness-95 shadow-lg border border-transparent',
   outline:
-    'bg-transparent text-primary border border-primary hover:bg-primary/10',
+    'bg-primary/5 text-primary border border-primary/25 hover:bg-primary/10',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -40,11 +40,11 @@ const sizeStyles: Record<ButtonSize, string> = {
 };
 
 const glowStyles: Record<ButtonVariant, string> = {
-  primary: 'shadow-[0_0_20px_rgba(139,92,246,0.4)] hover:shadow-[0_0_30px_rgba(139,92,246,0.6)]',
+  primary: 'shadow-[0_16px_42px_rgba(124,58,237,0.24)]',
   secondary: '',
   ghost: '',
-  danger: 'shadow-[0_0_20px_rgba(244,63,94,0.3)] hover:shadow-[0_0_30px_rgba(244,63,94,0.5)]',
-  outline: 'shadow-[0_0_15px_rgba(139,92,246,0.2)] hover:shadow-[0_0_25px_rgba(139,92,246,0.4)]',
+  danger: 'shadow-[0_16px_42px_rgba(220,38,38,0.2)]',
+  outline: 'shadow-[0_14px_34px_rgba(124,58,237,0.12)]',
 };
 
 export const AnimatedButton = forwardRef<HTMLButtonElement, AnimatedButtonProps>(
@@ -75,7 +75,7 @@ export const AnimatedButton = forwardRef<HTMLButtonElement, AnimatedButtonProps>
           'relative inline-flex items-center justify-center font-medium',
           'transition-all duration-200 cursor-pointer',
           'disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
           variantStyles[variant],
           sizeStyles[size],
           glow && glowStyles[variant],

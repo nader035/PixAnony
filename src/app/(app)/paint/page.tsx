@@ -243,7 +243,7 @@ export default function PaintPage() {
   return (
     <div className="flex h-[100dvh] select-none flex-col overflow-hidden bg-bg text-text">
       {/* Top Navigation Bar */}
-      <header className="z-20 flex min-h-16 items-center justify-between gap-2 border-b border-border/80 bg-bg/88 px-2 shadow-[0_16px_42px_rgba(0,0,0,.18)] backdrop-blur-xl sm:px-4">
+      <header className="z-20 flex min-h-16 items-center justify-between gap-2 border-b border-border/80 bg-bg/88 px-2 shadow-[0_16px_42px_rgba(58,42,92,.08)] backdrop-blur-xl sm:px-4">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <Link href="/home" aria-label="Back to feed" className="flex h-10 w-10 items-center justify-center hover:bg-card-hover rounded-xl border border-border/70 text-text-muted hover:text-text transition-colors">
             <ArrowLeft className="w-5 h-5" />
@@ -253,7 +253,7 @@ export default function PaintPage() {
           
           {/* Grid Size Dropdown */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-text-muted font-pixel hidden xl:inline">Grid:</span>
+            <span className="hidden text-xs font-semibold text-text-muted xl:inline">Grid:</span>
             <select
               value={gridSize}
               onChange={(e) => setGridSize(Number(e.target.value) as GridSize)}
@@ -398,7 +398,7 @@ export default function PaintPage() {
               aria-modal="true"
               aria-labelledby="paint-help-title"
             >
-              <h3 id="paint-help-title" className="mb-4 font-pixel text-lg text-primary">Keyboard Shortcuts</h3>
+              <h3 id="paint-help-title" className="mb-4 text-lg font-semibold text-text">Keyboard Shortcuts</h3>
               <ul className="grid gap-2 text-sm font-medium text-text-muted sm:grid-cols-2">
                 {PAINT_SHORTCUT_HELP.map((item) => (
                   <li key={`${item.label}-${item.shortcut}`} className="flex items-center justify-between gap-3 rounded-xl border border-border/50 bg-surface/70 px-3 py-2">
@@ -428,7 +428,7 @@ export default function PaintPage() {
               aria-modal="true"
               aria-labelledby="send-pixel-title"
             >
-              <h3 id="send-pixel-title" className="font-pixel text-lg text-primary mb-2 flex items-center gap-2">
+              <h3 id="send-pixel-title" className="mb-2 flex items-center gap-2 text-lg font-semibold text-text">
                 <Sparkles className="w-5 h-5" />
                 Send pixel art
               </h3>
@@ -439,7 +439,7 @@ export default function PaintPage() {
               <div className="space-y-4">
                 {/* Search Recipient */}
                 <div className="space-y-1">
-                  <label className="text-[10px] font-semibold text-text/80 uppercase tracking-wider">Recipient Username</label>
+                  <label className="text-[10px] font-semibold uppercase text-text/80">Recipient username</label>
                   <div className="relative">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-text-muted" />
                     <input
@@ -520,7 +520,7 @@ export default function PaintPage() {
 
                 {/* Caption */}
                 <div className="space-y-1">
-                  <label className="text-[10px] font-semibold text-text/80 uppercase tracking-wider">Optional Caption</label>
+                  <label className="text-[10px] font-semibold uppercase text-text/80">Optional caption</label>
                   <textarea
                     placeholder="Add a short caption to the drawing..."
                     value={caption}
@@ -543,7 +543,7 @@ export default function PaintPage() {
                 <button
                   onClick={handleSendPixel}
                   disabled={!selectedRecipient || isSending}
-                  className="flex-[2] py-2.5 bg-gradient-primary text-white rounded-xl text-sm font-semibold shadow-glow hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+                  className="flex flex-[2] items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(124,58,237,0.22)] transition-all hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
                 >
                   {isSending ? 'Sending...' : sendAnonymously ? 'Send anonymous' : 'Send signed'}
                 </button>

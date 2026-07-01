@@ -25,7 +25,6 @@ import { AnimatedButton } from '@/components/ui/animated-button';
 import { Logo } from '@/components/ui/logo';
 import { GridSize } from '@/lib/types';
 import { PixelAvatar } from '@/components/ui/pixel-avatar';
-import { BorderGlow } from '@/components/react-bits/border-glow';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface RecipientProfile {
@@ -200,7 +199,7 @@ export default function SendToUserPage() {
     return (
       <div className="flex min-h-[100svh] w-full flex-col items-center justify-center gap-4 bg-bg text-text">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="font-pixel text-xs text-text-muted">Loading canvas for @{username}...</p>
+        <p className="text-xs font-semibold text-text-muted">Loading canvas for @{username}...</p>
       </div>
     );
   }
@@ -208,9 +207,9 @@ export default function SendToUserPage() {
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-bg text-text select-none">
       {/* Top Navigation Bar */}
-      <header className="z-20 flex min-h-16 items-center justify-between gap-2 border-b border-border/80 bg-bg/88 px-2 shadow-[0_16px_42px_rgba(0,0,0,.18)] backdrop-blur-xl sm:px-4">
+      <header className="z-20 flex min-h-16 items-center justify-between gap-2 border-b border-border/80 bg-bg/88 px-2 shadow-[0_16px_42px_rgba(58,42,92,.08)] backdrop-blur-xl sm:px-4">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
-          <Link href={`/@${username}`} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/70 text-text-muted transition-colors hover:bg-card-hover hover:text-text">
+          <Link href={`/profile/${username}`} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/70 text-text-muted transition-colors hover:bg-card-hover hover:text-text">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <Logo size="sm" showText={false} className="hidden sm:flex" />
@@ -338,7 +337,7 @@ export default function SendToUserPage() {
               exit={{ scale: 0.95, opacity: 0 }}
               className="bg-card border border-border max-w-md w-full rounded-2xl p-6 shadow-2xl relative"
             >
-              <h3 className="font-pixel text-lg text-primary mb-2 flex items-center gap-2">
+              <h3 className="mb-2 flex items-center gap-2 text-lg font-semibold text-text">
                 <Sparkles className="w-5 h-5" />
                 Deliver pixel art
               </h3>
@@ -348,12 +347,12 @@ export default function SendToUserPage() {
 
               <div className="space-y-4">
                 {/* Display recipient metadata card */}
-                <BorderGlow animated className="rounded-2xl" borderRadius={16} glowRadius={24} fillOpacity={0.24}>
-                  <div className="flex items-center justify-between gap-3 bg-surface/78 p-3">
+                <div className="rounded-2xl border border-border bg-surface/78 p-3">
+                  <div className="flex items-center justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-3">
                       <PixelAvatar username={recipient?.username || 'recipient'} src={recipient?.avatar_url} size="md" showBadge={false} />
                       <div className="min-w-0">
-                        <h4 className="truncate font-semibold text-sm text-text">{recipient?.display_name || recipient?.username}</h4>
+                        <h4 className="truncate text-sm font-semibold text-text">{recipient?.display_name || recipient?.username}</h4>
                         <p className="text-xs text-text-muted">@{recipient?.username}</p>
                       </div>
                     </div>
@@ -366,7 +365,7 @@ export default function SendToUserPage() {
                       {copiedShareLink ? <Check className="h-3.5 w-3.5 text-green" /> : <Copy className="h-3.5 w-3.5" />}
                     </button>
                   </div>
-                </BorderGlow>
+                </div>
 
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   <button
@@ -409,7 +408,7 @@ export default function SendToUserPage() {
 
                 {/* Message */}
                 <div className="space-y-1">
-                  <label className="text-[10px] font-semibold text-text/80 uppercase tracking-wider">Optional Caption</label>
+                  <label className="text-[10px] font-semibold uppercase text-text/80">Optional caption</label>
                   <textarea
                     placeholder="Add a short caption to the artwork..."
                     value={caption}
@@ -432,7 +431,7 @@ export default function SendToUserPage() {
                 <button
                   onClick={() => currentUser ? void handleSendPixel() : router.push(loginHref)}
                   disabled={isSending}
-                  className="flex-[2] py-2.5 bg-gradient-primary text-white rounded-xl text-sm font-semibold shadow-glow hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  className="flex flex-[2] items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(124,58,237,0.22)] transition-all hover:brightness-105 active:scale-[0.98]"
                 >
                   {isSending ? 'Sending...' : currentUser ? (
                     <>

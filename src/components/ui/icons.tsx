@@ -14,6 +14,7 @@ import {
   faBars,
   faBell,
   faBellSlash,
+  faBolt,
   faBookmark,
   faCalendarDays,
   faChartLine,
@@ -65,6 +66,7 @@ import {
   faPlus,
   faRetweet,
   faRightToBracket,
+  faRightFromBracket,
   faShareNodes,
   faShieldHalved,
   faSpinner,
@@ -121,6 +123,7 @@ export const ArrowRight = icon(faArrowRight);
 export const BadgeCheck = icon(faCircleCheck);
 export const Bell = icon(faBell);
 export const BellOff = icon(faBellSlash);
+export const Zap = icon(faBolt);
 export const Bookmark = icon(faBookmark);
 export const Calendar = icon(faCalendarDays);
 export const CalendarClock = icon(faCalendarDays);
@@ -156,6 +159,7 @@ export const Loader2 = icon(faSpinner);
 export const Lock = icon(faLock);
 export const LockKeyhole = icon(faLock);
 export const LogIn = icon(faRightToBracket);
+export const LogOut = icon(faRightFromBracket);
 export const Mail = icon(faEnvelope);
 export const MailOpen = icon(faEnvelopeOpen);
 export const MapPin = icon(faLocationDot);

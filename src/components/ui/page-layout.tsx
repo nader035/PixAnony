@@ -5,8 +5,8 @@ type PageWidth = 'compact' | 'default' | 'wide';
 
 const pageWidths: Record<PageWidth, string> = {
   compact: 'max-w-[760px]',
-  default: 'max-w-[880px]',
-  wide: 'max-w-[1040px]',
+  default: 'max-w-[900px]',
+  wide: 'max-w-[1080px]',
 };
 
 interface PageFrameProps {
@@ -23,7 +23,7 @@ export function PageFrame({
   return (
     <div
       className={cn(
-        'page-enter w-full min-w-0 px-4 pb-10 pt-5 sm:px-5 sm:pt-7 xl:px-6',
+        'page-enter w-full min-w-0 px-4 pb-12 pt-5 sm:px-6 sm:pt-7 xl:px-7',
         pageWidths[width],
         className,
       )}
@@ -57,16 +57,15 @@ export function PageHeader({
     >
       <div className="min-w-0">
         {eyebrow && (
-          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">
+          <p className="mb-2 text-xs font-semibold uppercase text-primary">
             {eyebrow}
           </p>
         )}
-        <h1 className="text-2xl font-bold tracking-[-0.045em] text-text sm:text-3xl">
+        <h1 className="text-2xl font-semibold text-text sm:text-3xl">
           {title}
         </h1>
-        <span className="mt-3 block h-px w-24 bg-gradient-to-r from-primary via-pink to-transparent animate-pixel-flicker" aria-hidden="true" />
         {description && (
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-text-muted">
             {description}
           </p>
         )}

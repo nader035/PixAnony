@@ -103,7 +103,8 @@ export default async function ProfilePage({
 
   return (
     <div className="page-enter w-full max-w-[880px] overflow-hidden pb-10 sm:px-5 xl:px-6">
-      <div className="relative h-44 overflow-hidden bg-[radial-gradient(circle_at_75%_15%,rgba(244,63,143,.34),transparent_26%),radial-gradient(circle_at_24%_72%,rgba(34,211,238,.18),transparent_30%),linear-gradient(135deg,rgba(139,92,246,.42),rgba(7,11,19,.72))] sm:mt-5 sm:h-56 sm:rounded-3xl sm:border sm:border-border">
+      <div className="relative h-44 overflow-hidden bg-[radial-gradient(circle_at_75%_15%,rgba(236,72,153,.16),transparent_26%),radial-gradient(circle_at_24%_72%,rgba(34,211,238,.12),transparent_30%),linear-gradient(135deg,rgba(124,58,237,.18),rgba(255,255,255,.82))] sm:mt-5 sm:h-56 sm:rounded-3xl sm:border sm:border-border">
+        <div className="absolute inset-0 dot-grid opacity-35" />
         {profile.banner_url && <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url("${profile.banner_url}")` }} />}
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-bg to-transparent" />
       </div>
@@ -122,7 +123,7 @@ export default async function ProfilePage({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-bold tracking-[-0.04em] text-text">{profile.display_name}</h1>
+          <h1 className="text-2xl font-semibold text-text">{profile.display_name}</h1>
           {profile.is_verified && <BadgeCheck size={20} className="text-primary" />}
           {profile.is_pro && <span className="flex items-center gap-1 rounded-full border border-yellow/25 bg-yellow/10 px-2 py-1 text-[10px] font-bold text-yellow"><Crown size={11} /> PRO</span>}
         </div>
@@ -158,7 +159,7 @@ export default async function ProfilePage({
 
         <div className="mt-7 flex items-center justify-between border-b border-border pb-3">
           <h2 className="text-sm font-semibold text-text">Profile activity</h2>
-          {ownProfile && <Link href={`/@${profile.username}/received`} className="text-xs font-semibold text-primary">Received privately</Link>}
+          {ownProfile && <Link href={`/profile/${profile.username}/received`} className="text-xs font-semibold text-primary">Received privately</Link>}
         </div>
       </section>
 

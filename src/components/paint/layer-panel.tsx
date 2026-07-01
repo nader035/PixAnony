@@ -79,7 +79,7 @@ export default function LayerPanel() {
     >
       {/* Header */}
       <div className="flex items-center justify-between">
-        <span className="font-pixel text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+        <span className="text-[10px] font-semibold uppercase text-text-muted">
           Layers
         </span>
         <button

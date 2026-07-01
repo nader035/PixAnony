@@ -63,7 +63,7 @@ export default function ColorPalette({ compact = false }: { compact?: boolean })
       )}
     >
       {/* Header */}
-      <div className={cn('font-pixel text-[10px] font-semibold uppercase tracking-wider text-text-muted', compact && 'hidden')}>
+      <div className={cn('text-[10px] font-semibold uppercase text-text-muted', compact && 'hidden')}>
         Colors
       </div>
 
@@ -189,7 +189,7 @@ export default function ColorPalette({ compact = false }: { compact?: boolean })
       {/* Custom Colors */}
       {!compact && customColors.length > 0 && (
         <div>
-          <div className="text-[9px] font-semibold text-text-muted uppercase tracking-wider mb-1.5">
+          <div className="mb-1.5 text-[9px] font-semibold uppercase text-text-muted">
             Custom
           </div>
           <div className="flex flex-wrap gap-1">
@@ -224,7 +224,7 @@ export default function ColorPalette({ compact = false }: { compact?: boolean })
       {/* Recent Colors */}
       {!compact && recentColors.length > 0 && (
         <div>
-          <div className="text-[9px] font-semibold text-text-muted uppercase tracking-wider mb-1.5">
+          <div className="mb-1.5 text-[9px] font-semibold uppercase text-text-muted">
             Recent
           </div>
           <div className="flex flex-wrap gap-1">

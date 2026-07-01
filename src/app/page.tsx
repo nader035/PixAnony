@@ -2,214 +2,117 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   ArrowRight,
-  Check,
+  Bookmark,
   ChevronRight,
   Eye,
+  Heart,
   Lock,
   Menu,
+  MessageCircle,
   Palette,
   Paintbrush,
+  Repeat2,
   Send,
   Shield,
   Sparkles,
+  Users,
   X as XIcon,
 } from '@/components/ui/icons';
 import { Logo } from '@/components/ui/logo';
 import { PixelAvatar } from '@/components/ui/pixel-avatar';
-import { PixelParticles } from '@/components/ui/pixel-particles';
-import { BorderGlow } from '@/components/react-bits/border-glow';
-import { PixelBlast } from '@/components/react-bits/pixel-blast';
+import { PixelCanvasMock } from '@/components/ui/pixel-canvas-mock';
+import { UserMenu } from '@/components/auth/user-menu';
+import { useAuthProfile } from '@/hooks/use-auth-profile';
 import { BRAND } from '@/lib/constants';
 import { cn } from '@/lib/utils';
-
-const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 const navLinks = [
   { label: 'Features', href: '/#features' },
   { label: 'Workflow', href: '/#workflow' },
+  { label: 'Community', href: '/explore' },
   { label: 'Team', href: '/#team' },
-  { label: 'Explore', href: '/explore' },
 ] as const;
 
 const workflow = [
   {
+    step: '01',
     icon: Paintbrush,
-    title: 'Draw with intent',
-    text: 'A focused editor for pixel work, palettes, layers, preview, and clean export controls.',
+    title: 'Draw in a focused studio',
+    text: 'The editor keeps tools, layers, palettes, and zoom close without turning the interface into a retro arcade.',
   },
   {
+    step: '02',
     icon: Send,
-    title: 'Send privately',
-    text: 'Deliver artwork anonymously while keeping sender identity and received art protected.',
+    title: 'Publish or send quietly',
+    text: 'Share public artwork to your profile or send anonymous pieces through the same calm product language.',
   },
   {
-    icon: Eye,
-    title: 'Publish when ready',
-    text: 'Public pieces land in the feed and profile gallery with real reactions from the community.',
+    step: '03',
+    icon: Heart,
+    title: 'Let real interaction happen',
+    text: 'Likes, comments, reposts, bookmarks, and creator pages stay readable and grounded in the live app.',
   },
 ] as const;
 
-const assurances = [
-  'Supabase authentication',
-  'Row-level privacy rules',
-  'Responsive editor and feed',
+const features = [
+  { icon: Palette, title: 'Pixel editor', text: 'Pixel identity stays inside the canvas, previews, and small metadata accents.' },
+  { icon: Lock, title: 'Anonymous delivery', text: 'Private sends feel deliberate without hiding behind heavy visual effects.' },
+  { icon: Eye, title: 'Explore feed', text: 'Artwork cards, search, and creator context are clean, social, and scannable.' },
+  { icon: Users, title: 'Creator profiles', text: 'Profiles foreground galleries, bio details, and the anonymous send entry point.' },
 ] as const;
 
-const surfaceNotes = [
-  { label: 'Private delivery', icon: Lock },
-  { label: 'Public gallery', icon: Eye },
-  { label: 'Pixel editor', icon: Paintbrush },
-] as const;
-
-const featureCards = [
-  {
-    icon: Shield,
-    title: 'Privacy by design',
-    description:
-      'Every layer of the stack enforces row-level security. Your identity and received artwork stay protected by Supabase policies, not just hidden in the UI.',
-    gradient: 'from-primary/20 to-primary/5',
-    iconBg: 'bg-primary/15',
-    iconColor: 'text-primary',
-    linkColor: 'text-primary',
-    linkLabel: 'Learn about security →',
-  },
-  {
-    icon: Send,
-    title: 'Protected delivery',
-    description:
-      'Send pixel art without revealing your identity. Recipients see the artwork while database policies protect sender information.',
-    gradient: 'from-pink/20 to-pink/5',
-    iconBg: 'bg-pink/15',
-    iconColor: 'text-pink',
-    linkColor: 'text-pink',
-    linkLabel: 'How delivery works →',
-  },
-  {
-    icon: Eye,
-    title: 'Public gallery',
-    description:
-      'Publish finished pieces to the community feed. Your profile gallery showcases your art with real likes, comments, and reposts from fellow creators.',
-    gradient: 'from-cyan/20 to-cyan/5',
-    iconBg: 'bg-cyan/15',
-    iconColor: 'text-cyan',
-    linkColor: 'text-cyan',
-    linkLabel: 'Explore the gallery →',
-  },
-] as const;
-
-const heroPixels = [
-  '....pp....pp....',
-  '...pppp..pppp...',
-  '..pppppppppppp..',
-  '.pppwwppppwwppp.',
-  '.pppppppppppppp.',
-  '..pppppvvppppp..',
-  '...ppppvvvvpp...',
-  '....ppvvvvpp....',
-  '.....pvvvvp.....',
-  '......pvvp......',
-  '.......pp.......',
-  '................',
-  '..c.........y...',
-  '.....v....c.....',
-  '...y.........v..',
-  '................',
-] as const;
-
-const pixelClass: Record<string, string> = {
-  '.': 'bg-transparent',
-  p: 'bg-pink',
-  v: 'bg-primary',
-  w: 'bg-white/85',
-  c: 'bg-cyan',
-  y: 'bg-yellow',
-};
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.62, ease } },
-};
-
-const stagger = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
-};
-
-/* ------------------------------------------------------------------ */
-/*  Social proof avatars                                              */
-/* ------------------------------------------------------------------ */
-function SocialProofBar() {
-  return (
-    <motion.div
-      variants={fadeUp}
-      className="mt-9 flex max-w-lg items-start gap-3 rounded-2xl border border-border/70 bg-card/45 p-3.5"
-    >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary">
-        <Shield size={16} />
-      </span>
-      <div>
-        <p className="text-sm font-semibold text-text">Privacy enforced beyond the interface</p>
-        <p className="mt-1 text-xs leading-5 text-text-muted">
-          Authentication, ownership, and anonymous delivery rules are backed by Supabase policies.
-        </p>
-      </div>
-    </motion.div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Navbar                                                            */
-/* ------------------------------------------------------------------ */
 function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { profile, signOut } = useAuthProfile();
+  const isSignedIn = Boolean(profile);
 
   return (
-    <motion.header
-      initial={false}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease }}
-      className="fixed inset-x-0 top-0 z-50 border-b border-border/60 bg-bg/72 backdrop-blur-2xl"
-    >
-      <nav className="site-container flex h-16 items-center justify-between">
-        <Link href="/" aria-label="PixAnony home" className="shrink-0">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-border/70 bg-bg/82 backdrop-blur-2xl">
+      <nav className="site-container flex h-16 items-center justify-between" aria-label="Primary">
+        <Link href="/" aria-label="PixAnony home">
           <Logo size="md" />
         </Link>
 
         <div className="hidden items-center gap-7 md:flex">
           {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm font-medium text-text-muted transition-colors hover:text-text"
-            >
+            <Link key={link.href} href={link.href} className="text-sm font-medium text-text-muted transition-colors hover:text-text">
               {link.label}
             </Link>
           ))}
         </div>
 
         <div className="hidden items-center gap-2 md:flex">
-          <Link
-            href="/login"
-            className="rounded-xl px-4 py-2.5 text-sm font-semibold text-text-muted transition-colors hover:bg-card/70 hover:text-text"
-          >
-            Sign in
-          </Link>
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-[0_14px_36px_rgba(139,92,246,.28)] transition-transform hover:-translate-y-0.5"
-          >
-            Start creating
-            <ArrowRight size={14} />
-          </Link>
+          {isSignedIn && profile ? (
+            <>
+              <Link href="/home" className="rounded-full px-4 py-2.5 text-sm font-semibold text-text-muted transition-colors hover:bg-card-hover hover:text-text">
+                Dashboard
+              </Link>
+              <Link href="/paint" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-[0_14px_34px_rgba(124,58,237,0.22)] transition hover:-translate-y-0.5">
+                Create
+                <ArrowRight size={14} />
+              </Link>
+              <UserMenu profile={profile} signOut={signOut} compact />
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="rounded-full px-4 py-2.5 text-sm font-semibold text-text-muted transition-colors hover:bg-card-hover hover:text-text">
+                Login
+              </Link>
+              <Link href="/login?mode=signup" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-[0_14px_34px_rgba(124,58,237,0.22)] transition hover:-translate-y-0.5">
+                Get started
+                <ArrowRight size={14} />
+              </Link>
+            </>
+          )}
         </div>
 
         <button
           type="button"
           onClick={() => setMobileOpen((open) => !open)}
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-border text-text-muted transition-colors hover:bg-card hover:text-text md:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card/70 text-text-muted transition hover:text-text md:hidden"
           aria-label="Toggle navigation"
           aria-expanded={mobileOpen}
         >
@@ -217,707 +120,307 @@ function Navbar() {
         </button>
       </nav>
 
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.24, ease }}
-            className="overflow-hidden border-t border-border bg-bg/96 md:hidden"
-          >
-            <div className="space-y-2 px-4 py-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="block rounded-xl px-3 py-3 text-sm font-medium text-text-muted transition-colors hover:bg-card hover:text-text"
-                >
-                  {link.label}
-                </Link>
-              ))}
+      {mobileOpen && (
+        <div className="border-t border-border/70 bg-bg/95 px-4 py-4 backdrop-blur-xl md:hidden">
+          <div className="mx-auto grid max-w-lg gap-1">
+            {navLinks.map((link) => (
               <Link
-                href="/login"
-                className="mt-2 flex min-h-12 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-white"
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className="rounded-2xl px-3 py-3 text-sm font-medium text-text-muted transition hover:bg-card-hover hover:text-text"
               >
+                {link.label}
+              </Link>
+            ))}
+            {isSignedIn && profile ? (
+              <div className="mt-2 grid gap-2 border-t border-border pt-3">
+                <Link href="/home" onClick={() => setMobileOpen(false)} className="rounded-2xl px-3 py-3 text-sm font-semibold text-text hover:bg-card-hover">
+                  Dashboard
+                </Link>
+                <Link href="/paint" onClick={() => setMobileOpen(false)} className="flex min-h-12 items-center justify-center rounded-full bg-primary px-4 text-sm font-semibold text-white">
+                  Create artwork
+                </Link>
+                <Link href={`/profile/${profile.username}`} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-2xl border border-border bg-card/75 px-3 py-3">
+                  <PixelAvatar username={profile.username} src={profile.avatar_url} size="sm" isVerified={profile.is_verified} />
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-semibold text-text">{profile.display_name}</span>
+                    <span className="block truncate text-xs text-text-muted">@{profile.username}</span>
+                  </span>
+                </Link>
+                <div className="grid grid-cols-2 gap-2">
+                  <Link href={`/profile/${profile.username}/received`} onClick={() => setMobileOpen(false)} className="rounded-2xl border border-border bg-card/70 px-3 py-2.5 text-center text-xs font-semibold text-text-muted">
+                    Private Drops
+                  </Link>
+                  <Link href="/settings" onClick={() => setMobileOpen(false)} className="rounded-2xl border border-border bg-card/70 px-3 py-2.5 text-center text-xs font-semibold text-text-muted">
+                    Settings
+                  </Link>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    void signOut();
+                  }}
+                  className="rounded-2xl px-3 py-2.5 text-sm font-semibold text-red hover:bg-red/8"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <Link href="/login?mode=signup" className="mt-2 flex min-h-12 items-center justify-center rounded-full bg-primary px-4 text-sm font-semibold text-white">
                 Get started
               </Link>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.header>
+            )}
+          </div>
+        </div>
+      )}
+    </header>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Pixel Studio Visual                                               */
-/* ------------------------------------------------------------------ */
-function PixelStudioVisual() {
-  const { scrollYProgress } = useScroll();
-  const y = useTransform(scrollYProgress, [0, 0.35], [0, -28]);
+function CreateCta({ children, className }: { children: React.ReactNode; className: string }) {
+  const { isAuthenticated, loading } = useAuthProfile();
+  const href = isAuthenticated ? '/paint' : '/login?next=%2Fpaint';
 
   return (
-    <motion.div
-      style={{ y }}
-      initial={false}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.8, delay: 0.14, ease }}
-      className="relative mx-auto w-full max-w-[600px]"
-    >
-      <div className="absolute -inset-8 rounded-full bg-primary/16 blur-3xl" />
-      <BorderGlow animated className="rounded-[2rem]" borderRadius={32} glowRadius={44} fillOpacity={0.28}>
-      <div className="relative overflow-hidden rounded-[2rem] bg-card p-3 shadow-float sm:p-4">
-        <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border border-border/70 bg-surface/80 px-3 py-2.5">
-          <div className="flex items-center gap-2 text-xs font-semibold text-text">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/15 text-primary">
-              <Palette size={15} />
-            </span>
-            Board 16 x 16
-          </div>
-          <div className="hidden items-center gap-2 text-[11px] font-medium text-text-muted sm:flex">
-            <span className="rounded-lg border border-border px-2 py-1">Preview</span>
-            <span className="rounded-lg bg-primary px-2 py-1 text-white">Send</span>
-          </div>
-        </div>
-
-        <div className="grid gap-3 lg:grid-cols-[5rem_minmax(0,1fr)]">
-          <div className="hidden rounded-2xl border border-border/70 bg-bg/45 p-2 lg:block">
-            {['Brush', 'Fill', 'Pick', 'Move'].map((tool, index) => (
-              <div
-                key={tool}
-                className={`mb-1.5 rounded-xl px-2 py-2 text-[10px] font-semibold ${
-                  index === 0 ? 'bg-primary text-white' : 'text-text-muted'
-                }`}
-              >
-                {tool}
-              </div>
-            ))}
-          </div>
-
-          <div className="relative overflow-hidden rounded-2xl border border-border bg-bg/80 p-4">
-            <div className="absolute inset-0 opacity-[0.18] [background-image:linear-gradient(var(--border-color)_1px,transparent_1px),linear-gradient(90deg,var(--border-color)_1px,transparent_1px)] [background-size:24px_24px]" />
-            <motion.div
-              className="relative mx-auto grid aspect-square max-w-[420px] gap-0.5 sm:gap-1"
-              style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}
-              initial={false}
-              animate="visible"
-              variants={{ visible: { transition: { staggerChildren: 0.006 } } }}
-            >
-              {heroPixels.join('').split('').map((pixel, index) => (
-                <motion.span
-                  key={`${pixel}-${index}`}
-                  variants={{
-                    hidden: { opacity: 0, scale: 0.7 },
-                    visible: { opacity: 1, scale: 1 },
-                  }}
-                  className={`aspect-square rounded-[3px] ${pixelClass[pixel] ?? 'bg-transparent'}`}
-                />
-              ))}
-            </motion.div>
-          </div>
-        </div>
-
-        <div className="mt-3 grid gap-3 sm:grid-cols-3">
-          {surfaceNotes.map(({ label, icon: Icon }) => (
-            <div key={label} className="flex items-center gap-2 rounded-2xl border border-border/70 bg-surface/70 px-3 py-3">
-              <Icon size={14} className="text-primary" />
-              <span className="text-[11px] font-semibold text-text">{label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-      </BorderGlow>
-    </motion.div>
+    <Link href={href} aria-disabled={loading} className={className}>
+      {children}
+    </Link>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Hero                                                              */
-/* ------------------------------------------------------------------ */
 function Hero() {
   return (
-    <section className="relative flex min-h-[calc(100svh-4rem)] items-center overflow-hidden bg-gradient-hero pt-16">
-      <div className="absolute inset-0 opacity-55">
-        <PixelBlast
-          variant="circle"
-          pixelSize={6}
-          color="#EC4899"
-          patternScale={3.2}
-          patternDensity={1.08}
-          pixelSizeJitter={0.4}
-          enableRipples
-          rippleSpeed={0.36}
-          rippleThickness={0.12}
-          rippleIntensityScale={1.35}
-          liquid
-          liquidStrength={0.09}
-          liquidRadius={1.2}
-          liquidWobbleSpeed={5}
-          speed={0.45}
-          edgeFade={0.2}
-          transparent
-        />
-      </div>
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--bg)_0%,rgba(5,7,17,.86)_42%,rgba(5,7,17,.56)_100%)]" />
-      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-bg to-transparent" />
-      <div className="site-container grid items-center gap-10 py-14 lg:grid-cols-[minmax(0,.82fr)_minmax(500px,1.18fr)] lg:gap-14 xl:gap-16">
-        <motion.div initial={false} animate="visible" variants={stagger} className="relative z-10 max-w-[560px]">
-          <motion.p variants={fadeUp} className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
+    <section className="relative overflow-hidden pt-28 sm:pt-32">
+      <div className="absolute inset-0 dot-grid opacity-40" />
+      <div className="absolute left-1/2 top-28 h-80 w-80 -translate-x-1/2 rounded-full bg-primary/12 blur-3xl" />
+      <div className="site-container relative grid min-h-[calc(100svh-7rem)] items-center gap-12 pb-20 lg:grid-cols-[0.95fr_1.05fr]">
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="max-w-2xl">
+          <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/18 bg-primary/8 px-4 py-2 text-xs font-semibold text-primary">
             <Sparkles size={13} />
-            Private-first pixel art
-          </motion.p>
-          <motion.h1 variants={fadeUp} className="font-pixel text-[clamp(2.6rem,5.2vw,4.9rem)] leading-[1.01] tracking-[-0.055em] text-text">
-            Express in{' '}
-            <span className="mt-2 block bg-gradient-to-r from-pink via-primary to-cyan bg-clip-text text-transparent">
-              pixels.
-            </span>
-          </motion.h1>
-          <motion.p variants={fadeUp} className="mt-6 max-w-xl text-base leading-7 text-text-muted sm:text-lg">
-            Draw pixel art, publish it to your profile, or send it anonymously with production-ready privacy rules behind the scenes.
-          </motion.p>
-          <motion.div variants={fadeUp} className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link
-              href="/login"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-semibold text-white shadow-[0_18px_50px_rgba(139,92,246,.30)] transition-transform hover:-translate-y-0.5"
-            >
-              Create your studio
-              <ArrowRight size={15} />
-            </Link>
-            <Link
-              href="/explore"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border bg-card/55 px-6 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:bg-card"
-            >
-              Explore public art
-              <ChevronRight size={14} />
-            </Link>
-          </motion.div>
-          <motion.div variants={fadeUp} className="mt-7 grid gap-2 text-sm text-text-muted sm:grid-cols-3">
-            {assurances.map((item) => (
-              <div key={item} className="flex items-start gap-2">
-                <Check size={14} className="mt-0.5 shrink-0 text-green" />
-                <span>{item}</span>
-              </div>
-            ))}
-          </motion.div>
-
-          {/* Social proof bar */}
-          <SocialProofBar />
-        </motion.div>
-
-        <PixelStudioVisual />
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Workflow                                                          */
-/* ------------------------------------------------------------------ */
-function Workflow() {
-  return (
-    <section id="workflow" className="relative py-20 sm:py-28">
-      <div className="site-container grid gap-12 lg:grid-cols-[0.72fr_1fr] lg:items-start">
-        <div className="lg:sticky lg:top-24">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Workflow</p>
-          <h2 className="max-w-lg text-3xl font-bold tracking-[-0.05em] text-text sm:text-5xl">
-            One quiet path from sketch to{' '}
-            <span className="bg-gradient-to-r from-primary via-pink to-cyan bg-clip-text text-transparent">
-              share.
-            </span>
-          </h2>
-          <p className="mt-4 max-w-md text-sm leading-6 text-text-muted sm:text-base">
-            PixAnony keeps your process focused and your identity protected. Create, refine, and publish without the noise—just your art.
+            Modern anonymous pixel art sharing
           </p>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <Link
-              href="/login"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-white shadow-[0_14px_36px_rgba(139,92,246,.28)] transition-transform hover:-translate-y-0.5"
-            >
-              Start creating
+          <h1 className="text-4xl font-semibold leading-[1.05] text-text sm:text-6xl">
+            Share creative pixel art without the arcade costume.
+          </h1>
+          <p className="mt-6 max-w-xl text-base leading-7 text-text-muted sm:text-lg">
+            PixAnony is a calm social platform for drawing, publishing, and sending anonymous artwork with a clean interface and a subtle pixel signature.
+          </p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <CreateCta className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold text-white shadow-[0_16px_38px_rgba(124,58,237,0.22)] transition hover:-translate-y-0.5">
+              Create your studio
               <ArrowRight size={14} />
-            </Link>
-            <Link
-              href="/explore"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card/55 px-5 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:bg-card"
-            >
-              Explore public art
-              <ChevronRight size={14} />
+            </CreateCta>
+            <Link href="/explore" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-border bg-card/70 px-6 text-sm font-semibold text-text transition hover:border-primary/25 hover:bg-card">
+              Explore artwork
+              <ChevronRight size={13} />
             </Link>
           </div>
-        </div>
-
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-120px' }}
-          variants={stagger}
-          className="divide-y divide-border rounded-[1.75rem] border border-border bg-card/45"
-        >
-          {workflow.map(({ icon: Icon, title, text }) => (
-            <motion.div key={title} variants={fadeUp} className="grid gap-4 p-5 sm:grid-cols-[3.5rem_1fr_2.5rem] sm:p-7">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                <Icon size={20} />
+          <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            {[
+              { icon: Shield, label: 'Privacy-first flows' },
+              { icon: Palette, label: 'Real editor tools' },
+              { icon: Eye, label: 'Readable social UI' },
+            ].map(({ icon: Icon, label }) => (
+              <div key={label} className="flex items-center gap-2 rounded-2xl border border-border/70 bg-card/45 px-3 py-3 text-sm font-medium text-text-muted">
+                <Icon size={14} className="text-primary" />
+                {label}
               </div>
-              <div>
-                <h3 className="text-lg font-semibold tracking-[-0.02em] text-text">{title}</h3>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">{text}</p>
-              </div>
-              <div className="hidden items-center justify-center text-text-muted/50 sm:flex">
-                <ArrowRight size={16} />
-              </div>
-            </motion.div>
-          ))}
+            ))}
+          </div>
         </motion.div>
-      </div>
-    </section>
-  );
-}
 
-/* ------------------------------------------------------------------ */
-/*  Product Depth                                                     */
-/* ------------------------------------------------------------------ */
-function ProductDepth() {
-  return (
-    <section id="features" className="relative py-20 sm:py-28">
-      <div className="site-container">
-        <div className="mb-10 max-w-2xl">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Product surface</p>
-          <h2 className="text-3xl font-bold tracking-[-0.05em] text-text sm:text-5xl">
-            Cleaner app surfaces, fewer distractions.
-          </h2>
-          <p className="mt-4 text-sm leading-6 text-text-muted sm:text-base">
-            The app now favors a real feed, real profile galleries, real private received art, and empty states that explain what to do next.
-          </p>
-        </div>
-
-        <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ duration: 0.55, ease }}
-            className="surface-panel overflow-hidden rounded-[2rem] p-4 sm:p-5"
-          >
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Dashboard</p>
-                <h3 className="mt-1 text-xl font-semibold text-text">Feed-ready layout</h3>
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.12 }} className="relative mx-auto w-full max-w-[560px]">
+          <div className="absolute -inset-8 rounded-[3rem] bg-primary/12 blur-3xl" />
+          <div className="surface-panel relative overflow-hidden rounded-[2rem] p-4 shadow-float sm:p-5">
+            <div className="mb-4 flex items-center justify-between gap-3 rounded-3xl border border-border/70 bg-surface/80 px-4 py-3">
+              <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
+                  <Palette size={17} />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-text">Canvas preview</p>
+                  <p className="text-xs text-text-muted">Subtle pixel DNA, polished shell</p>
+                </div>
               </div>
-              <span className="rounded-full border border-green/20 bg-green/10 px-3 py-1 text-xs font-semibold text-green">
-                Live data
-              </span>
+              <span className="rounded-full bg-green/12 px-3 py-1 text-xs font-semibold text-green">Live app</span>
             </div>
-            <div className="rounded-3xl border border-border bg-bg/70 p-3">
-              <div className="mb-3 flex gap-2 overflow-hidden">
-                {['For You', 'Following', 'Trending'].map((tab, index) => (
+            <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_8rem]">
+              <PixelCanvasMock className="min-h-[280px]" />
+              <div className="grid gap-3">
+                {['Brush', 'Fill', 'Erase', 'Send'].map((tool, index) => (
                   <span
-                    key={tab}
-                    className={`rounded-full px-3 py-2 text-xs font-semibold ${
-                      index === 0 ? 'bg-primary text-white' : 'bg-card text-text-muted'
-                    }`}
+                    key={tool}
+                    className={cn(
+                      'flex items-center justify-center rounded-2xl border px-3 py-3 text-xs font-semibold',
+                      index === 0 ? 'border-primary/30 bg-primary text-white shadow-[0_12px_26px_rgba(124,58,237,0.18)]' : 'border-border bg-surface text-text-muted',
+                    )}
                   >
-                    {tab}
+                    {tool}
                   </span>
                 ))}
               </div>
-              <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-                <div className="aspect-[16/9] bg-[radial-gradient(circle_at_25%_25%,rgba(244,63,143,.42),transparent_16%),radial-gradient(circle_at_72%_28%,rgba(34,211,238,.30),transparent_18%),linear-gradient(135deg,rgba(139,92,246,.28),rgba(7,11,19,.9))]" />
-                <div className="flex items-center justify-between border-t border-border px-4 py-3 text-xs text-text-muted">
-                  <span className="flex items-center gap-2"><Sparkles size={13} /> Published artwork</span>
-                  <span>Like, comment, repost</span>
+            </div>
+            <div className="mt-4 rounded-3xl border border-border bg-surface/80 p-4">
+              <div className="flex items-center gap-3">
+                <PixelAvatar username="PixAnony" size="md" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-text">A tiny piece, shared beautifully</p>
+                  <p className="truncate text-xs text-text-muted">@anonymous-creator</p>
                 </div>
               </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ duration: 0.55, delay: 0.08, ease }}
-            className="grid gap-4"
-          >
-            <div className="surface-panel rounded-[2rem] p-5">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                <Shield size={20} />
+              <div className="mt-4 flex flex-wrap gap-2">
+                {[Heart, MessageCircle, Repeat2, Bookmark].map((Icon, index) => (
+                  <span key={index} className="inline-flex items-center gap-1.5 rounded-full bg-bg px-3 py-2 text-xs font-semibold text-text-muted">
+                    <Icon size={12} className="text-primary" />
+                    {['Like', 'Comment', 'Repost', 'Save'][index]}
+                  </span>
+                ))}
               </div>
-              <h3 className="text-lg font-semibold text-text">Privacy is structural</h3>
-              <p className="mt-2 text-sm leading-6 text-text-muted">
-                Received artwork and account-owned actions are guarded by Supabase policies, not just hidden in the UI.
-              </p>
             </div>
-            <div className="surface-panel rounded-[2rem] p-5">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-pink/12 text-pink">
-                <Lock size={20} />
-              </div>
-              <h3 className="text-lg font-semibold text-text">No dead message surface</h3>
-              <p className="mt-2 text-sm leading-6 text-text-muted">
-                The old messages feature has been removed so the product stays focused on artwork, delivery, and profiles.
-              </p>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Feature cards row */}
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-80px' }}
-          variants={stagger}
-          className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-        >
-          {featureCards.map(({ icon: Icon, title, description, gradient, iconBg, iconColor }) => (
-            <motion.div
-              key={title}
-              variants={fadeUp}
-              className={`group relative overflow-hidden rounded-[2rem] border border-border bg-gradient-to-br ${gradient} p-6 transition-shadow hover:shadow-float`}
-            >
-              <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-2xl ${iconBg} ${iconColor}`}>
-                <Icon size={20} />
-              </div>
-              <h3 className="text-lg font-semibold tracking-[-0.02em] text-text">{title}</h3>
-              <p className="mt-2 text-sm leading-6 text-text-muted">{description}</p>
-            </motion.div>
-          ))}
+          </div>
         </motion.div>
       </div>
     </section>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Team                                                              */
-/* ------------------------------------------------------------------ */
+function WorkflowSection() {
+  return (
+    <section id="workflow" className="py-20 sm:py-28">
+      <div className="site-container">
+        <div className="max-w-2xl">
+          <p className="text-xs font-semibold uppercase text-primary">Workflow</p>
+          <h2 className="mt-3 text-3xl font-semibold text-text sm:text-5xl">Creative, private, and still easy to understand.</h2>
+        </div>
+        <div className="mt-10 grid gap-4 lg:grid-cols-3">
+          {workflow.map(({ step, icon: Icon, title, text }) => (
+            <article key={title} className="surface-panel rounded-[1.75rem] p-6">
+              <div className="mb-8 flex items-center justify-between">
+                <span className="text-sm font-semibold text-text-muted">{step}</span>
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <Icon size={18} />
+                </span>
+              </div>
+              <h3 className="text-lg font-semibold text-text">{title}</h3>
+              <p className="mt-3 text-sm leading-6 text-text-muted">{text}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FeaturesSection() {
+  return (
+    <section id="features" className="bg-surface/45 py-20 sm:py-28">
+      <div className="site-container">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-xs font-semibold uppercase text-primary">Feature set</p>
+          <h2 className="mt-3 text-3xl font-semibold text-text sm:text-5xl">A social product shell with pixel accents where they belong.</h2>
+        </div>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {features.map(({ icon: Icon, title, text }) => (
+            <article key={title} className="rounded-[1.5rem] border border-border bg-card p-5 shadow-soft">
+              <span className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <Icon size={18} />
+              </span>
+              <h3 className="text-sm font-semibold text-text">{title}</h3>
+              <p className="mt-2 text-xs leading-5 text-text-muted">{text}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function TeamSection() {
   return (
-    <section id="team" className="relative py-20 sm:py-28">
+    <section id="team" className="py-20 sm:py-28">
       <div className="site-container">
-        <motion.div
-          initial={{ opacity: 0, y: 22 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-100px' }}
-          transition={{ duration: 0.56, ease }}
-          className="relative overflow-hidden rounded-[2rem] border border-border bg-card/55 p-6 shadow-float sm:p-8 lg:grid lg:grid-cols-[0.72fr_1fr] lg:gap-10"
-        >
-          <div className="absolute inset-0 opacity-60 [background-image:radial-gradient(circle_at_20%_20%,rgba(236,72,153,.18),transparent_24rem),radial-gradient(circle_at_85%_25%,rgba(139,92,246,.22),transparent_22rem),linear-gradient(transparent_31px,rgba(148,163,184,.07)_32px),linear-gradient(90deg,transparent_31px,rgba(148,163,184,.07)_32px)] [background-size:auto,auto,32px_32px,32px_32px]" />
-          <div className="relative">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Team</p>
-            <h2 className="font-pixel text-2xl leading-tight text-text sm:text-4xl">
-              Built by the person who cares about every pixel.
-            </h2>
-            <p className="mt-4 max-w-xl text-sm leading-6 text-text-muted sm:text-base">
-              PixAnony is shaped as a focused creator tool: private delivery, public galleries, and a board that feels good to use.
+        <div className="surface-panel grid gap-8 overflow-hidden rounded-[2rem] p-6 sm:p-8 lg:grid-cols-[0.82fr_1fr] lg:items-center">
+          <div>
+            <p className="text-xs font-semibold uppercase text-primary">Team</p>
+            <h2 className="mt-3 text-3xl font-semibold text-text sm:text-5xl">Built with product focus, not visual noise.</h2>
+            <p className="mt-4 max-w-xl text-sm leading-6 text-text-muted">
+              PixAnony keeps the main interface quiet so the artwork, creator profiles, and anonymous delivery moments stay clear.
             </p>
           </div>
-
-          <div className="relative mt-8 rounded-[1.75rem] border border-border bg-bg/72 p-5 lg:mt-0">
+          <div className="rounded-[1.75rem] border border-border bg-surface/80 p-5">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
               <PixelAvatar username="Nader Mohamed" size="xl" showBadge={false} />
-              <div className="min-w-0">
-                <p className="font-pixel text-xl text-text">Nader Mohamed</p>
+              <div>
+                <p className="text-xl font-semibold text-text">Nader Mohamed</p>
                 <p className="mt-1 text-sm font-semibold text-primary">Founder & Product Builder</p>
                 <p className="mt-3 max-w-md text-sm leading-6 text-text-muted">
                   Designing PixAnony around crisp boards, honest privacy, and a community feed that rewards real pixel work.
                 </p>
               </div>
             </div>
-            <div className="mt-5 grid gap-2 sm:grid-cols-3">
-              {['Product design', 'Frontend polish', 'Pixel systems'].map((skill) => (
-                <span key={skill} className="rounded-xl border border-border bg-surface/70 px-3 py-2 text-center text-xs font-semibold text-text-muted">
-                  {skill}
-                </span>
-              ))}
-            </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Final CTA                                                         */
-/* ------------------------------------------------------------------ */
 function FinalCta() {
   return (
     <section className="site-container py-20 sm:py-28">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.55, ease }}
-        className="mx-auto max-w-5xl overflow-hidden rounded-[2rem] border border-primary/20 bg-gradient-to-br from-primary/16 via-card to-pink/10 p-8 text-center shadow-float sm:p-12"
-      >
-        <p className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white">
-          <Sparkles size={20} />
-        </p>
-        <h2 className="mx-auto max-w-2xl font-pixel text-2xl leading-tight text-text sm:text-4xl">
-          Open a blank board and make something worth sending.
-        </h2>
-        <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-text-muted">
-          Sign in, draw, publish, or send anonymously. The app is wired for real production data now.
-        </p>
-        <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-          <Link href="/login" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-semibold text-white">
-            Get started
-            <ArrowRight size={15} />
-          </Link>
-          <Link href="/paint" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border bg-bg/45 px-6 text-sm font-semibold text-text hover:bg-card">
-            Open editor
-            <Paintbrush size={15} />
-          </Link>
-        </div>
-      </motion.div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Page                                                              */
-/* ------------------------------------------------------------------ */
-/* ------------------------------------------------------------------ */
-/*  Pricing Section                                                   */
-/* ------------------------------------------------------------------ */
-function Pricing() {
-  const tiers = [
-    {
-      name: 'Pioneer',
-      price: '$0',
-      description: 'Start your pixel journey and share anonymously.',
-      features: [
-        '16x16 & 32x32 board sizes',
-        'Up to 3 layers per canvas',
-        '5 anonymous sends per day',
-        'Public gallery feed posts',
-      ],
-      cta: 'Start drawing',
-      href: '/login',
-      popular: false,
-    },
-    {
-      name: 'Creator',
-      price: '$8',
-      description: 'Unlock larger canvas sizes and advanced editor tools.',
-      features: [
-        'Up to 128x128 board sizes',
-        'Unlimited canvas layers',
-        'Unlimited anonymous sends',
-        'Access to neon & custom palettes',
-        'Verified creator badge',
-      ],
-      cta: 'Upgrade to Creator',
-      href: '/login',
-      popular: true,
-    },
-    {
-      name: 'Studio',
-      price: '$24',
-      description: 'For power creators and pixel art studios.',
-      features: [
-        'Everything in Creator',
-        'Custom team/collaborative boards',
-        'Dedicated profile customization',
-        'Priority feed distribution',
-        'Direct API access',
-      ],
-      cta: 'Contact support',
-      href: '/login',
-      popular: false,
-    },
-  ];
-
-  return (
-    <section id="pricing" className="hidden">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-16 text-center">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Pricing plans</p>
-          <h2 className="text-3xl font-bold tracking-[-0.05em] text-text sm:text-5xl">
-            Transparent tiers for every creator.
-          </h2>
-          <p className="mt-4 mx-auto max-w-xl text-sm leading-6 text-text-muted sm:text-base">
-            Choose the plan that fits your studio. No hidden fees, cancel anytime.
+      <div className="relative overflow-hidden rounded-[2rem] border border-primary/18 bg-gradient-to-br from-primary/12 via-card to-pink/8 p-8 text-center shadow-float sm:p-14">
+        <div className="absolute inset-0 dot-grid opacity-35" />
+        <div className="relative">
+          <h2 className="mx-auto max-w-2xl text-3xl font-semibold text-text sm:text-5xl">Draw something small. Send something memorable.</h2>
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-text-muted sm:text-base">
+            Open the editor, publish to your profile, or send an anonymous piece to another creator.
           </p>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-3">
-          {tiers.map((tier) => (
-            <motion.div
-              key={tier.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-100px' }}
-              transition={{ duration: 0.5 }}
-              className={cn(
-                'relative flex flex-col rounded-3xl p-6 sm:p-8 surface-panel transition-all hover:border-primary/40',
-                tier.popular ? 'border-primary ring-1 ring-primary shadow-glow' : ''
-              )}
-            >
-              {tier.popular && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider">
-                  Most Popular
-                </span>
-              )}
-              <div className="mb-6">
-                <h3 className="text-lg font-bold text-text">{tier.name}</h3>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold tracking-tight text-text">{tier.price}</span>
-                  {tier.price !== '$0' && <span className="text-sm font-semibold text-text-muted">/month</span>}
-                </div>
-                <p className="mt-3 text-xs text-text-muted leading-relaxed">{tier.description}</p>
-              </div>
-
-              <ul className="mb-8 space-y-3.5 text-xs text-text-muted flex-1">
-                {tier.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2.5">
-                    <Check size={14} className="mt-0.5 shrink-0 text-primary" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href={tier.href}
-                className={cn(
-                  'inline-flex min-h-11 items-center justify-center rounded-xl text-xs font-semibold transition-all',
-                  tier.popular
-                    ? 'bg-primary text-white shadow-lg hover:brightness-110'
-                    : 'border border-border bg-card/65 text-text hover:bg-card hover:border-primary/30'
-                )}
-              >
-                {tier.cta}
-              </Link>
-            </motion.div>
-          ))}
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <CreateCta className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary px-7 text-sm font-semibold text-white shadow-[0_16px_38px_rgba(124,58,237,0.22)]">
+              Start creating
+              <ArrowRight size={14} />
+            </CreateCta>
+            <Link href="/paint" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-border bg-bg/70 px-7 text-sm font-semibold text-text transition hover:border-primary/25">
+              Open editor
+              <Paintbrush size={14} />
+            </Link>
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Changelog Section                                                 */
-/* ------------------------------------------------------------------ */
-function Changelog() {
-  const updates = [
-    {
-      version: 'v2.1.0',
-      date: 'June 2026',
-      title: 'Layout Polish & Grid Refactor',
-      description: 'Centered layout grids, refined margins, responsive layout constraints, and a complete aesthetic audit.',
-      bullets: [
-        'Responsive layout grid for the feed and dashboard views.',
-        'Added new pricing tiers and interactive changelog directly to the landing page.',
-        'Cleaned up FontAwesome custom icon mappings and verified all exports.',
-      ],
-    },
-    {
-      version: 'v2.0.0',
-      date: 'May 2026',
-      title: 'Supabase SSR & Custom Palettes',
-      description: 'Transitioned data fetching to Supabase server components and added multi-layer canvas editing.',
-      bullets: [
-        'Secure Next.js Server Components with cookie-based Supabase authentication.',
-        'Layer system: opacity controls, visibility toggles, and reordering support.',
-        'Advanced preset palettes: Retro, GameBoy, NES, Pastel, and Neon.',
-      ],
-    },
-    {
-      version: 'v1.5.0',
-      date: 'April 2026',
-      title: 'Privacy Rules & Notifications',
-      description: 'Enforced Row-Level Security (RLS) and real-time triggers for social notifications.',
-      bullets: [
-        'RLS policies protecting anonymous artwork deliveries.',
-        'Activity feed triggers for likes, comments, and reposts.',
-        'Unread notification badge counts in the left navigation sidebar.',
-      ],
-    },
-  ];
-
+function Footer() {
   return (
-    <section id="changelog" className="hidden">
-      <div className="mx-auto max-w-4xl">
-        <div className="mb-16 text-center">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Release history</p>
-          <h2 className="text-3xl font-bold tracking-[-0.05em] text-text sm:text-5xl">
-            What we&apos;ve built.
-          </h2>
-          <p className="mt-4 mx-auto max-w-xl text-sm leading-6 text-text-muted sm:text-base">
-            Track our progress as we ship new features, optimizations, and bug fixes weekly.
-          </p>
+    <footer className="border-t border-border/70 py-10">
+      <div className="site-container flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <Logo size="sm" />
+          <p className="mt-2 max-w-sm text-xs leading-5 text-text-muted">{BRAND.tagline}</p>
         </div>
-
-        <div className="relative border-l border-border/80 pl-6 ml-4 sm:pl-8 sm:ml-6 space-y-12">
-          {updates.map((update) => (
-            <motion.div
-              key={update.version}
-              initial={{ opacity: 0, x: -15 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="relative"
-            >
-              {/* Bullet node */}
-              <div className="absolute -left-[31px] sm:-left-[41px] top-1.5 flex h-4 w-4 sm:h-6 sm:w-6 items-center justify-center rounded-full border-2 border-border bg-bg">
-                <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-primary" />
-              </div>
-
-              <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full">
-                    {update.version}
-                  </span>
-                  <h3 className="text-base font-bold text-text sm:text-lg">{update.title}</h3>
-                </div>
-                <span className="text-xs font-medium text-text-muted">{update.date}</span>
-              </div>
-
-              <p className="mt-3 text-xs text-text-muted leading-relaxed sm:text-sm">
-                {update.description}
-              </p>
-
-              <ul className="mt-4 space-y-2 text-xs text-text-muted/80 list-disc list-inside">
-                {update.bullets.map((bullet) => (
-                  <li key={bullet} className="leading-relaxed pl-1">
-                    {bullet}
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          ))}
+        <div className="flex flex-wrap gap-5 text-xs font-semibold text-text-muted">
+          <Link href="/explore" className="transition hover:text-text">Explore</Link>
+          <Link href="/login" className="transition hover:text-text">Sign in</Link>
+          <Link href="/paint" className="transition hover:text-text">Editor</Link>
         </div>
       </div>
-    </section>
+    </footer>
   );
 }
 
 export default function LandingPage() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-bg text-text">
-      <PixelParticles />
+    <main className="min-h-screen bg-bg text-text">
       <Navbar />
       <Hero />
-      <Workflow />
-      <ProductDepth />
+      <WorkflowSection />
+      <FeaturesSection />
       <TeamSection />
-      <Pricing />
-      <Changelog />
       <FinalCta />
-      <footer className="border-t border-border py-8">
-        <div className="site-container flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <Logo size="sm" />
-            <p className="mt-2 text-xs text-text-muted">{BRAND.tagline}</p>
-          </div>
-          <div className="flex flex-wrap gap-4 text-xs font-semibold text-text-muted">
-            <Link href="/explore" className="hover:text-text">Explore</Link>
-            <Link href="/login" className="hover:text-text">Sign in</Link>
-            <Link href="/paint" className="hover:text-text">Editor</Link>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }

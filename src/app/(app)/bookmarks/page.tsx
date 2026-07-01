@@ -9,7 +9,7 @@ import { formatNumber } from '@/lib/utils';
 export default async function BookmarksPage() {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/login?next=%2Fbookmarks');
 
   const { data } = await supabase
     .from('bookmarks')

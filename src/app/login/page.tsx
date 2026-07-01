@@ -1,11 +1,12 @@
 'use client';
 
-import { Suspense, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Google, Github, ArrowLeft, ArrowRight, Lock, User, Eye, EyeOff, Loader2 } from '@/components/ui/icons';
 import { Logo } from '@/components/ui/logo';
+import { PixelCanvasMock } from '@/components/ui/pixel-canvas-mock';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
@@ -41,7 +42,7 @@ function OAuthButton({
       onClick={onClick}
       disabled={disabled}
       type="button"
-      className="w-full flex items-center justify-between px-5 py-3 rounded-xl border border-border bg-card/60 hover:bg-card-hover hover:border-primary/50 transition-all text-sm font-medium text-text group disabled:opacity-50 disabled:cursor-not-allowed"
+      className="group flex w-full items-center justify-between rounded-2xl border border-border bg-card/75 px-5 py-3 text-sm font-medium text-text transition-all hover:border-primary/30 hover:bg-card disabled:cursor-not-allowed disabled:opacity-50"
     >
       <div className="flex items-center gap-3">
         <Icon className="w-5 h-5 flex-shrink-0 transition-colors" style={{ color }} />
@@ -148,6 +149,9 @@ function PixelHeartPortal() {
   );
 }
 
+void FloatingStars;
+void PixelHeartPortal;
+
 /* ===== LOGIN PAGE ===== */
 function LoginPageContent() {
   const router = useRouter();
@@ -157,9 +161,10 @@ function LoginPageContent() {
     const next = searchParams.get('next');
     return next?.startsWith('/') && !next.startsWith('//') ? next : '/home';
   }, [searchParams]);
+  const requestedMode = searchParams.get('mode') === 'signup' ? 'signup' : 'login';
   
   const [authMethod, setAuthMethod] = useState<'social' | 'email'>('social');
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const [mode, setMode] = useState<'login' | 'signup'>(requestedMode);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -168,6 +173,17 @@ function LoginPageContent() {
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (active && user) router.replace(nextPath);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [nextPath, router, supabase]);
 
   const handleOAuthLogin = async (provider: 'google' | 'github') => {
     try {
@@ -232,6 +248,7 @@ function LoginPageContent() {
 
   return (
     <div className="grid min-h-[100svh] bg-bg lg:grid-cols-[minmax(420px,.9fr)_minmax(0,1.1fr)]">
+      <div className="pointer-events-none fixed inset-0 dot-grid opacity-35" />
       {/* Left — Form Panel */}
       <div className="relative flex min-w-0 flex-col justify-center px-5 py-10 sm:px-10 lg:px-14 xl:px-20">
         <motion.div
@@ -254,7 +271,7 @@ function LoginPageContent() {
 
           {/* Heading */}
           <motion.div variants={fadeUp} className="mb-6">
-            <h1 className="text-2xl sm:text-3xl font-bold text-text mb-2 font-pixel tracking-wide">
+            <h1 className="mb-2 text-2xl font-semibold text-text sm:text-3xl">
               {mode === 'login' ? 'Welcome back' : 'Create your account'}
             </h1>
             <p className="text-text-muted text-sm">
@@ -283,7 +300,7 @@ function LoginPageContent() {
                 <OAuthButton
                   icon={Github}
                   label="GitHub"
-                  color="#F8FAFC"
+                  color="#181528"
                   onClick={() => handleOAuthLogin('github')}
                   disabled={loading}
                 />
@@ -292,7 +309,7 @@ function LoginPageContent() {
 
                 <motion.div variants={fadeUp} className="flex items-center gap-4 my-6">
                   <div className="flex-1 h-px bg-border" />
-                  <span className="text-xs text-text-muted uppercase tracking-wider">or</span>
+                  <span className="text-xs font-semibold uppercase text-text-muted">or</span>
                   <div className="flex-1 h-px bg-border" />
                 </motion.div>
 
@@ -302,7 +319,7 @@ function LoginPageContent() {
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setAuthMethod('email')}
                   disabled={loading}
-                  className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl border border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 transition-all text-sm font-semibold tracking-wide"
+                  className="flex w-full items-center justify-center gap-3 rounded-2xl border border-primary/25 bg-primary/10 px-4 py-3.5 text-sm font-semibold text-primary transition-all hover:bg-primary/15"
                 >
                   <Mail className="w-5 h-5 text-primary" />
                   Continue with Email
@@ -320,7 +337,7 @@ function LoginPageContent() {
                 {mode === 'signup' && (
                   <>
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-text/80 uppercase tracking-wider">Username</label>
+                      <label className="text-xs font-semibold uppercase text-text/80">Username</label>
                       <div className="relative">
                         <User className="absolute left-3.5 top-3.5 h-5 w-5 text-text-muted" />
                         <input
@@ -331,13 +348,13 @@ function LoginPageContent() {
                           placeholder="pixel_master"
                           value={username}
                           onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
-                          className="w-full pl-11 pr-4 py-3 bg-card/40 border border-border rounded-xl text-sm focus:border-primary/80 focus:outline-none transition-colors"
+                          className="w-full rounded-2xl border border-border bg-card/70 py-3 pl-11 pr-4 text-sm transition-colors focus:border-primary/70 focus:outline-none"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-text/80 uppercase tracking-wider">Display Name</label>
+                      <label className="text-xs font-semibold uppercase text-text/80">Display name</label>
                       <div className="relative">
                         <User className="absolute left-3.5 top-3.5 h-5 w-5 text-text-muted opacity-50" />
                         <input
@@ -345,7 +362,7 @@ function LoginPageContent() {
                           placeholder="Pixel Master (Optional)"
                           value={displayName}
                           onChange={(e) => setDisplayName(e.target.value)}
-                          className="w-full pl-11 pr-4 py-3 bg-card/40 border border-border rounded-xl text-sm focus:border-primary/80 focus:outline-none transition-colors"
+                          className="w-full rounded-2xl border border-border bg-card/70 py-3 pl-11 pr-4 text-sm transition-colors focus:border-primary/70 focus:outline-none"
                         />
                       </div>
                     </div>
@@ -353,7 +370,7 @@ function LoginPageContent() {
                 )}
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-text/80 uppercase tracking-wider">Email Address</label>
+                  <label className="text-xs font-semibold uppercase text-text/80">Email address</label>
                   <div className="relative">
                     <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-text-muted" />
                     <input
@@ -362,13 +379,13 @@ function LoginPageContent() {
                       placeholder="you@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-11 pr-4 py-3 bg-card/40 border border-border rounded-xl text-sm focus:border-primary/80 focus:outline-none transition-colors"
+                      className="w-full rounded-2xl border border-border bg-card/70 py-3 pl-11 pr-4 text-sm transition-colors focus:border-primary/70 focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-text/80 uppercase tracking-wider">Password</label>
+                  <label className="text-xs font-semibold uppercase text-text/80">Password</label>
                   <div className="relative">
                     <Lock className="absolute left-3.5 top-3.5 h-5 w-5 text-text-muted" />
                     <input
@@ -377,7 +394,7 @@ function LoginPageContent() {
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-11 pr-11 py-3 bg-card/40 border border-border rounded-xl text-sm focus:border-primary/80 focus:outline-none transition-colors"
+                      className="w-full rounded-2xl border border-border bg-card/70 py-3 pl-11 pr-11 text-sm transition-colors focus:border-primary/70 focus:outline-none"
                     />
                     <button
                       type="button"
@@ -394,14 +411,14 @@ function LoginPageContent() {
                     type="button"
                     onClick={() => setAuthMethod('social')}
                     disabled={loading}
-                    className="flex-1 px-4 py-3.5 bg-card border border-border hover:bg-card-hover transition-colors rounded-xl text-sm font-semibold text-text"
+                    className="flex-1 rounded-2xl border border-border bg-card px-4 py-3.5 text-sm font-semibold text-text transition-colors hover:bg-card-hover"
                   >
                     Back
                   </button>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex-[2] py-3.5 bg-gradient-primary text-white rounded-xl text-sm font-semibold shadow-glow hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                    className="flex flex-[2] items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(124,58,237,0.22)] transition-all hover:brightness-105 active:scale-[0.98]"
                   >
                     {loading ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
@@ -434,20 +451,26 @@ function LoginPageContent() {
         </motion.div>
       </div>
 
-      {/* Right — Illustration Panel (hidden on mobile) */}
-      <div className="relative hidden min-w-0 items-center justify-center overflow-hidden border-l border-border bg-gradient-to-br from-surface via-bg to-surface lg:flex">
-        <FloatingStars />
-        <PixelHeartPortal />
-
-        {/* Brand text */}
+      <div className="relative hidden min-w-0 items-center justify-center overflow-hidden border-l border-border/70 bg-gradient-to-br from-surface via-bg to-primary/8 p-12 lg:flex">
+        <div className="absolute inset-0 dot-grid opacity-40" />
+        <div className="absolute right-16 top-16 h-72 w-72 rounded-full bg-primary/12 blur-3xl" />
         <motion.div
           initial={false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.5, duration: 0.6 }}
-          className="absolute bottom-12 left-0 right-0 text-center"
+          transition={{ duration: 0.6 }}
+          className="surface-panel relative w-full max-w-lg rounded-[2rem] p-5 shadow-float"
         >
-          <p className="font-pixel text-lg text-text/60">Express in Pixels.</p>
-          <p className="text-xs text-text-muted mt-1">Anonymously.</p>
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase text-primary">Private canvas</p>
+              <h2 className="mt-1 text-2xl font-semibold text-text">Draw, sign in, share softly.</h2>
+            </div>
+            <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">PixAnony</span>
+          </div>
+          <PixelCanvasMock className="min-h-[340px]" />
+          <p className="mt-4 text-sm leading-6 text-text-muted">
+            Authentication remains Supabase-powered. The interface simply gets calmer around it.
+          </p>
         </motion.div>
       </div>
     </div>

@@ -9,16 +9,18 @@ import {
   Compass,
   Bell,
   Bookmark,
+  Inbox,
   Trophy,
   Paintbrush,
   Settings,
   LogIn,
   ArrowRight,
+  User,
   type LucideIcon,
 } from '@/components/ui/icons';
 import { Logo } from '@/components/ui/logo';
-import { PixelAvatar } from '@/components/ui/pixel-avatar';
-import { NAV_ITEMS } from '@/lib/constants';
+import { UserMenu } from '@/components/auth/user-menu';
+import { useAuthProfile } from '@/hooks/use-auth-profile';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 
@@ -28,74 +30,80 @@ const iconMap: Record<string, LucideIcon> = {
   Compass,
   Bell,
   Bookmark,
+  Inbox,
   Trophy,
   Paintbrush,
   Settings,
+  User,
 };
-
-/* ===== Types ===== */
-type NavProfile = {
-  username: string;
-  display_name: string;
-  avatar_url: string | null;
-  is_verified: boolean;
-};
-
-/* ===== Nav items without Create (rendered separately) ===== */
-const SIDEBAR_NAV = NAV_ITEMS.filter((item) => item.label !== 'Create');
 
 export function Sidebar() {
   const pathname = usePathname();
   const supabase = useMemo(() => createClient(), []);
-  const [profile, setProfile] = useState<NavProfile | null>(null);
+  const { profile, user, signOut } = useAuthProfile();
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
     let active = true;
     void (async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user || !active) return;
-      const [{ data }, { count }] = await Promise.all([
-        supabase
-          .from('profiles')
-          .select('username, display_name, avatar_url, is_verified')
-          .eq('id', user.id)
-          .single(),
-        supabase
-          .from('notifications')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', user.id)
-          .eq('read', false),
-      ]);
-      if (active) {
-        setProfile(data);
-        setUnread(count ?? 0);
+      if (!user || !active) {
+        if (active) setUnread(0);
+        return;
       }
+      const { count } = await supabase
+        .from('notifications')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('read', false);
+      if (active) setUnread(count ?? 0);
     })();
     return () => {
       active = false;
     };
-  }, [supabase]);
+  }, [supabase, user]);
+
+  const sidebarNav = [
+    { label: 'Home', href: '/home', icon: 'Home' },
+    { label: 'Explore', href: '/explore', icon: 'Compass' },
+    { label: 'Create', href: '/paint', icon: 'Paintbrush' },
+    { label: 'Challenges', href: '/challenges', icon: 'Trophy' },
+    { label: 'Bookmarks', href: '/bookmarks', icon: 'Bookmark' },
+    { label: 'Private Drops', href: profile ? `/profile/${profile.username}/received` : '/login?next=%2Fhome', icon: 'Inbox' },
+    { label: 'Notifications', href: '/notifications', icon: 'Bell' },
+    { label: 'Profile', href: profile ? `/profile/${profile.username}` : '/login?next=%2Fhome', icon: 'User' },
+    { label: 'Settings', href: '/settings', icon: 'Settings' },
+  ];
 
   return (
     <aside
       className={cn(
         'sticky top-0 z-40 hidden h-svh min-w-0 flex-col lg:flex',
-        'border-r border-border/60 bg-sidebar/92 px-3 backdrop-blur-xl',
+        'border-r border-border/70 bg-sidebar px-3 backdrop-blur-xl',
+        'relative overflow-visible',
       )}
     >
-      {/* ===== Logo ===== */}
-      <Link href="/home" className="flex h-[72px] items-center px-3">
-        <Logo size="md" />
-      </Link>
+      <div
+        className="pointer-events-none absolute inset-0 dot-grid opacity-35"
+        aria-hidden="true"
+      />
+
+      <div className="relative">
+        <div
+          className="pointer-events-none absolute -left-3 -right-3 -top-1 h-28 bg-gradient-to-b from-primary/[0.08] to-transparent"
+          aria-hidden="true"
+        />
+        <Link href="/home" className="relative flex h-[72px] items-center px-3">
+          <Logo size="md" />
+        </Link>
+      </div>
 
       {/* ===== Navigation ===== */}
-      <nav aria-label="Primary navigation" className="flex-1 space-y-0.5 overflow-y-auto py-2">
-        {SIDEBAR_NAV.map((item) => {
+      <nav aria-label="Primary navigation" className="relative flex-1 space-y-0.5 overflow-y-auto py-2">
+        {sidebarNav.map((item) => {
           const Icon = iconMap[item.icon] || Home;
-          const active = pathname === item.href || pathname?.startsWith(`${item.href}/`);
+          const active = item.label === 'Profile' || item.label === 'Private Drops'
+            ? pathname === item.href
+            : pathname === item.href || (!item.href.includes('?') && pathname?.startsWith(`${item.href}/`));
           const badge = item.label === 'Notifications' ? unread : 0;
 
           return (
@@ -106,14 +114,14 @@ export function Sidebar() {
               className={cn(
                 'group relative flex h-11 items-center gap-3 rounded-xl px-3.5 text-[14px] font-medium transition-all duration-200',
                 active
-                  ? 'bg-primary text-white shadow-md shadow-primary/20'
-                  : 'text-text-muted hover:bg-card hover:text-text',
+                  ? 'bg-primary/10 text-primary ring-1 ring-primary/15'
+                  : 'text-text-muted hover:bg-card-hover hover:text-text',
               )}
             >
               {active && (
                 <motion.span
                   layoutId="sidebar-active"
-                  className="absolute inset-0 rounded-xl bg-primary"
+                  className="absolute inset-0 rounded-xl bg-primary/10"
                   style={{ zIndex: -1 }}
                   transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                 />
@@ -129,66 +137,52 @@ export function Sidebar() {
               </span>
 
               <span>{item.label}</span>
+
+              {!active && (
+                <span
+                  className="pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                  style={{
+                    background:
+                      'radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.06), transparent 70%)',
+                  }}
+                  aria-hidden="true"
+                />
+              )}
             </Link>
           );
         })}
 
-        {/* ===== Create Button ===== */}
         <div className="pt-3">
           <Link
-            href="/paint"
+            href={profile ? '/paint' : '/login?next=%2Fpaint'}
             className={cn(
-              'flex h-11 w-full items-center justify-between gap-2 rounded-xl px-4',
-              'bg-gradient-to-r from-primary to-pink text-white text-sm font-semibold',
-              'shadow-lg shadow-primary/25 transition-all duration-200',
-              'hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/30',
+              'group/create relative flex h-11 w-full items-center justify-between gap-2 rounded-xl px-4',
+              'bg-primary text-white text-sm font-semibold',
+              'shadow-[0_14px_34px_rgba(124,58,237,0.2)] transition-all duration-200',
+              'hover:-translate-y-0.5 hover:bg-primary-glow',
               'active:translate-y-0 active:shadow-md',
             )}
           >
-            <span className="flex items-center gap-2.5">
+            <span className="relative flex items-center gap-2.5">
               <Paintbrush size={16} />
               Create
             </span>
-            <ArrowRight size={15} />
+            <ArrowRight size={15} className="relative transition-transform duration-200 group-hover/create:translate-x-0.5" />
           </Link>
         </div>
       </nav>
 
       {/* ===== User Card ===== */}
-      <div className="border-t border-border/50 pb-4 pt-3">
+      <div className="relative border-t border-border/50 pb-5 pt-4">
         {profile ? (
-          <div className="flex items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-card/70">
-              <Link href={`/@${profile.username}`} className="shrink-0">
-                <PixelAvatar
-                  username={profile.username}
-                  src={profile.avatar_url}
-                  size="sm"
-                  isVerified={profile.is_verified}
-                />
-              </Link>
-
-              <Link href={`/@${profile.username}`} className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-text">
-                  {profile.display_name}
-                </p>
-                <p className="truncate text-xs text-text-muted">@{profile.username}</p>
-              </Link>
-
-              <Link
-                href="/settings"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface hover:text-text"
-                aria-label="Open settings"
-              >
-                <Settings size={15} />
-              </Link>
-          </div>
+          <UserMenu profile={profile} signOut={signOut} />
         ) : (
           <Link
             href="/login"
             className={cn(
               'flex h-11 items-center justify-center gap-2 rounded-xl',
               'border border-border text-sm font-semibold text-text',
-              'transition-colors hover:border-primary/40 hover:bg-card',
+              'transition-all duration-200 hover:border-primary/30 hover:bg-card',
             )}
           >
             <LogIn size={17} />

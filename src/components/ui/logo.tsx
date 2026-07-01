@@ -9,9 +9,9 @@ interface LogoProps {
 }
 
 const sizeConfig = {
-  sm: { icon: 24, text: 'text-base', gap: 'gap-1.5' },
-  md: { icon: 32, text: 'text-xl', gap: 'gap-2' },
-  lg: { icon: 48, text: 'text-3xl', gap: 'gap-3' },
+  sm: { icon: 'h-7 w-7', text: 'text-sm', gap: 'gap-2' },
+  md: { icon: 'h-9 w-9', text: 'text-base', gap: 'gap-2.5' },
+  lg: { icon: 'h-12 w-12', text: 'text-2xl', gap: 'gap-3' },
 };
 
 export function Logo({ size = 'md', showText = true, className }: LogoProps) {
@@ -19,58 +19,16 @@ export function Logo({ size = 'md', showText = true, className }: LogoProps) {
 
   return (
     <div className={cn('flex items-center', config.gap, className)}>
-      {/* Pixel Heart SVG */}
-      <svg
-        width={config.icon}
-        height={config.icon}
-        viewBox="0 0 16 16"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="pixel-art flex-shrink-0"
-        style={{ imageRendering: 'pixelated' }}
-      >
-        <defs>
-          <linearGradient id="pixHeart" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#8B5CF6" />
-            <stop offset="50%" stopColor="#A855F7" />
-            <stop offset="100%" stopColor="#EC4899" />
-          </linearGradient>
-          <linearGradient id="pixHeartLight" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#C4B5FD" />
-            <stop offset="100%" stopColor="#F9A8D4" />
-          </linearGradient>
-        </defs>
-        {/* Row 1 */}
-        <rect x="2" y="1" width="3" height="1" fill="url(#pixHeart)" />
-        <rect x="7" y="1" width="3" height="1" fill="url(#pixHeart)" />
-        {/* Row 2 */}
-        <rect x="1" y="2" width="5" height="1" fill="url(#pixHeart)" />
-        <rect x="6" y="2" width="5" height="1" fill="url(#pixHeart)" />
-        {/* Row 3 - with highlight */}
-        <rect x="1" y="3" width="1" height="1" fill="url(#pixHeart)" />
-        <rect x="2" y="3" width="2" height="1" fill="url(#pixHeartLight)" />
-        <rect x="4" y="3" width="7" height="1" fill="url(#pixHeart)" />
-        {/* Row 4 */}
-        <rect x="1" y="4" width="10" height="1" fill="url(#pixHeart)" />
-        {/* Row 5 */}
-        <rect x="1" y="5" width="10" height="1" fill="url(#pixHeart)" />
-        {/* Row 6 */}
-        <rect x="2" y="6" width="8" height="1" fill="url(#pixHeart)" />
-        {/* Row 7 */}
-        <rect x="3" y="7" width="6" height="1" fill="url(#pixHeart)" />
-        {/* Row 8 */}
-        <rect x="4" y="8" width="4" height="1" fill="url(#pixHeart)" />
-        {/* Row 9 */}
-        <rect x="5" y="9" width="2" height="1" fill="url(#pixHeart)" />
-        {/* Row 10 */}
-        <rect x="6" y="10" width="1" height="1" fill="url(#pixHeart)" />
-      </svg>
+      <span className={cn('relative grid shrink-0 place-items-center overflow-hidden rounded-xl bg-gradient-primary text-white shadow-[0_14px_32px_rgba(124,58,237,0.2)]', config.icon)}>
+        <span className="font-pixel text-[10px] font-semibold leading-none">PX</span>
+        <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-sm bg-white/70" />
+        <span className="absolute bottom-1 left-1 h-1 w-1 rounded-sm bg-white/50" />
+      </span>
 
       {showText && (
         <span
           className={cn(
-            'font-pixel font-bold tracking-tight',
-            'bg-gradient-to-r from-primary via-[#A855F7] to-pink bg-clip-text text-transparent',
+            'font-semibold text-text',
             config.text
           )}
         >

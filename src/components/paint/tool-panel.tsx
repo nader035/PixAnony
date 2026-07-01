@@ -50,7 +50,7 @@ export default function ToolPanel({ compact = false }: { compact?: boolean }) {
           : 'flex flex-col gap-1.5 rounded-2xl p-2.5'
       )}
     >
-      <div className={cn('px-2 py-1.5 font-pixel text-[10px] font-semibold uppercase tracking-wider text-text-muted', compact && 'hidden')}>
+      <div className={cn('px-2 py-1.5 text-[10px] font-semibold uppercase text-text-muted', compact && 'hidden')}>
         Tools
       </div>
 

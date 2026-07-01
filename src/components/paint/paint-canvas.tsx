@@ -510,12 +510,12 @@ export default function PaintCanvas() {
       className="relative flex flex-1 items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_50%_10%,rgba(139,92,246,.14),transparent_34rem),linear-gradient(transparent_23px,rgba(148,163,184,.045)_24px),linear-gradient(90deg,transparent_23px,rgba(148,163,184,.045)_24px),var(--bg)] bg-[length:auto,24px_24px,24px_24px,auto] p-3 sm:p-5"
     >
       <div className="pointer-events-none absolute left-4 top-4 z-20 hidden items-center gap-2 rounded-2xl border border-border/70 bg-bg/72 px-3 py-2 text-xs font-semibold text-text shadow-float backdrop-blur-xl md:flex">
-        <span className="font-pixel text-primary">Board {gridSize} x {gridSize}</span>
+        <span className="text-primary">Board {gridSize} x {gridSize}</span>
         <span className="h-1 w-1 rounded-full bg-text-muted/50" />
         <span className="text-text-muted">{activeToolLabel}</span>
       </div>
       <div
-        className="relative overflow-hidden rounded-[28px] border border-border/80 bg-[#080d19] shadow-[0_26px_80px_rgba(0,0,0,.42),inset_0_1px_0_rgba(255,255,255,.06)]"
+        className="relative overflow-hidden rounded-[28px] border border-border/80 bg-surface shadow-[0_26px_80px_rgba(58,42,92,.16),inset_0_1px_0_rgba(255,255,255,.7)]"
         style={{
           width: canvasSize.width,
           height: canvasSize.height,

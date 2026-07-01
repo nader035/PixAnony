@@ -15,7 +15,7 @@ export default async function ReceivedPage({
   const { username } = await params;
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect(`/login?next=${encodeURIComponent(`/profile/${username}/received`)}`);
 
   const { data: profile } = await supabase.from('profiles').select('id, username').eq('id', user.id).single();
   if (!profile || profile.username !== username) notFound();
@@ -83,7 +83,7 @@ export default async function ReceivedPage({
           <p className="mt-2 max-w-sm text-sm leading-6 text-text-muted">
             Share your profile link so other creators can send anonymous or signed pixel art.
           </p>
-          <Link href={`/@${username}`} className="mt-6 rounded-xl border border-border bg-card px-5 py-3 text-sm font-semibold text-text">Back to profile</Link>
+          <Link href={`/profile/${username}`} className="mt-6 rounded-xl border border-border bg-card px-5 py-3 text-sm font-semibold text-text">Back to profile</Link>
         </div>
       )}
     </PageFrame>

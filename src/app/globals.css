@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* ===== THEME CSS VARIABLES ===== */
+/* ===== PIXANONY THEME CSS VARIABLES ===== */
 @theme {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-pixel: var(--font-pixelify), var(--font-press-start), monospace;
@@ -676,4 +676,219 @@ select {
   body {
     font-size: 15px;
   }
+}
+
+/* ===== FIGMA MAKE REDESIGN OVERRIDES ===== */
+:root,
+.light {
+  color-scheme: light;
+  --bg: #fbfafc;
+  --bg-deep: #f4f1f8;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --card-hover: #f7f3ff;
+  --border-color: #e7e3ee;
+  --border-muted: rgba(30, 27, 46, 0.08);
+  --primary: #7c3aed;
+  --primary-glow: #8b5cf6;
+  --pink: #db2777;
+  --cyan: #0891b2;
+  --green: #059669;
+  --yellow: #ca8a04;
+  --red: #dc2626;
+  --text: #181528;
+  --text-muted: #6f6a80;
+  --sidebar-bg: rgba(255, 255, 255, 0.78);
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(40, 32, 64, 0.1);
+  --shadow-card: 0 1px 2px rgba(28, 24, 44, 0.04), 0 14px 42px rgba(63, 44, 92, 0.08);
+  --shadow-float: 0 24px 70px rgba(58, 42, 92, 0.14), 0 0 0 1px rgba(74, 58, 110, 0.08);
+  --shadow-glow: 0 16px 42px rgba(124, 58, 237, 0.16);
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: #11101a;
+  --bg-deep: #0c0b13;
+  --surface: #171522;
+  --card: #1c1929;
+  --card-hover: #241f35;
+  --border-color: rgba(235, 231, 244, 0.13);
+  --border-muted: rgba(255, 255, 255, 0.08);
+  --primary: #a78bfa;
+  --primary-glow: #c4b5fd;
+  --pink: #f472b6;
+  --cyan: #67e8f9;
+  --green: #34d399;
+  --yellow: #facc15;
+  --red: #f87171;
+  --text: #f7f4ff;
+  --text-muted: #b6adc9;
+  --sidebar-bg: rgba(23, 21, 34, 0.86);
+  --glass-bg: rgba(23, 21, 34, 0.76);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.22), 0 18px 52px rgba(0, 0, 0, 0.25);
+  --shadow-float: 0 24px 70px rgba(0, 0, 0, 0.38), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-glow: 0 18px 48px rgba(167, 139, 250, 0.18);
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--primary) 12%, transparent), transparent 28rem),
+    radial-gradient(circle at 90% 12%, color-mix(in srgb, var(--pink) 8%, transparent), transparent 26rem),
+    var(--bg);
+}
+
+.site-container {
+  width: min(100% - 2rem, 1180px);
+  margin-inline: auto;
+}
+
+@media (min-width: 768px) {
+  .site-container {
+    width: min(100% - 3rem, 1180px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .app-shell-grid {
+    grid-template-columns: 232px minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 1536px) {
+  .app-shell-grid--right {
+    grid-template-columns: 232px minmax(0, min(960px, calc(100% - 560px))) 328px;
+  }
+
+  .app-shell-grid--plain {
+    grid-template-columns: 232px minmax(0, min(1040px, calc(100% - 232px)));
+  }
+}
+
+.app-backdrop {
+  background:
+    radial-gradient(circle at 42% -8%, color-mix(in srgb, var(--primary) 9%, transparent), transparent 26rem),
+    radial-gradient(circle at 100% 22%, color-mix(in srgb, var(--pink) 6%, transparent), transparent 23rem),
+    var(--bg);
+}
+
+.dot-grid {
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--text-muted) 18%, transparent) 1px, transparent 1.5px);
+  background-size: 22px 22px;
+}
+
+.pixel-grid-plane {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--border-color) 45%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--border-color) 45%, transparent) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.pixel-noise {
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--primary) 12%, transparent) 1px, transparent 1.5px);
+  background-size: 18px 18px;
+}
+
+.glass-card,
+.surface-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.48)),
+    var(--card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-card);
+}
+
+.dark .glass-card,
+.dark .surface-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent),
+    var(--card);
+}
+
+.interactive-surface {
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.interactive-surface:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--primary) 30%, var(--border-color));
+  box-shadow: var(--shadow-card);
+}
+
+.border-glow-card {
+  border: 1px solid var(--border-color);
+  background: var(--card-bg, var(--card));
+  box-shadow: var(--shadow-card);
+}
+
+.border-glow-card::before,
+.border-glow-card::after,
+.border-glow-card > .edge-light {
+  opacity: 0 !important;
+}
+
+.checkerboard,
+.checkerboard-bg,
+.artwork-checker {
+  background-color: var(--surface);
+  background-image:
+    linear-gradient(45deg, color-mix(in srgb, var(--border-color) 46%, transparent) 25%, transparent 25%),
+    linear-gradient(-45deg, color-mix(in srgb, var(--border-color) 46%, transparent) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, color-mix(in srgb, var(--border-color) 46%, transparent) 75%),
+    linear-gradient(-45deg, transparent 75%, color-mix(in srgb, var(--border-color) 46%, transparent) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+
+.editor-panel {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--primary) 7%, transparent), transparent 52%),
+    var(--surface);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-card);
+}
+
+.bg-gradient-primary,
+.gradient-cta {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--pink) 100%);
+}
+
+.bg-gradient-dark,
+.bg-gradient-hero {
+  background:
+    radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 24rem),
+    var(--bg);
+}
+
+.glow-primary,
+.glow-pink,
+.glow-cyan,
+.shadow-glow {
+  box-shadow: var(--shadow-glow);
+}
+
+.shadow-float {
+  box-shadow: var(--shadow-float);
+}
+
+.text-glow-primary,
+.text-glow-pink {
+  text-shadow: none;
+}
+
+input,
+textarea,
+select {
+  color-scheme: light;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  color-scheme: dark;
 }

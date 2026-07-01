@@ -4,7 +4,6 @@ import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Home, Paintbrush, CheckCircle2, Sparkles } from '@/components/ui/icons';
-import { PixelParticles } from '@/components/ui/pixel-particles';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 
@@ -94,8 +93,8 @@ function ConfirmPageContent() {
 
   return (
     <div className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden bg-bg px-4">
-      {/* Background Star Particles */}
-      <PixelParticles count={30} />
+      <div className="absolute inset-0 dot-grid opacity-40" />
+      <div className="absolute left-1/2 top-24 h-80 w-80 -translate-x-1/2 rounded-full bg-primary/12 blur-3xl" />
 
       <div className="max-w-md w-full flex flex-col items-center text-center relative z-10">
         
@@ -107,7 +106,7 @@ function ConfirmPageContent() {
           initial={false}
           animate={{ scale: 1 }}
           transition={{ delay: 0.5, type: 'spring' }}
-          className="bg-green/10 text-green border border-green/30 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-semibold tracking-wide mb-6 uppercase"
+          className="mb-6 flex items-center gap-1.5 rounded-full border border-green/30 bg-green/10 px-3.5 py-1.5 text-xs font-semibold uppercase text-green"
         >
           <CheckCircle2 className="w-4 h-4" />
           {signed ? 'Signed Pixel Delivered' : 'Pixel Art Dispatched'}
@@ -118,7 +117,7 @@ function ConfirmPageContent() {
           initial={false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="text-2xl sm:text-3xl font-bold font-pixel tracking-wide text-text mb-3"
+          className="mb-3 text-2xl font-semibold text-text sm:text-3xl"
         >
           Your pixel is on its way.
         </motion.h1>
