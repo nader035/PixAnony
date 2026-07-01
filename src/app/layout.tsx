@@ -35,7 +35,7 @@ export default function RootLayout({
       className={`${inter.variable} ${pixelifySans.variable} h-full`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col antialiased bg-bg text-text font-sans">
+      <body className="min-h-full flex flex-col antialiased bg-bg text-text font-sans" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           {children}
           <Toaster

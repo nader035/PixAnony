@@ -49,7 +49,7 @@ export function UserMenu({ profile, signOut, compact = false, className }: UserM
     { label: 'Dashboard', href: '/home', icon: Home },
     { label: 'Create', href: '/paint', icon: Paintbrush },
     { label: 'Profile', href: `/profile/${profile.username}`, icon: User },
-    { label: 'Private Drops', href: `/profile/${profile.username}/received`, icon: Inbox },
+    { label: 'Private Drops', href: '/drops', icon: Inbox },
     { label: 'Bookmarks', href: '/bookmarks', icon: Bookmark },
     { label: 'Settings', href: '/settings', icon: Settings },
   ] as const;
@@ -69,7 +69,7 @@ export function UserMenu({ profile, signOut, compact = false, className }: UserM
         aria-haspopup="menu"
         aria-expanded={open}
         className={cn(
-          'flex min-h-11 items-center gap-2 rounded-full border border-border bg-card/80 px-2.5 py-1.5 text-left transition hover:border-primary/25 hover:bg-card focus:outline-none focus:ring-4 focus:ring-primary/15',
+          'flex w-full min-h-11 items-center gap-2 rounded-full border border-border bg-card/80 px-2.5 py-1.5 text-left transition hover:border-primary/25 hover:bg-card focus:outline-none focus:ring-4 focus:ring-primary/15',
           compact && 'h-11 w-11 justify-center rounded-2xl p-0',
         )}
       >
@@ -82,11 +82,11 @@ export function UserMenu({ profile, signOut, compact = false, className }: UserM
         />
         {!compact && (
           <>
-            <span className="hidden min-w-0 md:block">
-              <span className="block max-w-28 truncate text-sm font-semibold text-text">{profile.display_name}</span>
-              <span className="block max-w-28 truncate text-xs text-text-muted">@{profile.username}</span>
+            <span className="hidden min-w-0 flex-1 md:block">
+              <span className="block truncate text-sm font-semibold text-text">{profile.display_name}</span>
+              <span className="block truncate text-xs text-text-muted">@{profile.username}</span>
             </span>
-            <ChevronDown size={12} className={cn('text-text-muted transition-transform', open && 'rotate-180')} />
+            <ChevronDown size={12} className={cn('ml-auto shrink-0 text-text-muted transition-transform', open && 'rotate-180')} />
           </>
         )}
       </button>
@@ -94,7 +94,7 @@ export function UserMenu({ profile, signOut, compact = false, className }: UserM
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-[calc(100%+0.6rem)] z-50 w-64 overflow-hidden rounded-2xl border border-border bg-card p-2 shadow-float"
+          className="absolute bottom-[calc(100%+0.6rem)] left-0 z-50 w-64 overflow-hidden rounded-2xl border border-border bg-card p-2 shadow-float"
         >
           <div className="mb-1 flex items-center gap-3 rounded-xl bg-surface/80 p-2.5">
             <PixelAvatar username={profile.username} src={profile.avatar_url} size="sm" isVerified={profile.is_verified} />
@@ -106,7 +106,7 @@ export function UserMenu({ profile, signOut, compact = false, className }: UserM
 
           {menuItems.map(({ label, href, icon: Icon }) => (
             <Link
-              key={href}
+              key={label}
               href={href}
               role="menuitem"
               onClick={() => setOpen(false)}

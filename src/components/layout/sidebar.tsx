@@ -24,18 +24,26 @@ import { useAuthProfile } from '@/hooks/use-auth-profile';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 
-/* ===== Icon map ===== */
-const iconMap: Record<string, LucideIcon> = {
-  Home,
-  Compass,
-  Bell,
-  Bookmark,
-  Inbox,
-  Trophy,
-  Paintbrush,
-  Settings,
-  User,
+/* ===== Sidebar navigation items ===== */
+type NavItem = {
+  id: string;
+  label: string;
+  href: string;
+  icon: LucideIcon;
+  requiresAuth?: boolean;
 };
+
+const navItems: NavItem[] = [
+  { id: 'home', label: 'Home', href: '/home', icon: Home },
+  { id: 'explore', label: 'Explore', href: '/explore', icon: Compass },
+  { id: 'paint', label: 'Create', href: '/paint', icon: Paintbrush },
+  { id: 'challenges', label: 'Challenges', href: '/challenges', icon: Trophy },
+  { id: 'bookmarks', label: 'Bookmarks', href: '/bookmarks', icon: Bookmark },
+  { id: 'drops', label: 'Private Drops', href: '/drops', icon: Inbox, requiresAuth: true },
+  { id: 'notifications', label: 'Notifications', href: '/notifications', icon: Bell },
+  { id: 'profile', label: 'Profile', href: '/profile', icon: User, requiresAuth: true },
+  { id: 'settings', label: 'Settings', href: '/settings', icon: Settings },
+];
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -62,17 +70,14 @@ export function Sidebar() {
     };
   }, [supabase, user]);
 
-  const sidebarNav = [
-    { label: 'Home', href: '/home', icon: 'Home' },
-    { label: 'Explore', href: '/explore', icon: 'Compass' },
-    { label: 'Create', href: '/paint', icon: 'Paintbrush' },
-    { label: 'Challenges', href: '/challenges', icon: 'Trophy' },
-    { label: 'Bookmarks', href: '/bookmarks', icon: 'Bookmark' },
-    { label: 'Private Drops', href: profile ? `/profile/${profile.username}/received` : '/login?next=%2Fhome', icon: 'Inbox' },
-    { label: 'Notifications', href: '/notifications', icon: 'Bell' },
-    { label: 'Profile', href: profile ? `/profile/${profile.username}` : '/login?next=%2Fhome', icon: 'User' },
-    { label: 'Settings', href: '/settings', icon: 'Settings' },
-  ];
+  /* Resolve auth-dependent hrefs at render time.
+     Profile href uses the real username; everything else stays stable. */
+  const resolvedItems = navItems.map((item) => {
+    if (item.id === 'profile' && profile) {
+      return { ...item, href: `/profile/${profile.username}` };
+    }
+    return item;
+  });
 
   return (
     <aside
@@ -99,16 +104,19 @@ export function Sidebar() {
 
       {/* ===== Navigation ===== */}
       <nav aria-label="Primary navigation" className="relative flex-1 space-y-0.5 overflow-y-auto py-2">
-        {sidebarNav.map((item) => {
-          const Icon = iconMap[item.icon] || Home;
-          const active = item.label === 'Profile' || item.label === 'Private Drops'
-            ? pathname === item.href
-            : pathname === item.href || (!item.href.includes('?') && pathname?.startsWith(`${item.href}/`));
-          const badge = item.label === 'Notifications' ? unread : 0;
+        {resolvedItems.map((item) => {
+          const Icon = item.icon;
+          const active =
+            item.id === 'profile'
+              ? pathname === item.href
+              : item.id === 'drops'
+                ? pathname === item.href || pathname?.startsWith('/drops')
+                : pathname === item.href || pathname?.startsWith(`${item.href}/`);
+          const badge = item.id === 'notifications' ? unread : 0;
 
           return (
             <Link
-              key={item.href}
+              key={item.id}
               href={item.href}
               aria-current={active ? 'page' : undefined}
               className={cn(
@@ -154,7 +162,7 @@ export function Sidebar() {
 
         <div className="pt-3">
           <Link
-            href={profile ? '/paint' : '/login?next=%2Fpaint'}
+            href="/paint"
             className={cn(
               'group/create relative flex h-11 w-full items-center justify-between gap-2 rounded-xl px-4',
               'bg-primary text-white text-sm font-semibold',

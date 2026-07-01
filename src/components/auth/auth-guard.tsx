@@ -8,6 +8,7 @@ import { useAuthProfile } from '@/hooks/use-auth-profile';
 const protectedPrefixes = [
   '/home',
   '/paint',
+  '/drops',
   '/notifications',
   '/bookmarks',
   '/challenges',

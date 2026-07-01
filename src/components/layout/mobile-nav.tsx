@@ -39,7 +39,7 @@ export function MobileNav() {
           const active = pathname === item.href || (!item.href.includes('?') && pathname?.startsWith(`${item.href}/`));
           return (
             <Link
-              key={item.href}
+              key={item.label}
               href={item.href}
               aria-current={active ? 'page' : undefined}
               className={cn(
