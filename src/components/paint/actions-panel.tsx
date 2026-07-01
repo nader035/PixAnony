@@ -10,7 +10,12 @@ import { usePaintStore } from '@/stores/paint-store';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-export default function ActionsPanel({ compact = false }: { compact?: boolean }) {
+interface ActionsPanelProps {
+  compact?: boolean;
+  onClearCanvas?: () => void;
+}
+
+export default function ActionsPanel({ compact = false, onClearCanvas }: ActionsPanelProps) {
   const {
     undo, redo, clearCanvas, flipHorizontal, flipVertical,
     symmetryMode, setSymmetryMode,
@@ -20,6 +25,7 @@ export default function ActionsPanel({ compact = false }: { compact?: boolean })
 
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
+  const handleClearCanvas = onClearCanvas ?? clearCanvas;
 
   // ===== EXPORT PNG =====
   const exportPNG = useCallback(() => {
@@ -194,7 +200,7 @@ export default function ActionsPanel({ compact = false }: { compact?: boolean })
 
       {/* Clear */}
       <button
-        onClick={clearCanvas}
+        onClick={handleClearCanvas}
         className={cn(
           'flex items-center justify-center gap-1.5 rounded-xl border border-red/20 bg-red/10 px-2 py-1.5 text-[10px] font-medium text-red transition-colors hover:bg-red/20',
           compact && 'hidden'

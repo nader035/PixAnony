@@ -45,6 +45,21 @@ export interface PaintStoreState {
   drawStart: { x: number; y: number } | null;
 }
 
+export interface PaintStoreSnapshot {
+  color?: string;
+  gridSize: GridSize;
+  zoom?: number;
+  panX?: number;
+  panY?: number;
+  showGrid?: boolean;
+  showPreview?: boolean;
+  layers: PixelLayer[];
+  activeLayerId?: string;
+  recentColors?: string[];
+  activePalette?: string;
+  symmetryMode?: 'off' | 'horizontal' | 'vertical' | 'both';
+}
+
 export interface PaintStoreActions {
   // Tool
   setTool: (tool: PaintTool) => void;
@@ -93,6 +108,7 @@ export interface PaintStoreActions {
   // State
   resetState: () => void;
   initializeCanvas: (gridSize?: GridSize) => void;
+  restoreSnapshot: (snapshot: PaintStoreSnapshot) => void;
 
   // Drawing state
   setIsDrawing: (drawing: boolean) => void;
@@ -433,6 +449,39 @@ export const usePaintStore = create<PaintStore>((set, get) => {
         historyIndex: 0,
         panX: 0,
         panY: 0,
+      });
+    },
+
+    restoreSnapshot: (snapshot) => {
+      const size = snapshot.gridSize;
+      const expectedLength = size * size;
+      const restoredLayers = cloneLayers(snapshot.layers).filter(
+        (layer) => layer.pixels.length === expectedLength
+      );
+      const layers = restoredLayers.length > 0 ? restoredLayers : createInitialLayers(size);
+      const activeLayer = layers.find((layer) => layer.id === snapshot.activeLayerId)
+        ?? layers.find((layer) => !layer.locked)
+        ?? layers[0];
+      const color = snapshot.color ?? get().color ?? DEFAULT_COLOR;
+      const recentColors = snapshot.recentColors?.length ? snapshot.recentColors : [color];
+
+      set({
+        color,
+        gridSize: size,
+        zoom: snapshot.zoom ?? DEFAULT_ZOOM,
+        panX: snapshot.panX ?? 0,
+        panY: snapshot.panY ?? 0,
+        showGrid: snapshot.showGrid ?? true,
+        showPreview: snapshot.showPreview ?? true,
+        layers,
+        activeLayerId: activeLayer.id,
+        history: [cloneLayers(layers)],
+        historyIndex: 0,
+        recentColors,
+        activePalette: snapshot.activePalette ?? 'Neon',
+        symmetryMode: snapshot.symmetryMode ?? 'off',
+        isDrawing: false,
+        drawStart: null,
       });
     },
 

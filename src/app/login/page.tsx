@@ -162,6 +162,7 @@ function LoginPageContent() {
     return next?.startsWith('/') && !next.startsWith('//') ? next : '/home';
   }, [searchParams]);
   const requestedMode = searchParams.get('mode') === 'signup' ? 'signup' : 'login';
+  const isContinuingSendDraft = nextPath.startsWith('/send/');
   
   const [authMethod, setAuthMethod] = useState<'social' | 'email'>('social');
   const [mode, setMode] = useState<'login' | 'signup'>(requestedMode);
@@ -224,7 +225,7 @@ function LoginPageContent() {
         toast.success('Successfully logged in! Redirecting...');
         router.push(nextPath);
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -236,6 +237,11 @@ function LoginPageContent() {
           },
         });
         if (error) throw error;
+        if (data.session) {
+          toast.success('Account created! Redirecting...');
+          router.push(nextPath);
+          return;
+        }
         toast.success('Sign up successful! Please check your email for a confirmation link.');
         setMode('login');
       }
@@ -275,9 +281,11 @@ function LoginPageContent() {
               {mode === 'login' ? 'Welcome back' : 'Create your account'}
             </h1>
             <p className="text-text-muted text-sm">
-              {mode === 'login'
-                ? 'Sign in to continue your anonymous pixel art journey.'
-                : 'Create a profile and start drawing.'}
+              {isContinuingSendDraft
+                ? 'Sign in to deliver your saved private canvas.'
+                : mode === 'login'
+                  ? 'Sign in to continue your anonymous pixel art journey.'
+                  : 'Create a profile and start drawing.'}
             </p>
           </motion.div>
 

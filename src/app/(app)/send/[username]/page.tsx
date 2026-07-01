@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,6 +13,17 @@ import { usePaintStore } from '@/stores/paint-store';
 import { usePaintKeyboardShortcuts } from '@/hooks/use-paint-keyboard-shortcuts';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import {
+  clearSendDraft,
+  getSendDraftContentSignature,
+  hasMeaningfulSendDraft,
+  hasSendDraft,
+  loadSendDraft,
+  normalizeSendDraftRecipient,
+  saveSendDraft,
+  SEND_DRAFT_VERSION,
+  type SendDraft,
+} from '@/lib/send-draft-storage';
 
 // Panels
 import PaintCanvas from '@/components/paint/paint-canvas';
@@ -39,6 +50,8 @@ interface SenderProfile {
   display_name: string | null;
 }
 
+let inMemorySendDraft: SendDraft | null = null;
+
 
 export default function SendToUserPage() {
   const router = useRouter();
@@ -51,6 +64,7 @@ export default function SendToUserPage() {
 
   // Store
   const {
+    color,
     gridSize,
     setGridSize,
     showGrid,
@@ -61,8 +75,13 @@ export default function SendToUserPage() {
     redo,
     historyIndex,
     history,
-    resetState,
+    activeLayerId,
+    recentColors,
+    activePalette,
+    symmetryMode,
+    clearCanvas,
     initializeCanvas,
+    restoreSnapshot,
     layers
   } = usePaintStore();
 
@@ -76,17 +95,195 @@ export default function SendToUserPage() {
   const [sendAnonymously, setSendAnonymously] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
+  const [draftNotice, setDraftNotice] = useState<string | null>(null);
+  const draftReadyRef = useRef(false);
+  const lastSavedDraftSignatureRef = useRef<string | null>(null);
+  const discardedDraftSignatureRef = useRef<string | null>(null);
 
   usePaintKeyboardShortcuts({
     disabled: showSendModal,
     onEscape: () => setShowSendModal(false),
   });
 
-  // Initialize canvas on mount & Fetch recipient
+  const compositeArtwork = useCallback(() => {
+    const compositePixels = Array(gridSize * gridSize).fill('transparent');
+    for (const layer of layers) {
+      if (!layer.visible) continue;
+      for (let i = 0; i < layer.pixels.length; i++) {
+        const pixelColor = layer.pixels[i];
+        if (pixelColor && pixelColor !== 'transparent') compositePixels[i] = pixelColor;
+      }
+    }
+    return compositePixels;
+  }, [gridSize, layers]);
+
+  const buildCurrentDraft = useCallback((): SendDraft => ({
+    version: SEND_DRAFT_VERSION,
+    recipientUsername: normalizeSendDraftRecipient(username),
+    canvas: {
+      gridSize,
+      pixelData: compositeArtwork(),
+      layers,
+      activeLayerId,
+      color,
+      recentColors,
+      activePalette,
+      symmetryMode,
+      showGrid,
+      showPreview,
+    },
+    caption,
+    sendMode: sendAnonymously ? 'anonymous' : 'signed',
+    timestamp: Date.now(),
+  }), [
+    activeLayerId,
+    activePalette,
+    caption,
+    color,
+    compositeArtwork,
+    gridSize,
+    layers,
+    recentColors,
+    sendAnonymously,
+    showGrid,
+    showPreview,
+    symmetryMode,
+    username,
+  ]);
+
+  const buildCurrentDraftRef = useRef(buildCurrentDraft);
   useEffect(() => {
-    initializeCanvas(16);
-    
-    // Fetch auth user without blocking the public recipient link.
+    buildCurrentDraftRef.current = buildCurrentDraft;
+  }, [buildCurrentDraft]);
+
+  const persistDraft = useCallback((draft: SendDraft, notice: string | null = 'Draft saved') => {
+    const meaningfulDraft = hasMeaningfulSendDraft(draft);
+    const recipientKey = draft.recipientUsername;
+    const draftSignature = getSendDraftContentSignature(draft);
+
+    if (discardedDraftSignatureRef.current === draftSignature) return null;
+    if (discardedDraftSignatureRef.current && discardedDraftSignatureRef.current !== draftSignature) {
+      discardedDraftSignatureRef.current = null;
+    }
+    if (!meaningfulDraft && !hasSendDraft(recipientKey)) {
+      inMemorySendDraft = null;
+      lastSavedDraftSignatureRef.current = null;
+      return null;
+    }
+
+    const savedDraft = saveSendDraft(recipientKey, draft);
+    if (!savedDraft) return null;
+
+    inMemorySendDraft = savedDraft;
+    discardedDraftSignatureRef.current = null;
+    lastSavedDraftSignatureRef.current = getSendDraftContentSignature(savedDraft);
+    if (notice) setDraftNotice(notice);
+    return savedDraft;
+  }, []);
+
+  const persistCurrentDraft = useCallback((notice: string | null = 'Draft saved') => {
+    return persistDraft(buildCurrentDraftRef.current(), notice);
+  }, [persistDraft]);
+
+  const persistCurrentDraftRef = useRef(persistCurrentDraft);
+  useEffect(() => {
+    persistCurrentDraftRef.current = persistCurrentDraft;
+  }, [persistCurrentDraft]);
+
+  // Restore a recipient-specific send draft before autosave is enabled.
+  useEffect(() => {
+    let active = true;
+    draftReadyRef.current = false;
+    discardedDraftSignatureRef.current = null;
+
+    queueMicrotask(() => {
+      if (!active) return;
+
+      const normalizedRecipient = normalizeSendDraftRecipient(username);
+      const memoryDraft = inMemorySendDraft?.recipientUsername === normalizedRecipient
+        ? inMemorySendDraft
+        : null;
+      const draft = memoryDraft ?? loadSendDraft(username);
+
+      if (draft) {
+        restoreSnapshot({
+          gridSize: draft.canvas.gridSize,
+          layers: draft.canvas.layers,
+          activeLayerId: draft.canvas.activeLayerId,
+          color: draft.canvas.color,
+          recentColors: draft.canvas.recentColors,
+          activePalette: draft.canvas.activePalette,
+          symmetryMode: draft.canvas.symmetryMode,
+          showGrid: draft.canvas.showGrid,
+          showPreview: draft.canvas.showPreview,
+        });
+        setCaption(draft.caption);
+        setSendAnonymously(draft.sendMode !== 'signed');
+        setDraftNotice('Restored your drawing');
+        lastSavedDraftSignatureRef.current = getSendDraftContentSignature(draft);
+        inMemorySendDraft = draft;
+      } else {
+        initializeCanvas(16);
+        setCaption('');
+        setSendAnonymously(true);
+        setDraftNotice(null);
+        lastSavedDraftSignatureRef.current = null;
+      }
+
+      draftReadyRef.current = true;
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [initializeCanvas, restoreSnapshot, username]);
+
+  // Autosave every meaningful change after restore/default initialization.
+  useEffect(() => {
+    if (!draftReadyRef.current) return;
+
+    const draft = buildCurrentDraft();
+    const meaningfulDraft = hasMeaningfulSendDraft(draft);
+    const draftSignature = getSendDraftContentSignature(draft);
+
+    if (discardedDraftSignatureRef.current === draftSignature) return;
+    if (discardedDraftSignatureRef.current && discardedDraftSignatureRef.current !== draftSignature) {
+      discardedDraftSignatureRef.current = null;
+    }
+    if (!meaningfulDraft && !hasSendDraft(username)) {
+      inMemorySendDraft = null;
+      lastSavedDraftSignatureRef.current = null;
+      return;
+    }
+
+    if (draftSignature === lastSavedDraftSignatureRef.current) return;
+
+    const timer = window.setTimeout(() => {
+      persistDraft(draft, 'Draft saved');
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [buildCurrentDraft, persistDraft, username]);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (draftReadyRef.current) persistCurrentDraftRef.current(null);
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (draftReadyRef.current) persistCurrentDraftRef.current(null);
+    };
+  }, []);
+
+  // Fetch auth user without blocking the public recipient link.
+  useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
       if (data?.user) {
         setCurrentUser(data.user);
@@ -98,8 +295,10 @@ export default function SendToUserPage() {
         setCurrentProfile(profileData ?? null);
       }
     });
+  }, [supabase]);
 
-    // Fetch recipient profile
+  // Fetch recipient profile
+  useEffect(() => {
     const fetchRecipient = async () => {
       try {
         setLoadingRecipient(true);
@@ -124,11 +323,7 @@ export default function SendToUserPage() {
     };
 
     fetchRecipient();
-
-    return () => {
-      resetState();
-    };
-  }, [initializeCanvas, resetState, router, supabase, username]);
+  }, [router, supabase, username]);
 
   const loginHref = `/login?next=${encodeURIComponent(`/send/${username}`)}`;
   const shareUrl = typeof window === 'undefined'
@@ -142,27 +337,39 @@ export default function SendToUserPage() {
     window.setTimeout(() => setCopiedShareLink(false), 1600);
   };
 
+  const handleRequireAuth = useCallback(() => {
+    persistDraft(buildCurrentDraft(), 'Continue after login');
+    toast.success('Draft saved. Continue after login.');
+    setShowSendModal(false);
+    router.push(loginHref);
+  }, [buildCurrentDraft, loginHref, persistDraft, router]);
+
+  const handleClearSendDraft = useCallback(() => {
+    const draft = buildCurrentDraft();
+    if (hasMeaningfulSendDraft(draft) && !window.confirm('Clear this unsent drawing and remove the saved draft?')) {
+      return;
+    }
+
+    discardedDraftSignatureRef.current = getSendDraftContentSignature(draft);
+    inMemorySendDraft = null;
+    lastSavedDraftSignatureRef.current = null;
+    clearSendDraft(username);
+    clearCanvas();
+    setCaption('');
+    setSendAnonymously(true);
+    setDraftNotice('Draft cleared');
+    toast.success('Draft cleared.');
+  }, [buildCurrentDraft, clearCanvas, username]);
+
   const handleSendPixel = async () => {
     if (!recipient) return;
     if (!currentUser) {
-      toast.error('Sign in to deliver your pixel art.');
-      router.push(loginHref);
+      handleRequireAuth();
       return;
     }
 
     try {
       setIsSending(true);
-
-      const compositePixels = Array(gridSize * gridSize).fill('transparent');
-      for (const layer of layers) {
-        if (!layer.visible) continue;
-        for (let i = 0; i < layer.pixels.length; i++) {
-          const pixelColor = layer.pixels[i];
-          if (pixelColor && pixelColor !== 'transparent') {
-            compositePixels[i] = pixelColor;
-          }
-        }
-      }
 
       const senderName = currentProfile?.username ?? 'creator';
       const captionText = caption.trim() || (
@@ -177,7 +384,7 @@ export default function SendToUserPage() {
         title: sendAnonymously ? 'Anonymous Pixel Message' : `Pixel message from @${senderName}`,
         caption: captionText,
         grid_size: gridSize,
-        pixel_data: compositePixels,
+        pixel_data: compositeArtwork(),
         layers: layers,
         visibility: sendAnonymously ? 'anonymous' : 'private',
         is_anonymous: sendAnonymously
@@ -187,6 +394,9 @@ export default function SendToUserPage() {
 
       toast.success(sendAnonymously ? 'Anonymous pixel art delivered.' : 'Signed private pixel art delivered.');
       setShowSendModal(false);
+      clearSendDraft(username);
+      inMemorySendDraft = null;
+      lastSavedDraftSignatureRef.current = null;
       router.push(`/confirm?mode=${sendAnonymously ? 'anonymous' : 'signed'}`);
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Failed to send pixel art.');
@@ -306,13 +516,18 @@ export default function SendToUserPage() {
               <strong className="text-text">You can draw first.</strong> Sign in when you are ready to deliver it to @{recipient?.username}.
             </div>
           )}
+          {draftNotice && (
+            <div className="pointer-events-none absolute bottom-4 left-4 z-10 rounded-2xl border border-green/20 bg-bg/82 px-3 py-2 text-xs font-semibold text-green shadow-float backdrop-blur-xl">
+              {draftNotice}
+            </div>
+          )}
           <PaintCanvas />
         </main>
 
         <aside className="z-10 hidden w-[286px] flex-col gap-3 overflow-y-auto border-l border-border/80 bg-sidebar/70 p-3 hide-scrollbar lg:flex">
           <PreviewPanel />
           <LayerPanel />
-          <ActionsPanel />
+          <ActionsPanel onClearCanvas={handleClearSendDraft} />
         </aside>
       </div>
 
@@ -322,7 +537,7 @@ export default function SendToUserPage() {
           <div className="min-w-0 flex-1">
             <ToolPanel compact />
           </div>
-          <ActionsPanel compact />
+          <ActionsPanel compact onClearCanvas={handleClearSendDraft} />
         </div>
         <ColorPalette compact />
       </div>
@@ -402,7 +617,7 @@ export default function SendToUserPage() {
 
                 {!currentUser && (
                   <div className="rounded-2xl border border-yellow/20 bg-yellow/10 p-3 text-xs leading-5 text-text-muted">
-                    <strong className="text-yellow">Sign-in required:</strong> PixAnony requires an account before delivery so private sends stay rate-limitable and abuse-resistant.
+                    <strong className="text-yellow">Continue after login:</strong> PixAnony will keep this drawing, caption, and delivery choice while you sign in.
                   </div>
                 )}
 
@@ -429,7 +644,7 @@ export default function SendToUserPage() {
                   Cancel
                 </button>
                 <button
-                  onClick={() => currentUser ? void handleSendPixel() : router.push(loginHref)}
+                  onClick={() => currentUser ? void handleSendPixel() : handleRequireAuth()}
                   disabled={isSending}
                   className="flex flex-[2] items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(124,58,237,0.22)] transition-all hover:brightness-105 active:scale-[0.98]"
                 >
