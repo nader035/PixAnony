@@ -1,6 +1,14 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, Heart } from '@/components/ui/icons';
 import { Logo } from '@/components/ui/logo';
+import { createPublicPageMetadata } from '@/lib/seo';
+
+export const metadata: Metadata = createPublicPageMetadata({
+  title: 'Community Terms',
+  description: 'Read the PixAnony community terms for responsible artwork sharing, account safety, anonymity, and respectful participation.',
+  path: '/terms',
+});
 
 export default function TermsPage() {
   return (

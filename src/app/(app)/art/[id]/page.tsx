@@ -7,6 +7,7 @@ import { ArtworkComments } from '@/components/feed/artwork-comments';
 import { PageFrame } from '@/components/ui/page-layout';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { normalizeArtwork } from '@/lib/supabase/data';
+import { PUBLIC_ROBOTS } from '@/lib/seo';
 
 export async function generateMetadata({
   params,
@@ -21,9 +22,16 @@ export async function generateMetadata({
     .eq('id', id)
     .single();
 
-  if (!data || data.visibility === 'private') {
+  if (!data) {
     return {
-      title: 'Private artwork | PixAnony',
+      title: 'Artwork not found',
+      robots: { index: false, follow: false },
+    };
+  }
+
+  if (data.visibility === 'private') {
+    return {
+      title: 'Private artwork',
       description: 'This PixAnony artwork is available only to people with access.',
       robots: { index: false, follow: false },
     };
@@ -35,24 +43,34 @@ export async function generateMetadata({
     display_name: string;
   } | null | undefined;
   const creator = data.is_anonymous
-    ? 'Anonymous artist'
-    : joinedProfile?.display_name || (joinedProfile?.username ? `@${joinedProfile.username}` : 'A PixAnony artist');
-  const artworkTitle = data.title?.trim() || 'Artwork on PixAnony';
-  const description = data.caption?.trim().slice(0, 160) || `A new artwork shared by ${creator} on PixAnony.`;
+    ? 'an anonymous artist'
+    : joinedProfile?.username
+      ? `@${joinedProfile.username}`
+      : joinedProfile?.display_name || 'a PixAnony artist';
+  const artworkTitle = data.title?.trim();
+  const seoTitle = artworkTitle ? `${artworkTitle} — Pixel Art by ${creator}` : `Pixel Art by ${creator}`;
+  const caption = data.caption?.trim().replace(/\s+/g, ' ') || '';
+  const fallbackDescription = `Discover pixel art shared by ${creator} in the PixAnony creative community.`;
+  const description = caption.length >= 80
+    ? caption.slice(0, 160)
+    : `${caption}${caption ? ' ' : ''}${fallbackDescription}`.slice(0, 160);
 
   return {
-    title: `${artworkTitle} | PixAnony`,
+    title: seoTitle,
     description,
     alternates: { canonical: `/art/${id}` },
+    robots: PUBLIC_ROBOTS,
     openGraph: {
-      title: artworkTitle,
+      title: `${seoTitle} | PixAnony`,
       description,
       type: 'article',
       url: `/art/${id}`,
+      siteName: 'PixAnony',
+      locale: 'en_US',
     },
     twitter: {
       card: 'summary_large_image',
-      title: artworkTitle,
+      title: `${seoTitle} | PixAnony`,
       description,
     },
   };

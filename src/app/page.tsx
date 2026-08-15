@@ -29,7 +29,7 @@ function Navbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:pt-6">
       <nav className="mx-auto flex h-16 max-w-5xl items-center justify-between rounded-full bg-card/90 px-3 shadow-[0_16px_48px_rgba(44,40,58,0.12)] backdrop-blur-2xl sm:px-5" aria-label="Primary">
-        <Link href="/" aria-label="PixAnony home"><Logo size="sm" /></Link>
+        <Link href="/home" aria-label="PixAnony home feed"><Logo size="sm" /></Link>
         <div className="hidden items-center gap-7 md:flex">
           {navLinks.map((link) => <Link key={link.href} href={link.href} className="text-sm font-semibold text-text-muted transition-colors hover:text-text">{link.label}</Link>)}
         </div>
@@ -73,13 +73,13 @@ function ProductPreview() {
             <p className="mt-3 text-sm font-bold">Mina Sol</p>
             <p className="text-xs text-text-muted">@minasol</p>
           </div>
-          <nav className="mt-3 space-y-1">
+          <div className="mt-3 space-y-1">
             {['Home', 'Explore', 'Private drops', 'Bookmarks', 'Settings'].map((item, index) => <span key={item} className={`block rounded-full px-4 py-3 text-xs font-semibold ${index === 0 ? 'bg-primary text-bg' : 'text-text-muted'}`}>{item}</span>)}
-          </nav>
+          </div>
           <div className="mt-auto rounded-[24px] bg-[var(--lilac)] p-4 text-center"><Sparkles className="mx-auto" size={18} /><p className="mt-2 text-xs font-bold">Your ideas belong here</p></div>
         </aside>
 
-        <main className="min-w-0 px-0 md:px-5">
+        <section className="min-w-0 px-0 md:px-5" aria-label="PixAnony feed preview">
           <div className="flex items-center justify-between pb-4"><h2 className="text-xl font-bold">Your feed</h2><div className="flex gap-4 text-xs font-semibold"><span>Friends</span><span className="text-text-muted">Recent</span></div></div>
           <article className="rounded-[28px] bg-[var(--powder)] p-4 sm:p-5">
             <div className="flex items-center gap-3"><PixelAvatar username="Raya" size="sm" /><div><p className="text-sm font-bold">Raya Noor</p><p className="text-xs text-text-muted">12 minutes ago</p></div></div>
@@ -88,7 +88,7 @@ function ProductPreview() {
             <div className="mt-4 flex items-center gap-5 text-xs font-semibold text-text-muted"><span className="flex items-center gap-1.5"><Heart size={15} />482</span><span className="flex items-center gap-1.5"><MessageCircle size={15} />36</span><span className="flex items-center gap-1.5"><Repeat2 size={15} />18</span><Bookmark className="ml-auto" size={15} /></div>
           </article>
           <article className="mt-3 rounded-[28px] bg-[var(--butter)] p-5"><div className="flex items-center gap-3"><PixelAvatar username="Omar" size="sm" /><p className="text-sm font-bold">Omar Lee</p></div><p className="mt-4 text-sm leading-6">Sending a little warmth into the community today.</p></article>
-        </main>
+        </section>
 
         <aside className="hidden border-l border-border/60 pl-4 md:block">
           <h2 className="py-3 text-lg font-bold">Creators</h2>

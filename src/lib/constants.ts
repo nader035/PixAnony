@@ -126,6 +126,5 @@ export const POPULAR_TAGS = [
 export const BRAND = {
   name: 'PixAnony',
   tagline: 'Express in Pixels. Anonymously.',
-  description: 'Create, share, and receive anonymous pixel art in a focused community for pixel artists.',
-  url: 'https://pixanony.com',
+  description: 'Create, share, and discover anonymous pixel art on PixAnony — a playful social community built around pixels, creativity, and anonymous expression.',
 } as const;

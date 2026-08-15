@@ -1,3 +1,5 @@
+import type { Metadata } from 'next';
+import { cache } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { BadgeCheck, Calendar, Crown, LinkIcon, MapPin, Palette, Repeat2 } from '@/components/ui/icons';
@@ -9,6 +11,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { normalizeArtwork } from '@/lib/supabase/data';
 import { formatNumber } from '@/lib/utils';
 import type { Artwork } from '@/lib/types';
+import { createPublicPageMetadata } from '@/lib/seo';
 
 type TimelineItem = {
   kind: 'artwork' | 'repost';
@@ -26,6 +29,57 @@ function firstJoinedRow(value: RepostRow['artwork']): Record<string, unknown> | 
   return Array.isArray(value) ? value[0] ?? null : value;
 }
 
+const getPublicProfile = cache(async (username: string) => {
+  const supabase = await createServerSupabaseClient();
+  const { data } = await supabase
+    .from('profile_stats')
+    .select('*')
+    .eq('username', username)
+    .single();
+  return data;
+});
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}): Promise<Metadata> {
+  const { username } = await params;
+  const profile = await getPublicProfile(username);
+  if (!profile?.username) {
+    return {
+      title: { absolute: 'Profile not found | PixAnony' },
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const title = `@${profile.username} on PixAnony`;
+  const bio = profile.bio?.trim().replace(/\s+/g, ' ') || '';
+  const fallbackDescription = `Discover pixel art, reposts, and creative activity from @${profile.username} on PixAnony.`;
+  const description = bio.length >= 80
+    ? bio.slice(0, 160)
+    : `${bio}${bio ? ' ' : ''}${fallbackDescription}`.slice(0, 160);
+  const baseMetadata = createPublicPageMetadata({
+    title,
+    description,
+    path: `/profile/${encodeURIComponent(profile.username)}`,
+  });
+
+  return {
+    ...baseMetadata,
+    title: { absolute: title },
+    openGraph: {
+      ...baseMetadata.openGraph,
+      title,
+      type: 'profile',
+    },
+    twitter: {
+      ...baseMetadata.twitter,
+      title,
+    },
+  };
+}
+
 export default async function ProfilePage({
   params,
 }: {
@@ -33,9 +87,9 @@ export default async function ProfilePage({
 }) {
   const { username } = await params;
   const supabase = await createServerSupabaseClient();
-  const [{ data: { user } }, { data: profile }] = await Promise.all([
+  const [{ data: { user } }, profile] = await Promise.all([
     supabase.auth.getUser(),
-    supabase.from('profile_stats').select('*').eq('username', username).single(),
+    getPublicProfile(username),
   ]);
   if (!profile?.id || !profile.username) notFound();
 

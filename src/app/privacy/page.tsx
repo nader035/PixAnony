@@ -1,6 +1,14 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, Shield } from '@/components/ui/icons';
 import { Logo } from '@/components/ui/logo';
+import { createPublicPageMetadata } from '@/lib/seo';
+
+export const metadata: Metadata = createPublicPageMetadata({
+  title: 'Privacy',
+  description: 'Learn how PixAnony handles account information, public artwork, private delivery, and anonymous creative expression.',
+  path: '/privacy',
+});
 
 export default function PrivacyPage() {
   return (

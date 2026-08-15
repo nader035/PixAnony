@@ -82,12 +82,6 @@ input, textarea, select { color-scheme: light; }
 .hairline { border-color: var(--border-muted); }
 .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
-.brand-splash { position: relative; display: inline-grid; place-items: center; overflow: hidden; border-radius: 42% 58% 48% 52% / 56% 42% 58% 44%; background: var(--lilac); color: var(--text); box-shadow: inset -8px -8px 0 rgba(255,255,255,.26); }
-.brand-splash::before, .brand-splash::after { content: ""; position: absolute; border-radius: 999px; }
-.brand-splash::before { width: 42%; height: 42%; left: 2%; bottom: 4%; background: #83d7ca; }
-.brand-splash::after { width: 48%; height: 48%; right: -4%; top: 3%; background: #f49aac; }
-.brand-splash > span { position: relative; z-index: 1; font-weight: 800; }
-
 @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 @keyframes page-enter { from { opacity: 0; transform: translateY(16px); filter: blur(6px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
 @keyframes float { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-8px) rotate(2deg); } }

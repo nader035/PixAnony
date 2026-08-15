@@ -1,8 +1,9 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Manrope } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'sonner';
 import { BRAND } from '@/lib/constants';
+import { DEFAULT_SEO_DESCRIPTION, DEFAULT_SEO_TITLE, DEFAULT_SOCIAL_IMAGE, PUBLIC_ROBOTS, SITE_URL, WEBSITE_JSON_LD } from '@/lib/seo';
 import './globals.css';
 
 const manrope = Manrope({
@@ -11,26 +12,53 @@ const manrope = Manrope({
   display: 'swap',
 });
 
-const metadataUrl = process.env.NEXT_PUBLIC_SITE_URL
-  ?? (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : 'http://localhost:3000');
-
 export const metadata: Metadata = {
-  metadataBase: new URL(metadataUrl),
-  title: 'PixAnony | Make art. Share it your way.',
-  description: BRAND.description,
-  icons: { icon: '/favicon.ico' },
+  metadataBase: SITE_URL,
+  title: {
+    default: DEFAULT_SEO_TITLE,
+    template: '%s | PixAnony',
+  },
+  description: DEFAULT_SEO_DESCRIPTION,
+  applicationName: BRAND.name,
+  authors: [{ name: BRAND.name }],
+  creator: BRAND.name,
+  publisher: BRAND.name,
+  category: 'art',
+  keywords: ['anonymous pixel art', 'pixel art community', 'digital art', 'creative community'],
+  alternates: { canonical: '/' },
+  icons: {
+    icon: [
+      { url: '/assets/images/favicon.ico', sizes: 'any', type: 'image/x-icon' },
+      { url: '/assets/images/16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/assets/images/32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    shortcut: [{ url: '/assets/images/favicon.ico', type: 'image/x-icon' }],
+    apple: [{ url: '/assets/images/180x180.png', sizes: '180x180', type: 'image/png' }],
+  },
+  robots: PUBLIC_ROBOTS,
   openGraph: {
-    title: 'PixAnony | Make art. Share it your way.',
-    description: BRAND.description,
+    title: DEFAULT_SEO_TITLE,
+    description: DEFAULT_SEO_DESCRIPTION,
     type: 'website',
+    url: '/',
+    siteName: BRAND.name,
+    locale: 'en_US',
+    images: [DEFAULT_SOCIAL_IMAGE],
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'PixAnony | Make art. Share it your way.',
-    description: BRAND.description,
+    card: 'summary',
+    title: DEFAULT_SEO_TITLE,
+    description: DEFAULT_SEO_DESCRIPTION,
+    images: ['/assets/images/512x512.png'],
   },
+};
+
+export const viewport: Viewport = {
+  colorScheme: 'light dark',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#e6e8f1' },
+    { media: '(prefers-color-scheme: dark)', color: '#181818' },
+  ],
 };
 
 export default function RootLayout({
@@ -47,6 +75,10 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col antialiased bg-bg text-text font-sans" suppressHydrationWarning>
         <a href="#main-content" className="skip-link">Skip to content</a>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_JSON_LD).replace(/</g, '\\u003c') }}
+          />
           {children}
           <Toaster
             position="bottom-right"

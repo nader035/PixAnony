@@ -1,9 +1,17 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Heart, Search, Sparkles, TrendingUp } from '@/components/ui/icons';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { PixelArtRenderer } from '@/components/ui/pixel-art-renderer';
 import { PageFrame, PageHeader } from '@/components/ui/page-layout';
 import { formatNumber, cn } from '@/lib/utils';
+import { createPublicPageMetadata } from '@/lib/seo';
+
+export const metadata: Metadata = createPublicPageMetadata({
+  title: 'Explore Pixel Art',
+  description: 'Explore public pixel art, discover new creators, and find playful inspiration from the PixAnony community.',
+  path: '/explore',
+});
 
 const filters = ['all', 'trending', 'new', 'popular'] as const;
 
