@@ -155,16 +155,18 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
 
   const displayName = isAnonymous ? 'Anonymous' : profile?.display_name || 'Unknown';
   const username = isAnonymous ? 'anonymous' : profile?.username || 'unknown';
+  const cardTones = ['var(--powder)', 'var(--butter)', 'var(--blush)', 'var(--lilac)', 'var(--mint)'];
+  const cardTone = cardTones[artwork.id.charCodeAt(0) % cardTones.length];
 
   return (
     <motion.article
       initial={false}
       animate={{ opacity: 1, y: 0 }}
+      style={{ background: cardTone }}
       className={cn(
-        'content-auto overflow-hidden rounded-2xl sm:rounded-[24px]',
-        'surface-panel',
-        'transition-[border-color,box-shadow,transform] duration-300 ease-out',
-        'hover:border-primary/20 hover:shadow-float',
+        'content-auto overflow-hidden rounded-[28px] shadow-[0_12px_34px_rgba(44,40,58,0.06)]',
+        'transition-[box-shadow,transform] duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]',
+        'hover:-translate-y-0.5 hover:shadow-float',
         className
       )}
     >
@@ -182,9 +184,9 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
 
       {/* ===== HEADER ===== */}
       <div className="flex items-center gap-3 px-4 pt-4 pb-2.5 sm:px-5 sm:pt-5">
-        <Link href={isAnonymous ? '#' : `/profile/${username}`} className="shrink-0">
+        <Link href={isAnonymous ? `/art/${artwork.id}` : `/profile/${username}`} className="shrink-0">
           {isAnonymous ? (
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/14 to-pink/14">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-card">
               <EyeOff size={17} className="text-primary" />
             </div>
           ) : (
@@ -201,7 +203,7 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
             <Link
-              href={isAnonymous ? '#' : `/profile/${username}`}
+              href={isAnonymous ? `/art/${artwork.id}` : `/profile/${username}`}
               className="truncate text-[15px] font-semibold text-text transition-colors hover:text-primary"
             >
               {displayName}
@@ -262,11 +264,11 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
 
       {/* ===== ARTWORK ===== */}
       {pixelData.length > 0 && (
-        <div className="px-3 pb-3 sm:px-4 sm:pb-4">
+        <div className="px-4 pb-4 sm:px-5 sm:pb-5">
           <div
             className={cn(
-              'relative aspect-[16/10] overflow-hidden rounded-xl sm:rounded-2xl cursor-pointer',
-              'border border-border/70 bg-surface',
+              'relative aspect-[16/10] overflow-hidden rounded-[20px] cursor-pointer',
+              'bg-card',
               'shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]',
               'transition-shadow duration-300',
               'hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_12px_32px_rgba(58,42,92,0.1)]'
@@ -285,7 +287,7 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
       )}
 
       {/* ===== INTERACTION BAR ===== */}
-      <div className="flex items-center justify-between border-t border-border/40 px-2 py-2 sm:px-3 sm:py-2.5">
+      <div className="flex items-center justify-between px-3 pb-3 sm:px-4 sm:pb-4">
         <div className="flex min-w-0 items-center gap-0">
           {/* Like */}
           <button

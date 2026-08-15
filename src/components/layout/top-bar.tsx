@@ -11,13 +11,13 @@ export function TopBar() {
   const createHref = isAuthenticated ? '/paint' : '/login?next=%2Fpaint';
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-border/70 bg-[var(--glass-bg)] px-4 backdrop-blur-2xl lg:hidden">
+    <header className="sticky top-0 z-40 flex h-16 items-center gap-3 bg-[var(--glass-bg)] px-4 backdrop-blur-2xl lg:hidden">
       <Link href="/home" aria-label="PixAnony home" className="shrink-0">
         <Logo size="sm" showText={false} />
       </Link>
       <Link
         href="/explore"
-        className="group flex h-10 min-w-0 flex-1 items-center gap-2.5 rounded-full border border-border bg-card/80 px-3.5 text-sm text-text-muted transition-all duration-200 hover:border-primary/30 hover:bg-card hover:text-text"
+        className="group flex h-10 min-w-0 flex-1 items-center gap-2.5 rounded-full bg-surface px-3.5 text-sm text-text-muted transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-card-hover hover:text-text"
       >
         <Search size={15} className="shrink-0 text-text-muted/70 transition-colors group-hover:text-primary/70" />
         <span className="truncate">Search art and creators</span>
@@ -25,7 +25,7 @@ export function TopBar() {
       <Link
         href={createHref}
         aria-label="Create pixel art"
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-[0_12px_28px_rgba(124,58,237,0.2)] transition-all duration-200 hover:bg-primary-glow active:scale-95"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-bg shadow-[0_12px_28px_rgba(44,40,58,0.14)] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 active:scale-95"
       >
         <Plus size={19} />
       </Link>

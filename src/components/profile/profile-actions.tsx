@@ -23,7 +23,7 @@ export function ProfileActions({
 
   if (viewerId === profileId) {
     return (
-      <Link href="/settings" className="rounded-xl border border-border bg-bg/80 px-4 py-2.5 text-sm font-semibold text-text hover:bg-card">
+      <Link href="/settings" className="rounded-full bg-surface px-4 py-2.5 text-sm font-semibold text-text hover:bg-card-hover">
         Edit profile
       </Link>
     );
@@ -48,14 +48,14 @@ export function ProfileActions({
 
   return (
     <div className="flex gap-2">
-      <Link href={`/send/${username}`} className="flex items-center gap-2 rounded-xl border border-border bg-bg/80 px-4 py-2.5 text-sm font-semibold text-text hover:bg-card">
+      <Link href={`/send/${username}`} className="flex items-center gap-2 rounded-full bg-surface px-4 py-2.5 text-sm font-semibold text-text hover:bg-card-hover">
         <Send size={16} />
         Send pixel
       </Link>
       <button
         onClick={() => void toggleFollow()}
         disabled={saving}
-        className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+        className="flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-bg disabled:opacity-60"
       >
         <UserPlus size={16} />
         {following ? 'Following' : 'Follow'}

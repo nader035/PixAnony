@@ -68,6 +68,8 @@ export default function DropsPage() {
   }, [supabase, user]);
 
   useEffect(() => {
+    // Synchronize the collection with the authenticated Supabase session.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadDrops();
   }, [loadDrops]);
 
@@ -103,14 +105,14 @@ export default function DropsPage() {
       />
 
       {/* Tabs */}
-      <div className="mb-6 flex gap-1.5 rounded-xl border border-border bg-surface/60 p-1">
+      <div className="mb-8 flex gap-1.5 rounded-full bg-surface p-1.5">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setActiveTab(tab.id)}
             className={cn(
-              'flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all duration-200',
+              'flex-1 rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]',
               activeTab === tab.id
                 ? 'bg-card text-text shadow-sm'
                 : 'text-text-muted hover:text-text',
@@ -144,9 +146,10 @@ export default function DropsPage() {
               <Link
                 key={artwork.id}
                 href={`/art/${artwork.id}`}
-                className="group surface-panel interactive-surface overflow-hidden rounded-2xl"
+                style={{ background: ['var(--powder)', 'var(--butter)', 'var(--blush)', 'var(--lilac)', 'var(--mint)'][index % 5] }}
+                className="group interactive-surface overflow-hidden rounded-[28px] shadow-[0_10px_30px_rgba(44,40,58,.06)]"
               >
-                <div className="relative aspect-square bg-surface p-4">
+                <div className="relative m-4 aspect-square overflow-hidden rounded-[20px] bg-card p-4">
                   <PixelArtRenderer
                     pixels={Array.isArray(artwork.pixel_data) ? artwork.pixel_data as string[] : []}
                     gridSize={artwork.grid_size}

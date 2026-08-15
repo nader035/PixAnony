@@ -57,7 +57,7 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
       a.download = `pixanony-${gridSize}x${gridSize}-${Date.now()}.png`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success('PNG downloaded!');
+      toast.success('PNG downloaded.');
     }, 'image/png');
   }, [layers, gridSize]);
 
@@ -84,7 +84,7 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
     a.download = `pixanony-${gridSize}x${gridSize}-${Date.now()}.svg`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success('SVG downloaded!');
+    toast.success('SVG downloaded.');
   }, [layers, gridSize]);
 
   // ===== COPY TO CLIPBOARD =====
@@ -117,7 +117,7 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
       await navigator.clipboard.write([
         new ClipboardItem({ 'image/png': blob }),
       ]);
-      toast.success('Image copied to clipboard!');
+      toast.success('Image copied to clipboard.');
     } catch {
       toast.error('Failed to copy image');
     }
@@ -137,8 +137,8 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, delay: 0.4 }}
       className={cn(
-        'editor-panel border border-border/80 bg-surface/95',
-        compact ? 'flex gap-1 rounded-2xl p-1.5' : 'flex flex-col gap-3 rounded-2xl p-3'
+        'editor-panel bg-card',
+        compact ? 'flex gap-1 rounded-[20px] p-1.5' : 'flex flex-col gap-3 rounded-[20px] p-3'
       )}
     >
       {/* Header */}

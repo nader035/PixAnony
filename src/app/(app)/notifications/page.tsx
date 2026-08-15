@@ -104,12 +104,12 @@ export default function NotificationsPage() {
         <div className="space-y-2">
           {items.map((item) => {
             const { icon: Icon, text } = detail(item);
-            const href = item.artwork?.id ? `/art/${item.artwork.id}` : item.actor?.username ? `/@${item.actor.username}` : '#';
+            const href = item.artwork?.id ? `/art/${item.artwork.id}` : item.actor?.username ? `/profile/${item.actor.username}` : '/notifications';
             return (
               <Link
                 key={item.id}
                 href={href}
-                className={`interactive-surface flex items-start gap-3 rounded-2xl border p-3.5 sm:items-center sm:gap-4 sm:p-4 ${item.read ? 'border-border bg-card/45' : 'border-primary/30 bg-primary/[0.07]'}`}
+                className={`interactive-surface flex items-start gap-3 rounded-[24px] p-3.5 sm:items-center sm:gap-4 sm:p-4 ${item.read ? 'bg-surface' : 'bg-[var(--powder)] shadow-[0_10px_30px_rgba(44,40,58,.06)]'}`}
               >
                 <div className="relative">
                   <PixelAvatar username={item.actor?.username || 'anonymous'} src={item.actor?.avatar_url} size="md" />

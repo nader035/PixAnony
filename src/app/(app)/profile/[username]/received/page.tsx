@@ -31,15 +31,15 @@ export default async function ReceivedPage({
       <PageHeader
         eyebrow="Private collection"
         title="Received artwork"
-        description="Pixel art sent directly to you. Anonymous deliveries stay hidden, signed deliveries show the sender profile."
-        actions={<span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/12 text-primary"><Inbox size={21} /></span>}
+        description="Artwork sent directly to you. Anonymous deliveries stay hidden, while signed deliveries show the sender profile."
+        actions={<span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--lilac)] text-text"><Inbox size={21} /></span>}
       />
 
       {artworks?.length ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {artworks.map((artwork, index) => (
-            <Link key={artwork.id} href={`/art/${artwork.id}`} className="group surface-panel interactive-surface overflow-hidden rounded-2xl">
-              <div className="relative aspect-square bg-surface p-4">
+            <Link key={artwork.id} href={`/art/${artwork.id}`} style={{ background: ['var(--powder)', 'var(--butter)', 'var(--blush)', 'var(--lilac)', 'var(--mint)'][index % 5] }} className="group interactive-surface overflow-hidden rounded-[28px] shadow-[0_10px_30px_rgba(44,40,58,.06)]">
+              <div className="relative m-4 aspect-square overflow-hidden rounded-[20px] bg-card p-4">
                 <PixelArtRenderer
                   pixels={Array.isArray(artwork.pixel_data) ? artwork.pixel_data as string[] : []}
                   gridSize={artwork.grid_size}
@@ -52,7 +52,7 @@ export default async function ReceivedPage({
                   </span>
                 )}
               </div>
-              <div className="p-4">
+              <div className="px-4 pb-4">
                 <h2 className="truncate text-sm font-semibold text-text">{artwork.title || 'Anonymous artwork'}</h2>
                 {artwork.caption && <p className="mt-1 line-clamp-2 text-xs leading-5 text-text-muted">{artwork.caption}</p>}
                 <div className="mt-3 flex items-center justify-between gap-3 text-[11px] text-text-muted">
@@ -81,9 +81,9 @@ export default async function ReceivedPage({
           <Inbox size={30} className="mb-4 text-primary" />
           <h2 className="text-lg font-semibold text-text">Your private inbox is empty</h2>
           <p className="mt-2 max-w-sm text-sm leading-6 text-text-muted">
-            Share your profile link so other creators can send anonymous or signed pixel art.
+            Share your profile link so other creators can send anonymous or signed artwork.
           </p>
-          <Link href={`/profile/${username}`} className="mt-6 rounded-xl border border-border bg-card px-5 py-3 text-sm font-semibold text-text">Back to profile</Link>
+          <Link href={`/profile/${username}`} className="mt-6 rounded-full bg-surface px-5 py-3 text-sm font-semibold text-text">Back to profile</Link>
         </div>
       )}
     </PageFrame>

@@ -222,7 +222,7 @@ function LoginPageContent() {
           password,
         });
         if (error) throw error;
-        toast.success('Successfully logged in! Redirecting...');
+        toast.success('Signed in. Redirecting.');
         router.push(nextPath);
       } else {
         const { data, error } = await supabase.auth.signUp({
@@ -238,11 +238,11 @@ function LoginPageContent() {
         });
         if (error) throw error;
         if (data.session) {
-          toast.success('Account created! Redirecting...');
+          toast.success('Account created. Redirecting.');
           router.push(nextPath);
           return;
         }
-        toast.success('Sign up successful! Please check your email for a confirmation link.');
+        toast.success('Check your email for a confirmation link.');
         setMode('login');
       }
     } catch (err: unknown) {
@@ -253,10 +253,9 @@ function LoginPageContent() {
   };
 
   return (
-    <div className="grid min-h-[100svh] bg-bg lg:grid-cols-[minmax(420px,.9fr)_minmax(0,1.1fr)]">
-      <div className="pointer-events-none fixed inset-0 dot-grid opacity-35" />
+    <main id="main-content" className="grid min-h-[100dvh] bg-bg p-3 lg:grid-cols-[minmax(420px,.9fr)_minmax(0,1.1fr)]">
       {/* Left — Form Panel */}
-      <div className="relative flex min-w-0 flex-col justify-center px-5 py-10 sm:px-10 lg:px-14 xl:px-20">
+      <div className="relative flex min-w-0 flex-col justify-center rounded-[32px] bg-card px-5 py-10 shadow-[0_20px_70px_rgba(44,40,58,.1)] sm:px-10 lg:px-14 xl:px-20">
         <motion.div
           initial={false}
           animate="visible"
@@ -281,11 +280,7 @@ function LoginPageContent() {
               {mode === 'login' ? 'Welcome back' : 'Create your account'}
             </h1>
             <p className="text-text-muted text-sm">
-              {isContinuingSendDraft
-                ? 'Sign in to deliver your saved private canvas.'
-                : mode === 'login'
-                  ? 'Sign in to continue your anonymous pixel art journey.'
-                  : 'Create a profile and start drawing.'}
+              {isContinuingSendDraft ? 'Sign in to deliver your saved private canvas.' : mode === 'login' ? 'Come back to your art and your community.' : 'Create a profile and start drawing.'}
             </p>
           </motion.div>
 
@@ -454,34 +449,33 @@ function LoginPageContent() {
 
           {/* Terms */}
           <motion.p variants={fadeUp} className="text-center text-xs text-text-muted mt-6 leading-relaxed">
-            By continuing, you agree to the community terms and privacy expectations.
+            By continuing, you agree to our <Link href="/terms" className="font-semibold text-text">terms</Link> and <Link href="/privacy" className="font-semibold text-text">privacy policy</Link>.
           </motion.p>
         </motion.div>
       </div>
 
-      <div className="relative hidden min-w-0 items-center justify-center overflow-hidden border-l border-border/70 bg-gradient-to-br from-surface via-bg to-primary/8 p-12 lg:flex">
-        <div className="absolute inset-0 dot-grid opacity-40" />
-        <div className="absolute right-16 top-16 h-72 w-72 rounded-full bg-primary/12 blur-3xl" />
+      <div className="relative hidden min-w-0 items-center justify-center overflow-hidden p-12 lg:flex">
+        <div className="absolute right-16 top-16 h-72 w-72 rounded-full bg-[var(--lilac)] blur-3xl" />
         <motion.div
           initial={false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="surface-panel relative w-full max-w-lg rounded-[2rem] p-5 shadow-float"
+          className="relative w-full max-w-lg rounded-[32px] bg-card p-5 shadow-float"
         >
           <div className="mb-4 flex items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase text-primary">Private canvas</p>
-              <h2 className="mt-1 text-2xl font-semibold text-text">Draw, sign in, share softly.</h2>
+              <p className="text-sm font-bold text-pink">Private canvas</p>
+              <h2 className="mt-1 text-2xl font-bold text-text">Make it, then share it your way.</h2>
             </div>
             <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">PixAnony</span>
           </div>
           <PixelCanvasMock className="min-h-[340px]" />
           <p className="mt-4 text-sm leading-6 text-text-muted">
-            Authentication remains Supabase-powered. The interface simply gets calmer around it.
+            Your canvas stays ready while you sign in. Continue with the same private delivery flow when you return.
           </p>
         </motion.div>
       </div>
-    </div>
+    </main>
   );
 }
 

@@ -29,8 +29,8 @@ export function MobileNav() {
     <nav
       className={cn(
         'safe-area-bottom fixed inset-x-0 bottom-0 z-50 lg:hidden',
-        'border-t border-border/70 bg-[var(--glass-bg)] backdrop-blur-3xl',
-        'shadow-[0_-12px_36px_rgba(58,42,92,0.1)]',
+        'mx-3 mb-3 rounded-[24px] bg-[var(--glass-bg)] backdrop-blur-3xl',
+        'shadow-[0_18px_50px_rgba(44,40,58,0.18)]',
       )}
     >
       <div className="mx-auto flex h-[4.25rem] max-w-lg items-center justify-around px-2">
@@ -53,8 +53,8 @@ export function MobileNav() {
                   'relative flex items-center justify-center transition-all duration-200',
                   item.center
                     ? cn(
-                        'h-14 w-14 rounded-[18px] bg-primary text-white',
-                        'shadow-[0_12px_30px_rgba(124,58,237,0.24)]',
+                        'h-14 w-14 rounded-full bg-primary text-bg',
+                        'shadow-[0_12px_30px_rgba(44,40,58,0.2)]',
                         'hover:scale-105 active:scale-95',
                       )
                     : active

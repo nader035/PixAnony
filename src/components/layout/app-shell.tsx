@@ -42,7 +42,6 @@ export function AppShell({
 
   return (
     <div className="app-backdrop min-h-screen w-full bg-bg">
-      <div className="pointer-events-none fixed inset-0 z-0 dot-grid opacity-30" aria-hidden="true" />
       <div
         className={cn(
           'app-shell-grid relative z-10 min-h-screen w-full',
@@ -52,8 +51,9 @@ export function AppShell({
         <Sidebar />
 
         <main
+          id="main-content"
           className={cn(
-            'min-w-0 pb-[calc(5.25rem+env(safe-area-inset-bottom))] lg:pb-0',
+            'min-w-0 overflow-hidden bg-card pb-[calc(5.25rem+env(safe-area-inset-bottom))] lg:min-h-[calc(100dvh-2rem)] lg:rounded-[32px] lg:pb-0 lg:shadow-[0_20px_70px_rgba(44,40,58,0.1)]',
             className,
           )}
         >
@@ -75,7 +75,7 @@ export function AppShell({
             variants={variants}
             initial="initial"
             animate="animate"
-            transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }}
             className="w-full min-w-0"
           >
             {children}

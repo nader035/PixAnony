@@ -40,19 +40,17 @@ export function AnonymousInboxCard({
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       className="mt-7"
     >
-      <div className="surface-panel relative overflow-hidden rounded-3xl p-5 sm:p-6">
-        <div className="absolute inset-0 dot-grid opacity-40" aria-hidden="true" />
-        <div className="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
-        <div className="absolute -bottom-20 left-10 h-48 w-48 rounded-full bg-pink/10 blur-3xl" aria-hidden="true" />
+      <div className="relative overflow-hidden rounded-[28px] bg-[var(--blush)] p-5 sm:p-6">
+        <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[var(--butter)]" aria-hidden="true" />
 
         <div className="relative z-10 grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div className="min-w-0">
-              <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/12 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
+              <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-card px-3 py-1.5 text-sm font-bold text-text">
                 <Sparkles size={12} />
-                Pixel inbox
+                Private inbox
               </p>
               <h2 className="text-2xl font-semibold text-text sm:text-3xl">
-                {ownProfile ? 'Your anonymous pixel link' : `Send pixel art to ${displayName}`}
+                {ownProfile ? 'Your anonymous art link' : `Make something for ${displayName}`}
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">
                 {ownProfile
@@ -73,7 +71,7 @@ export function AnonymousInboxCard({
             </div>
 
             {ownProfile ? (
-              <div className="min-w-0 rounded-2xl border border-border/70 bg-bg/72 p-3 sm:min-w-[320px]">
+              <div className="min-w-0 rounded-[20px] bg-card p-3 sm:min-w-[320px]">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <span className="flex items-center gap-2 text-xs font-semibold text-text-muted">
                     <Inbox className="h-3.5 w-3.5 text-primary" />
@@ -100,7 +98,7 @@ export function AnonymousInboxCard({
             ) : (
               <Link
                 href={`/send/${username}`}
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-sm font-bold text-white shadow-[0_16px_36px_rgba(124,58,237,0.2)] transition-transform hover:-translate-y-0.5 hover:bg-primary-glow"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-bg shadow-[0_16px_36px_rgba(44,40,58,0.16)] transition-transform hover:-translate-y-0.5 hover:bg-primary-glow"
               >
                 <Send className="h-4 w-4" />
                 Draw for @{username}

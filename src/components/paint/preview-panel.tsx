@@ -63,7 +63,7 @@ export default function PreviewPanel() {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, delay: 0.15 }}
-      className="editor-panel flex flex-col gap-2 rounded-2xl border border-border/80 bg-surface/95 p-3"
+      className="editor-panel flex flex-col gap-2 rounded-[20px] bg-card p-3"
     >
       {/* Header */}
       <div className="flex items-center justify-between">

@@ -74,9 +74,10 @@ export default async function ExplorePage({
               <Link
                 key={artwork.id}
                 href={`/art/${artwork.id}`}
-                className="group surface-panel interactive-surface overflow-hidden rounded-2xl"
+                style={{ background: ['var(--powder)', 'var(--butter)', 'var(--blush)', 'var(--lilac)', 'var(--mint)'][index % 5] }}
+                className="group interactive-surface overflow-hidden rounded-[28px] shadow-[0_10px_30px_rgba(44,40,58,.06)]"
               >
-                <div className="relative aspect-square bg-surface p-3 sm:p-4">
+                <div className="relative m-3 aspect-square overflow-hidden rounded-[20px] bg-card p-3 sm:m-4 sm:p-4">
                   <PixelArtRenderer pixels={pixels} gridSize={artwork.grid_size} className="h-full w-full" />
                   {index < 3 && filter === 'trending' && (
                     <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full border border-pink/25 bg-bg/80 px-2 py-1 text-[10px] font-semibold text-pink backdrop-blur">
@@ -85,7 +86,7 @@ export default async function ExplorePage({
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-3 p-3">
+                <div className="flex items-center gap-3 px-4 pb-4">
                   <div className="min-w-0 flex-1">
                     <h2 className="truncate text-sm font-semibold text-text">{artwork.title || 'Untitled pixel art'}</h2>
                     <p className="truncate text-xs text-text-muted">@{profile?.username || 'creator'}</p>

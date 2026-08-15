@@ -74,23 +74,23 @@ export default async function HomePage({
   }
 
   return (
-    <div className="page-enter w-full max-w-[760px] px-4 pb-12 sm:px-5 xl:px-6">
+    <div className="page-enter mx-auto w-full max-w-[780px] px-4 pb-16 sm:px-8">
       {/* ===== HEADER ===== */}
-      <header className="sticky top-16 z-30 -mx-4 border-b border-border/50 bg-bg/90 px-4 pt-6 backdrop-blur-2xl sm:-mx-5 sm:px-5 lg:top-0 xl:-mx-6 xl:px-6">
+      <header className="sticky top-16 z-30 -mx-4 bg-card/90 px-4 pt-8 backdrop-blur-2xl sm:-mx-8 sm:px-8 lg:top-0">
         <div className="mb-5 flex items-end justify-between gap-4">
           <div>
-            <p className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase text-primary">
+            <p className="mb-2 flex items-center gap-1.5 text-sm font-bold text-pink">
               <Sparkles size={12} />
               Community feed
             </p>
-            <h1 className="text-[26px] font-semibold text-text sm:text-3xl">
-              Fresh pixel art
+            <h1 className="text-3xl font-bold text-text sm:text-4xl">
+              A little inspiration
             </h1>
           </div>
           <Link
             href="/paint"
             className={cn(
-              'hidden items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-semibold text-white shadow-[0_14px_32px_rgba(124,58,237,0.2)] sm:flex',
+              'hidden items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-bg shadow-[0_14px_32px_rgba(44,40,58,0.16)] sm:flex',
               'bg-primary',
               'transition-all duration-200 hover:scale-[1.03] active:scale-[0.98]'
             )}
@@ -107,7 +107,7 @@ export default async function HomePage({
               key={value}
               href={`/home?tab=${value}`}
               className={cn(
-                'relative flex min-h-[44px] min-w-[90px] flex-1 items-center justify-center gap-2 px-3 text-[13px] font-semibold transition-colors',
+                'relative flex min-h-[48px] min-w-[90px] flex-1 items-center justify-center gap-2 rounded-t-2xl px-3 text-sm font-semibold transition-colors',
                 tab === value
                   ? 'text-text'
                   : 'text-text-muted hover:text-text'
@@ -122,12 +122,18 @@ export default async function HomePage({
               />
               {label}
               {tab === value && (
-                <span className="absolute inset-x-3 bottom-0 h-[3px] rounded-full bg-primary" />
+                <span className="absolute inset-x-5 bottom-0 h-1 rounded-full bg-pink" />
               )}
             </Link>
           ))}
         </nav>
       </header>
+
+      <Link href="/paint" className="mt-6 flex items-center gap-3 rounded-[24px] bg-[var(--blush)] p-4 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5">
+        <span className="grid h-11 w-11 place-items-center rounded-full bg-card"><Palette size={18} /></span>
+        <span className="min-w-0 flex-1 text-sm font-semibold text-text-muted">What would you like to make today?</span>
+        <span className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-bg">Create</span>
+      </Link>
 
       {/* ===== FEED / EMPTY STATE ===== */}
       {artworks.length ? (

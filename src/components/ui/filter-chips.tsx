@@ -17,10 +17,10 @@ export function FilterChips<T extends string>({
           key={item}
           href={hrefFor(item)}
           className={cn(
-            'rounded-full border px-4 py-2 text-xs font-semibold capitalize transition-colors',
+            'rounded-full px-4 py-2 text-sm font-semibold capitalize transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]',
             active === item
-              ? 'border-primary bg-primary text-white shadow-[0_10px_26px_rgba(124,58,237,0.18)]'
-              : 'border-border bg-card text-text-muted hover:border-primary/25 hover:bg-card-hover hover:text-text',
+              ? 'bg-primary text-bg shadow-[0_10px_26px_rgba(44,40,58,0.16)]'
+              : 'bg-surface text-text-muted hover:bg-card-hover hover:text-text',
           )}
         >
           {item.replaceAll('-', ' ')}

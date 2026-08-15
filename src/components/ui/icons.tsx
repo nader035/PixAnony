@@ -1,208 +1,113 @@
 'use client';
 
-import type { CSSProperties, ComponentType } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import type { Icon, IconProps as PhosphorIconProps } from '@phosphor-icons/react';
 import {
-  faArrowLeft,
-  faArrowRight,
-  faArrowRotateLeft,
-  faArrowRotateRight,
-  faArrowsLeftRight,
-  faArrowsUpDown,
-  faArrowsUpDownLeftRight,
-  faBars,
-  faBell,
-  faBellSlash,
-  faBolt,
-  faBookmark,
-  faCalendarDays,
-  faChartLine,
-  faCheck,
-  faChevronDown,
-  faChevronRight,
-  faChevronUp,
-  faCircle,
-  faCircleCheck,
-  faCircleQuestion,
-  faClock,
-  faCode,
-  faComment,
-  faCompress,
-  faCopy,
-  faCrown,
-  faDesktop,
-  faDownload,
-  faEllipsis,
-  faEnvelope,
-  faEnvelopeOpen,
-  faEraser,
-  faExpand,
-  faEye,
-  faEyeDropper,
-  faEyeSlash,
-  faFileImage,
-  faFillDrip,
-  faFloppyDisk,
-  faGear,
-  faGlobe,
-  faGrip,
-  faHeart,
-  faHouse,
-  faInbox,
-  faLink,
-  faLocationDot,
-  faLock,
-  faMagnifyingGlass,
-  faMagnifyingGlassMinus,
-  faMagnifyingGlassPlus,
-  faMessage,
-  faMinus,
-  faMoon,
-  faPaintBrush,
-  faPalette,
-  faPaperPlane,
-  faPencil,
-  faPlus,
-  faRetweet,
-  faRightToBracket,
-  faRightFromBracket,
-  faShareNodes,
-  faShieldHalved,
-  faSpinner,
-  faSquare,
-  faStar,
-  faSun,
-  faTableCellsLarge,
-  faTrashCan,
-  faTrophy,
-  faUpload,
-  faUser,
-  faUserCheck,
-  faUserPlus,
-  faUsers,
-  faWandMagicSparkles,
-  faXmark,
-} from '@fortawesome/free-solid-svg-icons';
-import { faGithub, faGoogle } from '@fortawesome/free-brands-svg-icons';
+  ArrowLeft as ArrowLeftIcon, ArrowRight as ArrowRightIcon,
+  ArrowCounterClockwise, ArrowClockwise, ArrowsLeftRight, ArrowsVertical, ArrowsOutCardinal,
+  Bell as BellIcon, BellSlash, BookmarkSimple, CalendarBlank, CaretDown, CaretRight, CaretUp,
+  Check as CheckIcon, CheckCircle, Circle as CircleIcon, Clock as ClockIcon, Code as CodeIcon,
+  Copy as CopyIcon, CornersIn, CornersOut, Crown as CrownIcon, Desktop as DesktopIcon,
+  DotsNine, DotsThree, DownloadSimple, EnvelopeOpen, EnvelopeSimple, Eraser as EraserIcon,
+  Eye as EyeIcon, Eyedropper, EyeSlash, FileImage as FileImageIcon, FloppyDisk, Gear,
+  GithubLogo, Globe as GlobeIcon, GoogleLogo, Heart as HeartIcon, House, LinkSimple,
+  Lightning, LockKey, MagnifyingGlass, MagnifyingGlassMinus, MagnifyingGlassPlus,
+  MapPin as MapPinIcon, Minus as MinusIcon, Moon as MoonIcon, PaintBrush,
+  PaintBucket as PaintBucketIcon, Palette as PaletteIcon, PaperPlaneTilt, PencilSimple,
+  Plus as PlusIcon, Question, Repeat as RepeatIcon, ShareNetwork, ShieldCheck, Sparkle,
+  SpinnerGap, Square as SquareIcon, Star as StarIcon, Sun as SunIcon, SquaresFour,
+  Tray, Trash as TrashIcon, Trophy as TrophyIcon, UploadSimple, User as UserIcon,
+  UserCheck as UserCheckIcon, UserPlus as UserPlusIcon, Users as UsersIcon, X as XIcon,
+  ChatCircle, Chats,
+} from '@phosphor-icons/react';
 
-export interface IconProps {
-  size?: number | string;
-  className?: string;
-  style?: CSSProperties;
-  title?: string;
-  role?: string;
-  'aria-label'?: string;
-  'aria-hidden'?: boolean | 'true' | 'false';
-  strokeWidth?: number;
-}
+export type IconProps = PhosphorIconProps;
+export type LucideIcon = Icon;
 
-export type LucideIcon = ComponentType<IconProps>;
-
-function icon(definition: IconDefinition): LucideIcon {
-  function FontAwesomeAppIcon({ size, className, style, strokeWidth, ...props }: IconProps) {
-    void strokeWidth;
-    const dimension = typeof size === 'number' ? `${size}px` : size;
-    return (
-      <FontAwesomeIcon
-        icon={definition}
-        className={className}
-        style={{
-          ...(dimension ? { width: dimension, height: dimension } : null),
-          ...style,
-        }}
-        {...props}
-      />
-    );
-  }
-  return FontAwesomeAppIcon;
-}
-
-export const ArrowLeft = icon(faArrowLeft);
-export const ArrowRight = icon(faArrowRight);
-export const BadgeCheck = icon(faCircleCheck);
-export const Bell = icon(faBell);
-export const BellOff = icon(faBellSlash);
-export const Zap = icon(faBolt);
-export const Bookmark = icon(faBookmark);
-export const Calendar = icon(faCalendarDays);
-export const CalendarClock = icon(faCalendarDays);
-export const Check = icon(faCheck);
-export const CheckCircle2 = icon(faCircleCheck);
-export const ChevronDown = icon(faChevronDown);
-export const ChevronRight = icon(faChevronRight);
-export const ChevronUp = icon(faChevronUp);
-export const Circle = icon(faCircle);
-export const Clock = icon(faClock);
-export const Code = icon(faCode);
-export const Compass = icon(faGrip);
-export const Copy = icon(faCopy);
-export const Crown = icon(faCrown);
-export const Download = icon(faDownload);
-export const Eraser = icon(faEraser);
-export const Eye = icon(faEye);
-export const EyeOff = icon(faEyeSlash);
-export const FileImage = icon(faFileImage);
-export const FlipHorizontal = icon(faArrowsLeftRight);
-export const FlipVertical = icon(faArrowsUpDown);
-export const Globe = icon(faGlobe);
-export const Google = icon(faGoogle);
-export const Github = icon(faGithub);
-export const Grid3X3 = icon(faTableCellsLarge);
-export const Heart = icon(faHeart);
-export const HelpCircle = icon(faCircleQuestion);
-export const Home = icon(faHouse);
-export const Image = icon(faFileImage);
-export const Inbox = icon(faInbox);
-export const LinkIcon = icon(faLink);
-export const Loader2 = icon(faSpinner);
-export const Lock = icon(faLock);
-export const LockKeyhole = icon(faLock);
-export const LogIn = icon(faRightToBracket);
-export const LogOut = icon(faRightFromBracket);
-export const Mail = icon(faEnvelope);
-export const MailOpen = icon(faEnvelopeOpen);
-export const MapPin = icon(faLocationDot);
-export const Maximize2 = icon(faExpand);
-export const Menu = icon(faBars);
-export const MessageCircle = icon(faComment);
-export const MessageSquare = icon(faMessage);
-export const Minimize2 = icon(faCompress);
-export const Minus = icon(faMinus);
-export const Monitor = icon(faDesktop);
-export const Moon = icon(faMoon);
-export const MoreHorizontal = icon(faEllipsis);
-export const Move = icon(faArrowsUpDownLeftRight);
-export const PaintBucket = icon(faFillDrip);
-export const Paintbrush = icon(faPaintBrush);
-export const Palette = icon(faPalette);
-export const Pencil = icon(faPencil);
-export const Pipette = icon(faEyeDropper);
-export const Plus = icon(faPlus);
-export const Redo2 = icon(faArrowRotateRight);
-export const Repeat = icon(faRetweet);
-export const Repeat2 = icon(faRetweet);
-export const RotateCcw = icon(faArrowRotateLeft);
-export const RotateCw = icon(faArrowRotateRight);
-export const Save = icon(faFloppyDisk);
-export const Search = icon(faMagnifyingGlass);
-export const Send = icon(faPaperPlane);
-export const Settings = icon(faGear);
-export const Share2 = icon(faShareNodes);
-export const Shield = icon(faShieldHalved);
-export const Sparkles = icon(faWandMagicSparkles);
-export const Square = icon(faSquare);
-export const Star = icon(faStar);
-export const Sun = icon(faSun);
-export const Trash2 = icon(faTrashCan);
-export const TrendingUp = icon(faChartLine);
-export const Trophy = icon(faTrophy);
-export const Undo2 = icon(faArrowRotateLeft);
-export const Upload = icon(faUpload);
-export const User = icon(faUser);
-export const UserCheck = icon(faUserCheck);
-export const UserPlus = icon(faUserPlus);
-export const Users = icon(faUsers);
-export const X = icon(faXmark);
-export const ZoomIn = icon(faMagnifyingGlassPlus);
-export const ZoomOut = icon(faMagnifyingGlassMinus);
+export const ArrowLeft = ArrowLeftIcon;
+export const ArrowRight = ArrowRightIcon;
+export const BadgeCheck = CheckCircle;
+export const Bell = BellIcon;
+export const BellOff = BellSlash;
+export const Zap = Lightning;
+export const Bookmark = BookmarkSimple;
+export const Calendar = CalendarBlank;
+export const CalendarClock = CalendarBlank;
+export const Check = CheckIcon;
+export const CheckCircle2 = CheckCircle;
+export const ChevronDown = CaretDown;
+export const ChevronRight = CaretRight;
+export const ChevronUp = CaretUp;
+export const Circle = CircleIcon;
+export const Clock = ClockIcon;
+export const Code = CodeIcon;
+export const Compass = DotsNine;
+export const Copy = CopyIcon;
+export const Crown = CrownIcon;
+export const Download = DownloadSimple;
+export const Eraser = EraserIcon;
+export const Eye = EyeIcon;
+export const EyeOff = EyeSlash;
+export const FileImage = FileImageIcon;
+export const FlipHorizontal = ArrowsLeftRight;
+export const FlipVertical = ArrowsVertical;
+export const Globe = GlobeIcon;
+export const Google = GoogleLogo;
+export const Github = GithubLogo;
+export const Grid3X3 = SquaresFour;
+export const Heart = HeartIcon;
+export const HelpCircle = Question;
+export const Home = House;
+export const Image = FileImageIcon;
+export const Inbox = Tray;
+export const LinkIcon = LinkSimple;
+export const Loader2 = SpinnerGap;
+export const Lock = LockKey;
+export const LockKeyhole = LockKey;
+export const LogIn = ArrowRightIcon;
+export const LogOut = ArrowLeftIcon;
+export const Mail = EnvelopeSimple;
+export const MailOpen = EnvelopeOpen;
+export const MapPin = MapPinIcon;
+export const Maximize2 = CornersOut;
+export const Menu = DotsThree;
+export const MessageCircle = ChatCircle;
+export const MessageSquare = Chats;
+export const Minimize2 = CornersIn;
+export const Minus = MinusIcon;
+export const Monitor = DesktopIcon;
+export const Moon = MoonIcon;
+export const MoreHorizontal = DotsThree;
+export const Move = ArrowsOutCardinal;
+export const PaintBucket = PaintBucketIcon;
+export const Paintbrush = PaintBrush;
+export const Palette = PaletteIcon;
+export const Pencil = PencilSimple;
+export const Pipette = Eyedropper;
+export const Plus = PlusIcon;
+export const Redo2 = ArrowClockwise;
+export const Repeat = RepeatIcon;
+export const Repeat2 = RepeatIcon;
+export const RotateCcw = ArrowCounterClockwise;
+export const RotateCw = ArrowClockwise;
+export const Save = FloppyDisk;
+export const Search = MagnifyingGlass;
+export const Send = PaperPlaneTilt;
+export const Settings = Gear;
+export const Share2 = ShareNetwork;
+export const Shield = ShieldCheck;
+export const Sparkles = Sparkle;
+export const Square = SquareIcon;
+export const Star = StarIcon;
+export const Sun = SunIcon;
+export const Trash2 = TrashIcon;
+export const TrendingUp = Lightning;
+export const Trophy = TrophyIcon;
+export const Undo2 = ArrowCounterClockwise;
+export const Upload = UploadSimple;
+export const User = UserIcon;
+export const UserCheck = UserCheckIcon;
+export const UserPlus = UserPlusIcon;
+export const Users = UsersIcon;
+export const X = XIcon;
+export const ZoomIn = MagnifyingGlassPlus;
+export const ZoomOut = MagnifyingGlassMinus;

@@ -9,7 +9,7 @@ export function SearchInput({
   inputClassName?: string;
 }) {
   return (
-    <div className={cn('flex h-11 items-center gap-2 rounded-full border border-border bg-card px-4 transition-colors focus-within:border-primary/40 focus-within:ring-4 focus-within:ring-primary/10', className)}>
+    <div className={cn('flex h-12 items-center gap-2 rounded-full bg-surface px-4 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-within:bg-card focus-within:ring-4 focus-within:ring-pink/15', className)}>
       <Search size={15} className="text-text-muted" />
       <input
         className={cn('min-w-0 flex-1 bg-transparent text-sm text-text outline-none placeholder:text-text-muted', inputClassName)}

@@ -3,170 +3,37 @@
 import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Home, Paintbrush, CheckCircle2, Sparkles } from '@/components/ui/icons';
-import { AnimatedButton } from '@/components/ui/animated-button';
+import { ArrowRight, CheckCircle2, Home, Paintbrush, Send, Sparkles } from '@/components/ui/icons';
 
-
-
-/* ===== CSS Pixel Envelope Animation ===== */
-function PixelEnvelopeAnimation() {
-  return (
-    <div className="relative w-48 h-32 flex items-center justify-center mb-8">
-      {/* Glow */}
-      <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full" />
-      
-      {/* Floating Sparkles */}
-      <motion.div
-        className="absolute -top-12 -left-6 text-yellow"
-        animate={{ y: [0, -15, 0], opacity: [0, 1, 0] }}
-        transition={{ duration: 2, repeat: Infinity, delay: 0.2 }}
-      >
-        <Sparkles className="w-5 h-5" />
-      </motion.div>
-      <motion.div
-        className="absolute -top-6 -right-8 text-cyan"
-        animate={{ y: [0, -20, 0], opacity: [0, 1, 0] }}
-        transition={{ duration: 2.5, repeat: Infinity, delay: 0.8 }}
-      >
-        <Sparkles className="w-4 h-4" />
-      </motion.div>
-
-      {/* Envelope Outer */}
-      <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, type: 'spring' }}
-        className="relative w-40 h-28 bg-card border-4 border-border rounded-lg shadow-2xl flex items-center justify-center overflow-visible"
-      >
-        {/* Flap Open/Close */}
-        <motion.div
-          className="absolute top-0 left-0 right-0 h-0 border-t-[48px] border-t-card-hover border-x-[76px] border-x-transparent origin-top z-10"
-          style={{ transformStyle: 'preserve-3d' }}
-          animate={{ rotateX: [0, 180, 180] }}
-          transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2, ease: 'easeInOut' }}
-        />
-
-        {/* Envelope interior gradient */}
-        <div className="absolute inset-1.5 bg-gradient-to-t from-surface to-card rounded-md z-0" />
-
-        {/* Envelope Body Overlay (Fold Lines) */}
-        <div className="absolute inset-0 border-b-[48px] border-b-card/80 border-x-[76px] border-x-transparent z-20 pointer-events-none rounded-b-md" />
-
-        {/* Released Pixel Heart Floating Up */}
-        <motion.div
-          className="absolute z-15"
-          animate={{ 
-            y: [10, -80, -100], 
-            scale: [0.6, 1.2, 0], 
-            opacity: [0, 1, 0],
-            rotate: [0, 15, -15, 0]
-          }}
-          transition={{ 
-            duration: 2.5, 
-            repeat: Infinity, 
-            repeatDelay: 1, 
-            ease: 'easeOut' 
-          }}
-        >
-          {/* Custom SVG Pixel Heart */}
-          <svg className="w-10 h-10 drop-shadow-[0_0_8px_rgba(236,72,153,0.6)]" viewBox="0 0 10 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2 0H3V1H4V2H6V1H7V0H8V1H9V3H8V4H7V5H6V6H4V5H3V4H2V3H1V1H2V0Z" fill="url(#pinkGrad)"/>
-            <defs>
-              <linearGradient id="pinkGrad" x1="0" y1="0" x2="10" y2="9" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#EC4899" />
-                <stop offset="1" stopColor="#8B5CF6" />
-              </linearGradient>
-            </defs>
-          </svg>
-        </motion.div>
-      </motion.div>
-    </div>
-  );
-}
-
-/* ===== MAIN CONFIRMATION PAGE ===== */
-function ConfirmPageContent() {
+function ConfirmContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const mode = searchParams.get('mode');
-  const signed = mode === 'signed';
+  const signed = searchParams.get('mode') === 'signed';
 
   return (
-    <div className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden bg-bg px-4">
-      <div className="absolute inset-0 dot-grid opacity-40" />
-      <div className="absolute left-1/2 top-24 h-80 w-80 -translate-x-1/2 rounded-full bg-primary/12 blur-3xl" />
-
-      <div className="max-w-md w-full flex flex-col items-center text-center relative z-10">
-        
-        {/* Animated Envelope */}
-        <PixelEnvelopeAnimation />
-
-        {/* Checked Badge */}
-        <motion.div
-          initial={false}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.5, type: 'spring' }}
-          className="mb-6 flex items-center gap-1.5 rounded-full border border-green/30 bg-green/10 px-3.5 py-1.5 text-xs font-semibold uppercase text-green"
-        >
-          <CheckCircle2 className="w-4 h-4" />
-          {signed ? 'Signed Pixel Delivered' : 'Pixel Art Dispatched'}
-        </motion.div>
-
-        {/* Message */}
-        <motion.h1
-          initial={false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="mb-3 text-2xl font-semibold text-text sm:text-3xl"
-        >
-          Your pixel is on its way.
-        </motion.h1>
-        
-        <motion.p
-          initial={false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          className="text-sm text-text-muted leading-relaxed mb-10 max-w-sm"
-        >
-          {signed
-            ? 'It has been delivered to their private collection with your profile attached.'
-            : 'It has been delivered to their private collection anonymously. They can view the artwork while your identity remains hidden.'}
-        </motion.p>
-
-        {/* Call to Actions */}
-        <motion.div
-          initial={false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-          className="flex flex-col sm:flex-row gap-3.5 w-full justify-center"
-        >
-          <AnimatedButton
-            variant="ghost"
-            onClick={() => router.push('/home')}
-            className="w-full sm:w-auto px-6 py-3 text-sm font-semibold flex items-center justify-center gap-2 border border-border"
-          >
-            <Home className="w-4 h-4" />
-            Back to Feed
-          </AnimatedButton>
-          
-          <AnimatedButton
-            variant="primary"
-            onClick={() => router.push('/paint')}
-            className="w-full sm:w-auto px-6 py-3 text-sm font-semibold flex items-center justify-center gap-2 glow-primary"
-          >
-            <Paintbrush className="w-4 h-4" />
-            Draw Another Art
-          </AnimatedButton>
-        </motion.div>
-      </div>
-    </div>
+    <main id="main-content" className="relative grid min-h-[100dvh] place-items-center overflow-hidden bg-bg px-4 py-8 text-text">
+      <span className="absolute -left-16 top-20 h-52 w-52 rounded-full bg-[var(--powder)] blur-3xl" />
+      <span className="absolute -right-12 bottom-12 h-48 w-48 rounded-full bg-[var(--blush)] blur-3xl" />
+      <motion.section initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .8, ease: [0.32,0.72,0,1] }} className="relative w-full max-w-lg overflow-hidden rounded-[32px] bg-card p-8 text-center shadow-float sm:p-12">
+        <span className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-[var(--butter)]" />
+        <div className="relative">
+          <div className="relative mx-auto grid h-24 w-24 place-items-center rounded-full bg-[var(--lilac)]">
+            <Send size={34} weight="fill" />
+            <motion.span animate={{ rotate: [0, 18, 0], y: [0, -5, 0] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }} className="absolute -right-2 -top-2 grid h-9 w-9 place-items-center rounded-full bg-[var(--blush)]"><Sparkles size={16} /></motion.span>
+          </div>
+          <p className="mx-auto mt-8 inline-flex items-center gap-2 rounded-full bg-[var(--mint)] px-4 py-2 text-sm font-bold"><CheckCircle2 size={16} />{signed ? 'Sent with your name' : 'Sent anonymously'}</p>
+          <h1 className="mt-6 text-4xl font-bold">Your artwork is on its way.</h1>
+          <p className="mx-auto mt-4 max-w-md text-base leading-7 text-text-muted">{signed ? 'It has been delivered privately with your profile attached.' : 'It has been delivered privately. The recipient can see the artwork, while your identity stays hidden.'}</p>
+          <div className="mt-8 grid gap-3 sm:grid-cols-2">
+            <button onClick={() => router.push('/home')} className="flex min-h-12 items-center justify-center gap-2 rounded-full bg-surface px-5 text-base font-semibold transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 active:scale-[.98]"><Home size={17} />Back to feed</button>
+            <button onClick={() => router.push('/paint')} className="flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary px-5 text-base font-semibold text-bg transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 active:scale-[.98]"><Paintbrush size={17} />Create another <ArrowRight size={15} /></button>
+          </div>
+        </div>
+      </motion.section>
+    </main>
   );
 }
 
 export default function ConfirmPage() {
-  return (
-    <Suspense fallback={<div className="min-h-[100svh] bg-bg" />}>
-      <ConfirmPageContent />
-    </Suspense>
-  );
+  return <Suspense fallback={<div className="min-h-[100dvh] bg-bg" />}><ConfirmContent /></Suspense>;
 }

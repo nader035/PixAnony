@@ -5,7 +5,7 @@ type PageWidth = 'compact' | 'default' | 'wide';
 
 const pageWidths: Record<PageWidth, string> = {
   compact: 'max-w-[760px]',
-  default: 'max-w-[900px]',
+  default: 'max-w-[920px]',
   wide: 'max-w-[1080px]',
 };
 
@@ -23,7 +23,7 @@ export function PageFrame({
   return (
     <div
       className={cn(
-        'page-enter w-full min-w-0 px-4 pb-12 pt-5 sm:px-6 sm:pt-7 xl:px-7',
+        'page-enter mx-auto w-full min-w-0 px-4 pb-16 pt-6 sm:px-8 sm:pt-10',
         pageWidths[width],
         className,
       )}
@@ -51,17 +51,17 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        'mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between',
+        'mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between',
         className,
       )}
     >
       <div className="min-w-0">
         {eyebrow && (
-          <p className="mb-2 text-xs font-semibold uppercase text-primary">
+          <p className="mb-3 text-sm font-bold text-pink">
             {eyebrow}
           </p>
         )}
-        <h1 className="text-2xl font-semibold text-text sm:text-3xl">
+        <h1 className="text-3xl font-bold text-text sm:text-4xl">
           {title}
         </h1>
         {description && (

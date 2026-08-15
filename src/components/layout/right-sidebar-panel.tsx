@@ -61,11 +61,11 @@ export function RightSidebarPanel() {
   }, [supabase]);
 
   return (
-    <aside className="page-enter sticky top-0 hidden h-svh min-w-0 overflow-y-auto border-l border-border/70 bg-bg/55 px-4 py-5 2xl:flex 2xl:flex-col 2xl:gap-4">
-      <section className="surface-panel rounded-2xl p-4">
+    <aside className="page-enter sticky top-4 hidden h-[calc(100dvh-2rem)] min-w-0 overflow-y-auto rounded-[32px] bg-sidebar px-4 py-5 shadow-[0_20px_70px_rgba(44,40,58,0.1)] 2xl:flex 2xl:flex-col 2xl:gap-4">
+      <section className="rounded-[24px] bg-[var(--powder)] p-4">
         <div className="mb-3.5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/12">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-card">
               <TrendingUp size={14} className="text-primary" />
             </span>
             <h2 className="text-[13px] font-semibold text-text">Trending artwork</h2>
@@ -107,10 +107,10 @@ export function RightSidebarPanel() {
         )}
       </section>
 
-      <section className="surface-panel rounded-2xl p-4">
+      <section className="rounded-[24px] bg-[var(--butter)] p-4">
         <div className="mb-3.5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan/12">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-card">
               <Users size={14} className="text-cyan" />
             </span>
             <h2 className="text-[13px] font-semibold text-text">New creators</h2>
@@ -150,10 +150,10 @@ export function RightSidebarPanel() {
 
       <Link
         href="/paint"
-        className="group interactive-surface rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 to-pink/6 p-4"
+        className="group interactive-surface rounded-[24px] bg-[var(--blush)] p-4"
       >
         <span className="mb-2.5 flex items-center gap-2.5 text-sm font-semibold text-text">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-pink/20 to-primary/20">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-card">
             <Palette size={15} className="text-pink" />
           </span>
           Open the pixel editor
@@ -168,7 +168,7 @@ export function RightSidebarPanel() {
         </span>
       </Link>
 
-      <div className="mt-auto surface-panel rounded-2xl p-3.5">
+      <div className="mt-auto rounded-[24px] bg-[var(--lilac)] p-3.5">
         <ThemeToggle showLabel />
       </div>
     </aside>

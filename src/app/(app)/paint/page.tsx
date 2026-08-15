@@ -241,11 +241,11 @@ export default function PaintPage() {
   };
 
   return (
-    <div className="flex h-[100dvh] select-none flex-col overflow-hidden bg-bg text-text">
+    <div className="flex h-[100dvh] select-none flex-col overflow-hidden bg-bg p-2 text-text sm:p-3">
       {/* Top Navigation Bar */}
-      <header className="z-20 flex min-h-16 items-center justify-between gap-2 border-b border-border/80 bg-bg/88 px-2 shadow-[0_16px_42px_rgba(58,42,92,.08)] backdrop-blur-xl sm:px-4">
+      <header className="z-20 flex min-h-16 items-center justify-between gap-2 rounded-[24px] bg-card/90 px-2 shadow-[0_16px_42px_rgba(44,40,58,.1)] backdrop-blur-xl sm:px-4">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
-          <Link href="/home" aria-label="Back to feed" className="flex h-10 w-10 items-center justify-center hover:bg-card-hover rounded-xl border border-border/70 text-text-muted hover:text-text transition-colors">
+          <Link href="/home" aria-label="Back to feed" className="flex h-10 w-10 items-center justify-center rounded-full bg-surface text-text-muted transition-colors hover:bg-card-hover hover:text-text">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <Logo size="sm" showText={false} className="hidden sm:flex" />
@@ -258,7 +258,7 @@ export default function PaintPage() {
               value={gridSize}
               onChange={(e) => setGridSize(Number(e.target.value) as GridSize)}
               aria-label="Canvas grid size"
-              className="h-10 max-w-[112px] bg-card hover:bg-card-hover border border-border px-2 sm:px-3 rounded-xl text-xs font-semibold focus:outline-none transition-colors"
+                className="h-10 max-w-[112px] rounded-full bg-surface px-2 text-xs font-semibold transition-colors hover:bg-card-hover focus:outline-none sm:px-3"
             >
               <option value="8">8x8 (Easy)</option>
               <option value="16">16x16 (Normal)</option>
@@ -356,20 +356,20 @@ export default function PaintPage() {
       </header>
 
       {/* Main Workspace Layout */}
-      <div className="relative flex flex-1 overflow-hidden">
+      <div className="relative mt-3 flex flex-1 gap-3 overflow-hidden">
         {/* Left Side: Tools & Palettes */}
-        <aside className="z-10 hidden w-[260px] flex-col gap-3 overflow-y-auto border-r border-border/80 bg-sidebar/70 p-3 hide-scrollbar lg:flex">
+        <aside className="z-10 hidden w-[260px] flex-col gap-3 overflow-y-auto rounded-[28px] bg-sidebar p-3 shadow-[0_16px_42px_rgba(44,40,58,.08)] hide-scrollbar lg:flex">
           <ToolPanel />
           <ColorPalette />
         </aside>
 
         {/* Center: Interactive Canvas */}
-        <main className="relative flex h-full flex-1 items-center justify-center overflow-hidden bg-bg">
+        <main id="main-content" className="relative flex h-full flex-1 items-center justify-center overflow-hidden rounded-[28px] bg-bg-deep">
           <PaintCanvas />
         </main>
 
         {/* Right Side: Layers & Live Preview */}
-        <aside className="z-10 hidden w-[286px] flex-col gap-3 overflow-y-auto border-l border-border/80 bg-sidebar/70 p-3 hide-scrollbar lg:flex">
+        <aside className="z-10 hidden w-[286px] flex-col gap-3 overflow-y-auto rounded-[28px] bg-sidebar p-3 shadow-[0_16px_42px_rgba(44,40,58,.08)] hide-scrollbar lg:flex">
           <PreviewPanel />
           <LayerPanel />
           <ActionsPanel />
@@ -377,7 +377,7 @@ export default function PaintPage() {
       </div>
 
       {/* Bottom bar for Mobile views (containing basic tools and colors) */}
-      <div className="lg:hidden border-t border-border/80 bg-bg/92 backdrop-blur-xl px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] z-20 space-y-2">
+      <div className="z-20 space-y-2 bg-bg/92 px-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl lg:hidden">
         <div className="flex items-center gap-2">
           <div className="min-w-0 flex-1"><ToolPanel compact /></div>
           <ActionsPanel compact />
@@ -393,7 +393,7 @@ export default function PaintPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="surface-panel max-w-md w-full rounded-2xl p-6 shadow-2xl relative"
+              className="surface-panel relative w-full max-w-md rounded-[28px] p-6 shadow-2xl"
               role="dialog"
               aria-modal="true"
               aria-labelledby="paint-help-title"
@@ -423,7 +423,7 @@ export default function PaintPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="surface-panel max-w-md w-full rounded-2xl p-5 sm:p-6 shadow-2xl relative"
+              className="surface-panel relative w-full max-w-md rounded-[28px] p-5 shadow-2xl sm:p-6"
               role="dialog"
               aria-modal="true"
               aria-labelledby="send-pixel-title"
@@ -563,7 +563,7 @@ export default function PaintPage() {
               role="dialog"
               aria-modal="true"
               aria-labelledby="publish-title"
-              className="surface-panel w-full max-w-md rounded-2xl p-5 sm:p-6"
+              className="surface-panel w-full max-w-md rounded-[28px] p-5 sm:p-6"
             >
               <h3 id="publish-title" className="flex items-center gap-2 text-lg font-semibold text-text">
                 <Upload className="h-5 w-5 text-primary" />

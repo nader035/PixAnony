@@ -108,7 +108,7 @@ export default function SettingsPage() {
 
       if (error) throw error;
 
-      toast.success('Your profile settings have been updated!');
+      toast.success('Profile settings updated.');
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Failed to update profile settings.');
     } finally {
@@ -120,7 +120,7 @@ export default function SettingsPage() {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-text">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="text-xs font-semibold text-text-muted">Loading settings...</p>
+        <p className="text-sm font-semibold text-text-muted">Loading settings</p>
       </div>
     );
   }
@@ -131,18 +131,18 @@ export default function SettingsPage() {
         eyebrow="Preferences"
         title="Settings"
         description="Manage profile, appearance, and account details."
-        actions={<span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/12 text-primary"><Settings size={19} /></span>}
+        actions={<span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--lilac)] text-text"><Settings size={19} /></span>}
       />
 
       <div className="grid gap-5 md:grid-cols-[180px_minmax(0,1fr)]">
         {/* Left Side: Navigation Menu */}
-        <aside className="flex gap-2 overflow-x-auto rounded-2xl border border-border bg-card/45 p-2 md:sticky md:top-24 md:h-fit md:flex-col md:overflow-visible">
+        <aside className="flex gap-2 overflow-x-auto rounded-[24px] bg-surface p-2 md:sticky md:top-24 md:h-fit md:flex-col md:overflow-visible">
           <button
             onClick={() => setActiveTab('profile')}
             className={`flex min-h-11 shrink-0 items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition-colors ${
               activeTab === 'profile'
-                ? 'bg-primary/15 text-primary border border-primary/20'
-                : 'text-text-muted hover:bg-card/30 hover:text-text border border-transparent'
+                ? 'bg-primary text-bg'
+                : 'text-text-muted hover:bg-card hover:text-text'
             }`}
           >
             <User className="w-4 h-4" />
@@ -152,8 +152,8 @@ export default function SettingsPage() {
             onClick={() => setActiveTab('appearance')}
             className={`flex min-h-11 shrink-0 items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition-colors ${
               activeTab === 'appearance'
-                ? 'bg-primary/15 text-primary border border-primary/20'
-                : 'text-text-muted hover:bg-card/30 hover:text-text border border-transparent'
+                ? 'bg-primary text-bg'
+                : 'text-text-muted hover:bg-card hover:text-text'
             }`}
           >
             <Palette className="w-4 h-4" />
@@ -163,8 +163,8 @@ export default function SettingsPage() {
             onClick={() => setActiveTab('security')}
             className={`flex min-h-11 shrink-0 items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition-colors ${
               activeTab === 'security'
-                ? 'bg-primary/15 text-primary border border-primary/20'
-                : 'text-text-muted hover:bg-card/30 hover:text-text border border-transparent'
+                ? 'bg-primary text-bg'
+                : 'text-text-muted hover:bg-card hover:text-text'
             }`}
           >
             <Shield className="w-4 h-4" />
@@ -181,11 +181,11 @@ export default function SettingsPage() {
               onSubmit={handleSaveProfile}
               className="space-y-5"
             >
-              <div className="surface-panel rounded-2xl p-4">
+              <div className="rounded-[24px] bg-[var(--powder)] p-5">
                 <div className="mb-4">
                   <h3 className="text-sm font-semibold text-text">Drawn profile avatar</h3>
                   <p className="mt-1 text-xs leading-5 text-text-muted">
-                    Build a small pixel avatar directly in PixAnony. Profile photo uploads are intentionally disabled.
+                    Draw a small profile avatar directly in PixAnony. Profile photo uploads are intentionally disabled.
                   </p>
                 </div>
                 <DrawnAvatarEditor

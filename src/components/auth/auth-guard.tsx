@@ -36,9 +36,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   if (protectedRoute && loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-bg text-text">
-        <div className="flex flex-col items-center gap-3 rounded-3xl border border-border bg-card px-8 py-7 shadow-soft">
+        <div className="flex flex-col items-center gap-3 rounded-[28px] bg-card px-8 py-7 shadow-float">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          <p className="text-sm font-semibold text-text-muted">Checking your PixAnony session...</p>
+          <p className="text-sm font-semibold text-text-muted">Checking your session</p>
         </div>
       </div>
     );
@@ -47,9 +47,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   if (protectedRoute && !isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-bg text-text">
-        <div className="flex flex-col items-center gap-3 rounded-3xl border border-border bg-card px-8 py-7 shadow-soft">
+        <div className="flex flex-col items-center gap-3 rounded-[28px] bg-card px-8 py-7 shadow-float">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          <p className="text-sm font-semibold text-text-muted">Taking you to sign in...</p>
+          <p className="text-sm font-semibold text-text-muted">Taking you to sign in</p>
         </div>
       </div>
     );

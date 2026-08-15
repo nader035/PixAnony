@@ -26,13 +26,11 @@ const sizeConfig = {
 
 function getAvatarColor(username: string): string {
   const colors = [
-    'from-primary to-pink',
-    'from-pink to-cyan',
-    'from-cyan to-green',
-    'from-primary to-cyan',
-    'from-pink to-primary',
-    'from-[#F97316] to-pink',
-    'from-green to-cyan',
+    'bg-[var(--powder)]',
+    'bg-[var(--blush)]',
+    'bg-[var(--mint)]',
+    'bg-[var(--butter)]',
+    'bg-[var(--lilac)]',
   ];
   let hash = 0;
   for (let i = 0; i < username.length; i++) {
@@ -65,17 +63,10 @@ export function PixelAvatar({
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
     >
-      <div
-        className={cn(
-          'rounded-2xl p-[2px]',
-          'bg-gradient-to-br from-primary/70 via-pink/60 to-cyan/60',
-          'shadow-[0_12px_26px_rgba(124,58,237,0.16)]',
-          onClick && 'cursor-pointer transition-transform hover:-translate-y-0.5'
-        )}
-      >
+      <div className={cn('rounded-full bg-card p-0.5 shadow-[0_8px_20px_rgba(44,40,58,0.12)]', onClick && 'cursor-pointer transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5')}>
         <div
           className={cn(
-            'overflow-hidden rounded-[14px] flex items-center justify-center',
+            'overflow-hidden rounded-full flex items-center justify-center',
             'ring-2 ring-bg',
             config.container
           )}
@@ -85,7 +76,7 @@ export function PixelAvatar({
             <img
               src={src}
               alt={username}
-              className="h-full w-full bg-surface object-cover pixel-art"
+              className="h-full w-full bg-surface object-cover"
               onError={() => setImgError(true)}
             />
           ) : showImg ? (
@@ -96,32 +87,14 @@ export function PixelAvatar({
               height={96}
               loader={({ src: imageSrc }) => imageSrc}
               unoptimized
-              className="h-full w-full object-cover pixel-art"
+              className="h-full w-full object-cover"
               onError={() => setImgError(true)}
             />
           ) : (
             <div
-              className={cn(
-                'grid h-full w-full grid-cols-4 gap-px bg-bg p-1',
-                gradientColor,
-                config.text
-              )}
+              className={cn('flex h-full w-full items-center justify-center font-bold text-text', gradientColor, config.text)}
             >
-              {Array.from({ length: 16 }).map((_, index) => (
-                <span
-                  key={index}
-                  className={cn(
-                    'rounded-[2px]',
-                    (index + letter.charCodeAt(0)) % 5 === 0
-                      ? 'bg-pink'
-                      : (index + letter.charCodeAt(0)) % 3 === 0
-                        ? 'bg-primary'
-                        : (index + letter.charCodeAt(0)) % 2 === 0
-                          ? 'bg-cyan'
-                          : 'bg-surface',
-                  )}
-                />
-              ))}
+              {letter}
             </div>
           )}
         </div>

@@ -102,11 +102,11 @@ export default async function ProfilePage({
   }
 
   return (
-    <div className="page-enter w-full max-w-[880px] overflow-hidden pb-10 sm:px-5 xl:px-6">
-      <div className="relative h-44 overflow-hidden bg-[radial-gradient(circle_at_75%_15%,rgba(236,72,153,.16),transparent_26%),radial-gradient(circle_at_24%_72%,rgba(34,211,238,.12),transparent_30%),linear-gradient(135deg,rgba(124,58,237,.18),rgba(255,255,255,.82))] sm:mt-5 sm:h-56 sm:rounded-3xl sm:border sm:border-border">
-        <div className="absolute inset-0 dot-grid opacity-35" />
+    <div className="page-enter mx-auto w-full max-w-[900px] overflow-hidden pb-12 sm:px-8">
+      <div className="relative h-44 overflow-hidden bg-[var(--lilac)] sm:mt-8 sm:h-56 sm:rounded-[32px]">
+        <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-[var(--blush)]" />
+        <div className="absolute bottom-5 left-12 h-16 w-16 rounded-full bg-[var(--mint)]" />
         {profile.banner_url && <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url("${profile.banner_url}")` }} />}
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-bg to-transparent" />
       </div>
 
       <section className="relative z-10 -mt-14 px-4 sm:px-7">
@@ -143,21 +143,21 @@ export default async function ProfilePage({
           receivedCount={receivedCountResult.count ?? 0}
         />
 
-        <div className="mt-6 grid grid-cols-2 gap-2 rounded-2xl border border-border bg-card/60 p-2 sm:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-2 rounded-[24px] bg-surface p-2 sm:grid-cols-4">
           {[
             ['Paints', profile.paints_count],
             ['Followers', profile.followers_count],
             ['Following', profile.following_count],
             ['Likes', profile.likes_count],
           ].map(([label, value]) => (
-            <div key={String(label)} className="flex min-h-16 flex-col items-center justify-center rounded-xl">
+            <div key={String(label)} className="flex min-h-16 flex-col items-center justify-center rounded-[18px] bg-card">
               <strong className="text-sm text-text">{formatNumber(Number(value ?? 0))}</strong>
               <span className="mt-1 text-[11px] text-text-muted">{label}</span>
             </div>
           ))}
         </div>
 
-        <div className="mt-7 flex items-center justify-between border-b border-border pb-3">
+        <div className="mt-8 flex items-center justify-between pb-3">
           <h2 className="text-sm font-semibold text-text">Profile activity</h2>
           {ownProfile && <Link href={`/profile/${profile.username}/received`} className="text-xs font-semibold text-primary">Received privately</Link>}
         </div>

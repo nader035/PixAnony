@@ -31,14 +31,14 @@ export default async function BookmarksPage() {
       />
       {items.length ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
-          {items.map((artwork) => {
+          {items.map((artwork, index) => {
             const profile = Array.isArray(artwork.profile) ? artwork.profile[0] : artwork.profile;
             return (
-              <Link key={artwork.id} href={`/art/${artwork.id}`} className="surface-panel interactive-surface overflow-hidden rounded-2xl">
-                <div className="aspect-square bg-surface p-3">
+              <Link key={artwork.id} href={`/art/${artwork.id}`} style={{ background: ['var(--powder)', 'var(--butter)', 'var(--blush)', 'var(--lilac)', 'var(--mint)'][index % 5] }} className="interactive-surface overflow-hidden rounded-[28px] shadow-[0_10px_30px_rgba(44,40,58,.06)]">
+                <div className="m-3 aspect-square overflow-hidden rounded-[20px] bg-card p-3">
                   <PixelArtRenderer pixels={Array.isArray(artwork.pixel_data) ? artwork.pixel_data as string[] : []} gridSize={artwork.grid_size} className="h-full w-full" />
                 </div>
-                <div className="flex items-center gap-3 p-3">
+                <div className="flex items-center gap-3 px-4 pb-4">
                   <div className="min-w-0 flex-1">
                     <h2 className="truncate text-sm font-semibold text-text">{artwork.title || 'Untitled'}</h2>
                     <p className="truncate text-xs text-text-muted">@{profile?.username || 'creator'}</p>

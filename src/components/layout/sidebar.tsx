@@ -82,28 +82,28 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'sticky top-0 z-40 hidden h-svh min-w-0 flex-col lg:flex',
-        'border-r border-border/70 bg-sidebar px-3 backdrop-blur-xl',
-        'relative overflow-visible',
+        'sticky top-4 z-40 hidden h-[calc(100dvh-2rem)] min-w-0 flex-col lg:flex',
+        'rounded-[32px] bg-sidebar px-4 shadow-[0_20px_70px_rgba(44,40,58,0.1)] backdrop-blur-xl',
+        'relative overflow-hidden',
       )}
     >
       <div
-        className="pointer-events-none absolute inset-0 dot-grid opacity-35"
+        className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-[var(--lilac)] opacity-80"
         aria-hidden="true"
       />
 
       <div className="relative">
         <div
-          className="pointer-events-none absolute -left-3 -right-3 -top-1 h-28 bg-gradient-to-b from-primary/[0.08] to-transparent"
+          className="pointer-events-none absolute -left-8 top-4 h-16 w-16 rounded-full bg-[var(--blush)] opacity-70"
           aria-hidden="true"
         />
-        <Link href="/home" className="relative flex h-[72px] items-center px-3">
+        <Link href="/home" className="relative flex h-24 items-center px-2">
           <Logo size="md" />
         </Link>
       </div>
 
       {/* ===== Navigation ===== */}
-      <nav aria-label="Primary navigation" className="relative flex-1 space-y-0.5 overflow-y-auto py-2">
+      <nav aria-label="Primary navigation" className="relative flex-1 space-y-1 overflow-y-auto py-2">
         {resolvedItems.map((item) => {
           const Icon = item.icon;
           const active =
@@ -120,16 +120,16 @@ export function Sidebar() {
               href={item.href}
               aria-current={active ? 'page' : undefined}
               className={cn(
-                'group relative flex h-11 items-center gap-3 rounded-xl px-3.5 text-[14px] font-medium transition-all duration-200',
+                'group relative flex h-11 items-center gap-3 rounded-full px-4 text-sm font-semibold transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]',
                 active
-                  ? 'bg-primary/10 text-primary ring-1 ring-primary/15'
+                  ? 'bg-primary text-bg shadow-[0_12px_24px_rgba(24,23,28,0.14)]'
                   : 'text-text-muted hover:bg-card-hover hover:text-text',
               )}
             >
               {active && (
                 <motion.span
                   layoutId="sidebar-active"
-                  className="absolute inset-0 rounded-xl bg-primary/10"
+                  className="absolute inset-0 rounded-full bg-primary"
                   style={{ zIndex: -1 }}
                   transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                 />
@@ -147,14 +147,7 @@ export function Sidebar() {
               <span>{item.label}</span>
 
               {!active && (
-                <span
-                  className="pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                  style={{
-                    background:
-                      'radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.06), transparent 70%)',
-                  }}
-                  aria-hidden="true"
-                />
+                <span className="pointer-events-none absolute left-3 h-1.5 w-1.5 rounded-full bg-pink opacity-0 transition-opacity duration-700 group-hover:opacity-100" aria-hidden="true" />
               )}
             </Link>
           );
@@ -164,10 +157,10 @@ export function Sidebar() {
           <Link
             href="/paint"
             className={cn(
-              'group/create relative flex h-11 w-full items-center justify-between gap-2 rounded-xl px-4',
-              'bg-primary text-white text-sm font-semibold',
-              'shadow-[0_14px_34px_rgba(124,58,237,0.2)] transition-all duration-200',
-              'hover:-translate-y-0.5 hover:bg-primary-glow',
+              'group/create relative flex h-11 w-full items-center justify-between gap-2 rounded-full px-4',
+              'bg-[var(--blush)] text-text text-sm font-semibold',
+              'shadow-[0_14px_34px_rgba(44,40,58,0.08)] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]',
+              'hover:-translate-y-0.5 hover:bg-pink hover:text-white',
               'active:translate-y-0 active:shadow-md',
             )}
           >
@@ -181,14 +174,14 @@ export function Sidebar() {
       </nav>
 
       {/* ===== User Card ===== */}
-      <div className="relative border-t border-border/50 pb-5 pt-4">
+      <div className="relative pb-5 pt-4">
         {profile ? (
           <UserMenu profile={profile} signOut={signOut} />
         ) : (
           <Link
             href="/login"
             className={cn(
-              'flex h-11 items-center justify-center gap-2 rounded-xl',
+              'flex h-11 items-center justify-center gap-2 rounded-full',
               'border border-border text-sm font-semibold text-text',
               'transition-all duration-200 hover:border-primary/30 hover:bg-card',
             )}

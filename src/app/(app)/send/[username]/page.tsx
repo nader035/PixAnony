@@ -415,9 +415,9 @@ export default function SendToUserPage() {
   }
 
   return (
-    <div className="flex h-[100dvh] flex-col overflow-hidden bg-bg text-text select-none">
+    <div className="flex h-[100dvh] select-none flex-col overflow-hidden bg-bg p-2 text-text sm:p-3">
       {/* Top Navigation Bar */}
-      <header className="z-20 flex min-h-16 items-center justify-between gap-2 border-b border-border/80 bg-bg/88 px-2 shadow-[0_16px_42px_rgba(58,42,92,.08)] backdrop-blur-xl sm:px-4">
+      <header className="z-20 flex min-h-16 items-center justify-between gap-2 rounded-[24px] bg-card/90 px-2 shadow-[0_16px_42px_rgba(44,40,58,.1)] backdrop-blur-xl sm:px-4">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <Link href={`/profile/${username}`} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/70 text-text-muted transition-colors hover:bg-card-hover hover:text-text">
             <ArrowLeft className="w-5 h-5" />
@@ -504,13 +504,13 @@ export default function SendToUserPage() {
       </header>
 
       {/* Main Workspace Layout */}
-      <div className="relative flex flex-1 overflow-hidden">
-        <aside className="z-10 hidden w-[260px] flex-col gap-3 overflow-y-auto border-r border-border/80 bg-sidebar/70 p-3 hide-scrollbar lg:flex">
+      <div className="relative mt-3 flex flex-1 gap-3 overflow-hidden">
+        <aside className="z-10 hidden w-[260px] flex-col gap-3 overflow-y-auto rounded-[28px] bg-sidebar p-3 shadow-[0_16px_42px_rgba(44,40,58,.08)] hide-scrollbar lg:flex">
           <ToolPanel />
           <ColorPalette />
         </aside>
 
-        <main className="relative flex h-full flex-1 items-center justify-center overflow-hidden bg-bg">
+        <main id="main-content" className="relative flex h-full flex-1 items-center justify-center overflow-hidden rounded-[28px] bg-bg-deep">
           {!currentUser && (
             <div className="pointer-events-none absolute left-3 right-3 top-3 z-10 mx-auto max-w-xl rounded-2xl border border-primary/20 bg-bg/82 px-4 py-3 text-xs leading-5 text-text-muted shadow-float backdrop-blur-xl">
               <strong className="text-text">You can draw first.</strong> Sign in when you are ready to deliver it to @{recipient?.username}.
@@ -524,7 +524,7 @@ export default function SendToUserPage() {
           <PaintCanvas />
         </main>
 
-        <aside className="z-10 hidden w-[286px] flex-col gap-3 overflow-y-auto border-l border-border/80 bg-sidebar/70 p-3 hide-scrollbar lg:flex">
+        <aside className="z-10 hidden w-[286px] flex-col gap-3 overflow-y-auto rounded-[28px] bg-sidebar p-3 shadow-[0_16px_42px_rgba(44,40,58,.08)] hide-scrollbar lg:flex">
           <PreviewPanel />
           <LayerPanel />
           <ActionsPanel onClearCanvas={handleClearSendDraft} />

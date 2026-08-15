@@ -1,27 +1,25 @@
 import type { Metadata } from 'next';
-import { Inter, Pixelify_Sans } from 'next/font/google';
+import { Manrope } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'sonner';
 import { BRAND } from '@/lib/constants';
 import './globals.css';
 
-const inter = Inter({
+const manrope = Manrope({
   subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-});
-
-const pixelifySans = Pixelify_Sans({
-  subsets: ['latin'],
-  variable: '--font-pixelify',
-  weight: ['400', '500', '600', '700'],
+  variable: '--font-manrope',
   display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: 'PixAnony - Express in Pixels Anonymously',
+  title: 'PixAnony | Make art. Share it your way.',
   description: BRAND.description,
   icons: { icon: '/favicon.ico' },
+  openGraph: {
+    title: 'PixAnony | Make art. Share it your way.',
+    description: BRAND.description,
+    type: 'website',
+  },
 };
 
 export default function RootLayout({
@@ -32,10 +30,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${pixelifySans.variable} h-full`}
+      className={`${manrope.variable} h-full`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col antialiased bg-bg text-text font-sans" suppressHydrationWarning>
+        <a href="#main-content" className="skip-link">Skip to content</a>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           {children}
           <Toaster

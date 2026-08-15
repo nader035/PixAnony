@@ -44,10 +44,10 @@ export default function ToolPanel({ compact = false }: { compact?: boolean }) {
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, delay: 0.1 }}
       className={cn(
-        'editor-panel border border-border/80 bg-surface/95',
+        'editor-panel bg-card',
         compact
-          ? 'flex max-w-full gap-1 overflow-x-auto rounded-2xl p-1.5 hide-scrollbar'
-          : 'flex flex-col gap-1.5 rounded-2xl p-2.5'
+          ? 'flex max-w-full gap-1 overflow-x-auto rounded-[20px] p-1.5 hide-scrollbar'
+          : 'flex flex-col gap-1.5 rounded-[20px] p-2.5'
       )}
     >
       <div className={cn('px-2 py-1.5 text-[10px] font-semibold uppercase text-text-muted', compact && 'hidden')}>
@@ -67,11 +67,11 @@ export default function ToolPanel({ compact = false }: { compact?: boolean }) {
             whileTap={{ scale: 0.92 }}
             onClick={() => setTool(t.id)}
             className={cn(
-              'group relative flex items-center gap-2.5 rounded-xl border text-sm transition-all duration-150',
+              'group relative flex items-center gap-2.5 rounded-full text-sm transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]',
               compact ? 'h-11 min-w-11 justify-center px-3' : 'px-3 py-2.5',
               isActive
-                ? 'bg-primary text-white shadow-[0_10px_26px_rgba(139,92,246,.28)] border-primary'
-                : 'border-border/45 bg-card/55 text-text-muted hover:border-primary/35 hover:bg-card-hover hover:text-text'
+                ? 'bg-primary text-bg shadow-[0_10px_26px_rgba(44,40,58,.16)]'
+                : 'bg-surface text-text-muted hover:bg-card-hover hover:text-text'
               ,
             )}
             title={`${t.label} (${t.shortcut})`}
@@ -90,7 +90,7 @@ export default function ToolPanel({ compact = false }: { compact?: boolean }) {
 
             <Icon
               size={16}
-              className={cn('relative z-10', isActive ? 'text-white' : '')}
+              className={cn('relative z-10', isActive ? 'text-bg' : '')}
             />
             <span className={cn('relative z-10 flex-1 text-left text-xs font-medium', compact && 'sr-only')}>
               {t.label}
@@ -98,7 +98,7 @@ export default function ToolPanel({ compact = false }: { compact?: boolean }) {
             <span
               className={cn(
                 'relative z-10 rounded px-1.5 py-0.5 font-mono text-[9px]',
-                isActive ? 'bg-white/16 text-white' : 'bg-bg/80 text-text-muted',
+                isActive ? 'bg-bg/15 text-bg' : 'bg-bg/80 text-text-muted',
                 compact && 'hidden'
               )}
             >
