@@ -9,7 +9,7 @@ import {
   Copy as CopyIcon, CornersIn, CornersOut, Crown as CrownIcon, Desktop as DesktopIcon,
   DotsNine, DotsThree, DownloadSimple, EnvelopeOpen, EnvelopeSimple, Eraser as EraserIcon,
   Eye as EyeIcon, Eyedropper, EyeSlash, FileImage as FileImageIcon, FloppyDisk, Gear,
-  GithubLogo, Globe as GlobeIcon, GoogleLogo, Heart as HeartIcon, House, LinkSimple,
+  Globe as GlobeIcon, GoogleLogo, Heart as HeartIcon, House, LinkSimple,
   Lightning, LockKey, MagnifyingGlass, MagnifyingGlassMinus, MagnifyingGlassPlus,
   MapPin as MapPinIcon, Minus as MinusIcon, Moon as MoonIcon, PaintBrush,
   PaintBucket as PaintBucketIcon, Palette as PaletteIcon, PaperPlaneTilt, PencilSimple,
@@ -17,6 +17,7 @@ import {
   SpinnerGap, Square as SquareIcon, Star as StarIcon, Sun as SunIcon, SquaresFour,
   Tray, Trash as TrashIcon, Trophy as TrophyIcon, UploadSimple, User as UserIcon,
   UserCheck as UserCheckIcon, UserPlus as UserPlusIcon, Users as UsersIcon, X as XIcon,
+  XLogo,
   ChatCircle, Chats,
 } from '@phosphor-icons/react';
 
@@ -52,7 +53,7 @@ export const FlipHorizontal = ArrowsLeftRight;
 export const FlipVertical = ArrowsVertical;
 export const Globe = GlobeIcon;
 export const Google = GoogleLogo;
-export const Github = GithubLogo;
+export const XSocial = XLogo;
 export const Grid3X3 = SquaresFour;
 export const Heart = HeartIcon;
 export const HelpCircle = Question;

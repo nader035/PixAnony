@@ -63,8 +63,11 @@ Open the newly created `.env.local` file and fill in your Supabase details:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 > 💡 *You can retrieve these values from your **Supabase Dashboard** -> **Project Settings** -> **API**.*
+
+For **Sign in with X**, enable **X / Twitter (OAuth 2.0)** in **Supabase Dashboard -> Authentication -> Providers**, add the Client ID and Client Secret from your X developer app, and register Supabase's displayed callback URL in that X app. Add `http://localhost:3000/auth/callback` and your production `/auth/callback` URL to Supabase's redirect allow list.
 
 ### 4. Install Dependencies
 ```bash
@@ -103,9 +106,10 @@ PixAnony is configured out-of-the-box for seamless deployments on **Vercel**.
    *   Import the repository `PixAnony`.
    *   Specify the Root Directory as `pixanony-app` since the Next.js app is located in that subdirectory.
 3. **Configure Environment Variables:**
-   *   In the **Environment Variables** section during configuration, add the following two environment variables exactly as defined in `.env.local`:
+   *   In the **Environment Variables** section during configuration, add the following environment variables exactly as defined in `.env.local`:
      *   `NEXT_PUBLIC_SUPABASE_URL`
      *   `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+     *   `NEXT_PUBLIC_SITE_URL` (your public production origin, used for social share previews)
 4. **Deploy:** Click **Deploy**. Vercel will build, optimize, and serve your application globally!
 5. **Set up Supabase Redirects (Optional):**
    *   If using Supabase OAuth or Email confirmations, update your redirect URLs in **Supabase Dashboard** -> **Authentication** -> **URL Configuration** to match your new Vercel domain (e.g., `https://your-app.vercel.app/auth/callback`).

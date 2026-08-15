@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/icons';
 import { PixelAvatar } from '@/components/ui/pixel-avatar';
 import { PixelArtRenderer } from '@/components/ui/pixel-art-renderer';
+import { ArtworkShareSheet } from '@/components/feed/artwork-share-sheet';
 import { formatNumber, formatTimeAgo, cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
@@ -77,6 +78,7 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
   const [repostsCount, setRepostsCount] = useState(artwork.reposts_count);
   const [bookmarked, setBookmarked] = useState(artwork.bookmarked_by_user ?? false);
   const [showBurst, setShowBurst] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const profile = artwork.profile;
   const isAnonymous = artwork.is_anonymous;
@@ -142,16 +144,6 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
       setBookmarked(bookmarked);
     }
   }, [bookmarked, toggleRelation]);
-
-  const handleShare = useCallback(async () => {
-    const url = `${window.location.origin}/art/${artwork.id}`;
-    if (navigator.share) {
-      await navigator.share({ title: artwork.title || 'PixAnony artwork', url });
-    } else {
-      await navigator.clipboard.writeText(url);
-      toast.success('Artwork link copied.');
-    }
-  }, [artwork.id, artwork.title]);
 
   const displayName = isAnonymous ? 'Anonymous' : profile?.display_name || 'Unknown';
   const username = isAnonymous ? 'anonymous' : profile?.username || 'unknown';
@@ -400,17 +392,24 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
 
           {/* Share */}
           <button
-            onClick={() => void handleShare()}
-            className="group flex items-center justify-center w-10 h-10 rounded-xl hover:bg-cyan/8 transition-colors"
+            onClick={() => setShareOpen(true)}
+            className="group flex h-10 items-center justify-center gap-1.5 rounded-xl px-3 transition-colors hover:bg-cyan/8"
             aria-label="Share artwork"
+            aria-haspopup="dialog"
           >
             <Share2
               size={16}
               className="text-text-muted group-hover:text-cyan transition-colors duration-200"
             />
+            <span className="hidden text-xs font-semibold text-text-muted transition-colors group-hover:text-text sm:inline">Share</span>
           </button>
         </div>
       </div>
+      <ArtworkShareSheet
+        artwork={artwork}
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+      />
     </motion.article>
   );
 }

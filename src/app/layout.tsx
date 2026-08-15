@@ -11,7 +11,13 @@ const manrope = Manrope({
   display: 'swap',
 });
 
+const metadataUrl = process.env.NEXT_PUBLIC_SITE_URL
+  ?? (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : 'http://localhost:3000');
+
 export const metadata: Metadata = {
+  metadataBase: new URL(metadataUrl),
   title: 'PixAnony | Make art. Share it your way.',
   description: BRAND.description,
   icons: { icon: '/favicon.ico' },
@@ -19,6 +25,11 @@ export const metadata: Metadata = {
     title: 'PixAnony | Make art. Share it your way.',
     description: BRAND.description,
     type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'PixAnony | Make art. Share it your way.',
+    description: BRAND.description,
   },
 };
 

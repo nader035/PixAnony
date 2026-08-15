@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from '@/components/ui/icons';
@@ -6,6 +7,56 @@ import { ArtworkComments } from '@/components/feed/artwork-comments';
 import { PageFrame } from '@/components/ui/page-layout';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { normalizeArtwork } from '@/lib/supabase/data';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const supabase = await createServerSupabaseClient();
+  const { data } = await supabase
+    .from('artworks')
+    .select('title, caption, visibility, is_anonymous, profile:profiles!artworks_user_id_fkey(username, display_name)')
+    .eq('id', id)
+    .single();
+
+  if (!data || data.visibility === 'private') {
+    return {
+      title: 'Private artwork | PixAnony',
+      description: 'This PixAnony artwork is available only to people with access.',
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const rawProfile = data.profile;
+  const joinedProfile = (Array.isArray(rawProfile) ? rawProfile[0] : rawProfile) as {
+    username: string;
+    display_name: string;
+  } | null | undefined;
+  const creator = data.is_anonymous
+    ? 'Anonymous artist'
+    : joinedProfile?.display_name || (joinedProfile?.username ? `@${joinedProfile.username}` : 'A PixAnony artist');
+  const artworkTitle = data.title?.trim() || 'Artwork on PixAnony';
+  const description = data.caption?.trim().slice(0, 160) || `A new artwork shared by ${creator} on PixAnony.`;
+
+  return {
+    title: `${artworkTitle} | PixAnony`,
+    description,
+    alternates: { canonical: `/art/${id}` },
+    openGraph: {
+      title: artworkTitle,
+      description,
+      type: 'article',
+      url: `/art/${id}`,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: artworkTitle,
+      description,
+    },
+  };
+}
 
 export default async function ArtworkDetailPage({
   params,

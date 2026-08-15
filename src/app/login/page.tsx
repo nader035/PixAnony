@@ -4,7 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Google, Github, ArrowLeft, ArrowRight, Lock, User, Eye, EyeOff, Loader2 } from '@/components/ui/icons';
+import { Mail, Google, XSocial, ArrowLeft, ArrowRight, Lock, User, Eye, EyeOff, Loader2 } from '@/components/ui/icons';
 import { Logo } from '@/components/ui/logo';
 import { PixelCanvasMock } from '@/components/ui/pixel-canvas-mock';
 import { createClient } from '@/lib/supabase/client';
@@ -186,7 +186,7 @@ function LoginPageContent() {
     };
   }, [nextPath, router, supabase]);
 
-  const handleOAuthLogin = async (provider: 'google' | 'github') => {
+  const handleOAuthLogin = async (provider: 'google' | 'x') => {
     try {
       setLoading(true);
       const { error } = await supabase.auth.signInWithOAuth({
@@ -301,10 +301,10 @@ function LoginPageContent() {
                   disabled={loading}
                 />
                 <OAuthButton
-                  icon={Github}
-                  label="GitHub"
-                  color="#181528"
-                  onClick={() => handleOAuthLogin('github')}
+                  icon={XSocial}
+                  label="X"
+                  color="#111111"
+                  onClick={() => handleOAuthLogin('x')}
                   disabled={loading}
                 />
 
