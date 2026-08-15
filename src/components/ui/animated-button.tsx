@@ -21,7 +21,7 @@ interface AnimatedButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    'bg-primary text-white hover:bg-primary-glow shadow-[0_14px_34px_rgba(124,58,237,0.2)] border border-transparent',
+    'bg-primary text-white hover:bg-primary-glow shadow-[0_14px_34px_rgba(0,94,254,0.2)] border border-transparent',
   secondary:
     'bg-card text-text border border-border hover:border-primary/25 hover:bg-card-hover',
   ghost:
@@ -40,11 +40,11 @@ const sizeStyles: Record<ButtonSize, string> = {
 };
 
 const glowStyles: Record<ButtonVariant, string> = {
-  primary: 'shadow-[0_16px_42px_rgba(124,58,237,0.24)]',
+  primary: 'shadow-[0_16px_42px_rgba(0,94,254,0.24)]',
   secondary: '',
   ghost: '',
   danger: 'shadow-[0_16px_42px_rgba(220,38,38,0.2)]',
-  outline: 'shadow-[0_14px_34px_rgba(124,58,237,0.12)]',
+  outline: 'shadow-[0_14px_34px_rgba(0,94,254,0.12)]',
 };
 
 export const AnimatedButton = forwardRef<HTMLButtonElement, AnimatedButtonProps>(

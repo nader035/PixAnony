@@ -543,7 +543,7 @@ export default function PaintPage() {
                 <button
                   onClick={handleSendPixel}
                   disabled={!selectedRecipient || isSending}
-                  className="flex flex-[2] items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(124,58,237,0.22)] transition-all hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+                  className="flex flex-[2] items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(0,94,254,0.22)] transition-all hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
                 >
                   {isSending ? 'Sending...' : sendAnonymously ? 'Send anonymous' : 'Send signed'}
                 </button>

@@ -152,7 +152,7 @@ export default async function HomePage({
         <div className="surface-panel mt-8 flex min-h-[420px] flex-col items-center justify-center rounded-3xl px-6 py-12 text-center animate-fade-in">
           {/* Large decorative icon */}
           <div className="relative mb-6">
-            <span className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary shadow-[0_18px_42px_rgba(124,58,237,0.2)]">
+            <span className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary shadow-[0_18px_42px_rgba(0,94,254,0.2)]">
               <Palette size={36} className="text-white" />
             </span>
             {/* Decorative dot */}
@@ -173,7 +173,7 @@ export default async function HomePage({
             href={tab === 'following' ? '/explore' : '/paint'}
             className={cn(
               'mt-8 rounded-full px-6 py-3.5 text-sm font-semibold text-white',
-              'bg-primary shadow-[0_14px_32px_rgba(124,58,237,0.2)]',
+              'bg-primary shadow-[0_14px_32px_rgba(0,94,254,0.2)]',
               'transition-all duration-200 hover:scale-[1.03] active:scale-[0.98]'
             )}
           >

@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const GRID_SIZE = 8;
-const DEFAULT_COLORS = ['#181528', '#7c3aed', '#db2777', '#0891b2', '#059669', '#f59e0b', '#f8fafc', 'transparent'];
+const DEFAULT_COLORS = ['#141c2c', '#005efe', '#db2777', '#0891b2', '#059669', '#f59e0b', '#f8fafc', 'transparent'];
 
 function seedPixels(username: string) {
   const pixels = Array(GRID_SIZE * GRID_SIZE).fill('transparent');
   let hash = 0;
   for (const char of username || 'pixanony') hash = char.charCodeAt(0) + ((hash << 5) - hash);
-  const palette = ['#7c3aed', '#db2777', '#0891b2', '#059669'];
+  const palette = ['#005efe', '#db2777', '#0891b2', '#059669'];
   const color = palette[Math.abs(hash) % palette.length];
   const accent = palette[Math.abs(hash + 2) % palette.length];
 

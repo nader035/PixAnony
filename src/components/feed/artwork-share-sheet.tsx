@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Copy, Globe, Image as ImageIcon, LinkIcon, Loader2, Lock, Share2, X, XSocial } from '@/components/ui/icons';
 import { PixelArtRenderer } from '@/components/ui/pixel-art-renderer';
 import { PixelAvatar } from '@/components/ui/pixel-avatar';
+import { Logo } from '@/components/ui/logo';
 import { cn } from '@/lib/utils';
 import { createArtworkShareImage, downloadArtworkShareImage } from '@/lib/artwork-share-image';
 import { toast } from 'sonner';
@@ -184,7 +185,7 @@ export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetP
                   <p className="truncate text-sm font-bold text-text">{displayName}</p>
                   <p className="truncate text-xs text-text-muted">{isAnonymous ? 'Identity protected' : `@${username}`}</p>
                 </div>
-                <span className="rounded-full bg-card/80 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-primary">PixAnony</span>
+                <Logo size="sm" />
               </div>
               {pixels.length > 0 && (
                 <div className="relative mt-3 aspect-[16/9] overflow-hidden rounded-[18px] bg-card">

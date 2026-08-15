@@ -421,7 +421,7 @@ function LoginPageContent() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex flex-[2] items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(124,58,237,0.22)] transition-all hover:brightness-105 active:scale-[0.98]"
+                    className="flex flex-[2] items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(0,94,254,0.22)] transition-all hover:brightness-105 active:scale-[0.98]"
                   >
                     {loading ? (
                       <Loader2 className="w-5 h-5 animate-spin" />

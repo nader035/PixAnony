@@ -10,6 +10,17 @@ type ArtworkShareImageOptions = {
 
 const WIDTH = 1080;
 const HEIGHT = 1350;
+const SHARE_LOGO_URL = '/assets/images/logo-lightTheme-nav.png';
+
+function loadImage(src: string) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.decoding = 'async';
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('Could not load the PixAnony logo.'));
+    image.src = src;
+  });
+}
 
 function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) {
   const r = Math.min(radius, width / 2, height / 2);
@@ -132,11 +143,12 @@ export async function createArtworkShareImage({
   canvas.height = HEIGHT;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Canvas is not supported in this browser.');
+  const shareLogo = await loadImage(SHARE_LOGO_URL);
 
   const background = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
-  background.addColorStop(0, '#dce7f7');
-  background.addColorStop(0.48, '#eee4f7');
-  background.addColorStop(1, '#f9e1e7');
+  background.addColorStop(0, '#dce8ff');
+  background.addColorStop(0.48, '#eee8ff');
+  background.addColorStop(1, '#ffe3eb');
   ctx.fillStyle = background;
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
@@ -145,7 +157,7 @@ export async function createArtworkShareImage({
   ctx.beginPath();
   ctx.arc(984, 126, 150, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = '#8ed6c7';
+  ctx.fillStyle = '#9adbc5';
   ctx.beginPath();
   ctx.arc(72, 1240, 170, 0, Math.PI * 2);
   ctx.fill();
@@ -154,50 +166,44 @@ export async function createArtworkShareImage({
   ctx.shadowColor = 'rgba(44, 40, 58, 0.14)';
   ctx.shadowBlur = 48;
   ctx.shadowOffsetY = 22;
-  ctx.fillStyle = '#fffefa';
+  ctx.fillStyle = '#ffffff';
   roundedRect(ctx, 54, 54, 972, 1242, 58);
   ctx.fill();
   ctx.shadowColor = 'transparent';
 
-  ctx.fillStyle = '#ece2f7';
-  ctx.beginPath();
-  ctx.arc(116, 122, 30, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = '#f29ab0';
-  ctx.beginPath();
-  ctx.arc(129, 111, 18, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = '#80d0bf';
-  ctx.beginPath();
-  ctx.arc(102, 137, 13, 0, Math.PI * 2);
-  ctx.fill();
+  const logoHeight = 58;
+  const logoWidth = logoHeight * (shareLogo.naturalWidth / shareLogo.naturalHeight);
+  ctx.drawImage(shareLogo, 108, 93, logoWidth, logoHeight);
 
-  ctx.fillStyle = '#18171c';
-  ctx.font = '800 34px Manrope, Arial, sans-serif';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('PixAnony', 164, 122);
-  ctx.fillStyle = '#77727d';
+  ctx.fillStyle = '#005efe';
+  ctx.fillRect(914, 88, 14, 14);
+  ctx.globalAlpha = 0.42;
+  ctx.fillRect(938, 100, 9, 9);
+  ctx.globalAlpha = 1;
+
+  ctx.fillStyle = '#677187';
   ctx.font = '600 18px Manrope, Arial, sans-serif';
+  ctx.textBaseline = 'middle';
   ctx.textAlign = 'right';
-  ctx.fillText('MAKE · SHARE · STAY YOU', 958, 122);
+  ctx.fillText('MAKE · SHARE · STAY YOU', 958, 134);
   ctx.textAlign = 'left';
 
   drawArtwork(ctx, pixels, gridSize, 106, 188, 868);
 
-  ctx.fillStyle = '#18171c';
+  ctx.fillStyle = '#141c2c';
   ctx.textBaseline = 'alphabetic';
   ctx.font = '800 38px Manrope, Arial, sans-serif';
   drawWrappedText(ctx, title || 'Untitled artwork', 108, 1122, 864, 46, 2);
 
   const creatorLine = isAnonymous ? 'Anonymous artist' : `${displayName}  @${username}`;
-  ctx.fillStyle = '#6f687b';
+  ctx.fillStyle = '#5f6b82';
   ctx.font = '650 22px Manrope, Arial, sans-serif';
   ctx.fillText(creatorLine, 108, 1222);
 
   if (caption?.trim()) {
     ctx.textAlign = 'right';
     ctx.font = '500 20px Manrope, Arial, sans-serif';
-    ctx.fillStyle = '#8c8596';
+    ctx.fillStyle = '#7b869a';
     ctx.fillText('Shared from PixAnony', 972, 1222);
     ctx.textAlign = 'left';
   }
