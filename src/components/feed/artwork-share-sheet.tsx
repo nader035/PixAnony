@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Copy, Globe, LinkIcon, Lock, Share2, X, XSocial } from '@/components/ui/icons';
+import { Copy, Globe, Image as ImageIcon, LinkIcon, Loader2, Lock, Share2, X, XSocial } from '@/components/ui/icons';
 import { PixelArtRenderer } from '@/components/ui/pixel-art-renderer';
 import { PixelAvatar } from '@/components/ui/pixel-avatar';
 import { cn } from '@/lib/utils';
+import { createArtworkShareImage, downloadArtworkShareImage } from '@/lib/artwork-share-image';
 import { toast } from 'sonner';
 import type { Artwork } from '@/lib/types';
 
@@ -28,6 +29,7 @@ interface ArtworkShareSheetProps {
 
 export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const [imageBusy, setImageBusy] = useState(false);
   const isPrivate = artwork.visibility === 'private';
   const isAnonymous = artwork.is_anonymous;
   const displayName = isAnonymous ? 'Anonymous artist' : artwork.profile?.display_name || 'PixAnony artist';
@@ -94,6 +96,40 @@ export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetP
     }
   };
 
+  const shareImage = async () => {
+    try {
+      setImageBusy(true);
+      const file = await createArtworkShareImage({
+        pixels,
+        gridSize: artwork.grid_size,
+        title: artwork.title || 'Artwork on PixAnony',
+        caption: artwork.caption,
+        displayName,
+        username,
+        isAnonymous,
+      });
+      const shareData = {
+        files: [file],
+        title: artwork.title || 'Artwork on PixAnony',
+        text: `Created by ${displayName} on PixAnony`,
+      };
+
+      if (navigator.share && navigator.canShare?.(shareData)) {
+        await navigator.share(shareData);
+        onClose();
+        return;
+      }
+
+      downloadArtworkShareImage(file);
+      toast.success('Branded artwork image downloaded.');
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+      toast.error(error instanceof Error ? error.message : 'Could not create the share image.');
+    } finally {
+      setImageBusy(false);
+    }
+  };
+
   const xIntentUrl = `https://x.com/intent/post?text=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`;
 
   if (typeof document === 'undefined') return null;
@@ -118,13 +154,13 @@ export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetP
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
             transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
-            className="w-full max-w-lg overflow-hidden rounded-[30px] bg-card p-4 shadow-float sm:p-5"
+            className="max-h-[calc(100dvh-1.5rem)] w-full max-w-lg overflow-y-auto overscroll-contain rounded-[30px] bg-card p-4 shadow-float sm:p-5"
           >
             <div className="mb-4 flex items-start justify-between gap-4 px-1">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">Pass it on</p>
                 <h2 id={`share-title-${artwork.id}`} className="mt-1 text-2xl font-bold text-text">Share this artwork</h2>
-                <p className="mt-1 text-sm text-text-muted">A polished preview will travel with the link.</p>
+                <p className="mt-1 text-sm text-text-muted">Choose a ready-to-post image or share the link.</p>
               </div>
               <button
                 ref={closeButtonRef}
@@ -166,7 +202,33 @@ export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetP
               </div>
             </div>
 
-            <div className={cn('mt-4 grid gap-2', isPrivate ? 'grid-cols-2' : 'grid-cols-3')}>
+            <div className="mt-4 flex items-center gap-3 rounded-[22px] bg-[var(--blush)] p-3 sm:p-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-card text-pink shadow-card">
+                <ImageIcon size={22} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold text-text">Share a branded image</p>
+                <p className="mt-0.5 text-xs leading-5 text-text-muted">A polished 4:5 PNG with your art and the PixAnony name.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void shareImage()}
+                disabled={imageBusy || pixels.length === 0}
+                className="flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-text px-4 text-xs font-bold text-card transition-transform hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-50"
+              >
+                {imageBusy ? <Loader2 size={16} className="animate-spin" /> : <Share2 size={16} />}
+                <span className="hidden sm:inline">Share image</span>
+                <span className="sm:hidden">Image</span>
+              </button>
+            </div>
+
+            <div className="my-4 flex items-center gap-3 px-1">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">Or share link only</span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+
+            <div className={cn('grid gap-2', isPrivate ? 'grid-cols-2' : 'grid-cols-3')}>
               {!isPrivate && (
                 <a
                   href={xIntentUrl}
