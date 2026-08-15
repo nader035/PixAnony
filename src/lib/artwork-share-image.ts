@@ -6,6 +6,11 @@ type ArtworkShareImageOptions = {
   displayName: string;
   username: string;
   isAnonymous: boolean;
+  locale: 'en' | 'ar';
+  untitledLabel: string;
+  anonymousArtistLabel: string;
+  tagline: string;
+  sharedFromLabel: string;
 };
 
 const WIDTH = 1080;
@@ -135,8 +140,14 @@ export async function createArtworkShareImage({
   displayName,
   username,
   isAnonymous,
+  locale,
+  untitledLabel,
+  anonymousArtistLabel,
+  tagline,
+  sharedFromLabel,
 }: ArtworkShareImageOptions) {
   await document.fonts?.ready;
+  if (locale === 'ar') await document.fonts?.load('700 38px "Thmanyah Sans"');
 
   const canvas = document.createElement('canvas');
   canvas.width = WIDTH;
@@ -182,30 +193,33 @@ export async function createArtworkShareImage({
   ctx.globalAlpha = 1;
 
   ctx.fillStyle = '#677187';
-  ctx.font = '600 18px Manrope, Arial, sans-serif';
+  const fontFamily = locale === 'ar' ? '"Thmanyah Sans", Tahoma, Arial, sans-serif' : 'Manrope, Arial, sans-serif';
+  ctx.font = `600 18px ${fontFamily}`;
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'right';
-  ctx.fillText('MAKE · SHARE · STAY YOU', 958, 134);
+  ctx.direction = locale === 'ar' ? 'rtl' : 'ltr';
+  ctx.fillText(tagline, 958, 134);
   ctx.textAlign = 'left';
 
   drawArtwork(ctx, pixels, gridSize, 106, 188, 868);
 
   ctx.fillStyle = '#141c2c';
   ctx.textBaseline = 'alphabetic';
-  ctx.font = '800 38px Manrope, Arial, sans-serif';
-  drawWrappedText(ctx, title || 'Untitled artwork', 108, 1122, 864, 46, 2);
+  ctx.font = `800 38px ${fontFamily}`;
+  ctx.textAlign = locale === 'ar' ? 'right' : 'left';
+  drawWrappedText(ctx, title || untitledLabel, locale === 'ar' ? 972 : 108, 1122, 864, 46, 2);
 
-  const creatorLine = isAnonymous ? 'Anonymous artist' : `${displayName}  @${username}`;
+  const creatorLine = isAnonymous ? anonymousArtistLabel : `${displayName}  @${username}`;
   ctx.fillStyle = '#5f6b82';
-  ctx.font = '650 22px Manrope, Arial, sans-serif';
-  ctx.fillText(creatorLine, 108, 1222);
+  ctx.font = `650 22px ${fontFamily}`;
+  ctx.fillText(creatorLine, locale === 'ar' ? 972 : 108, 1222);
 
   if (caption?.trim()) {
     ctx.textAlign = 'right';
-    ctx.font = '500 20px Manrope, Arial, sans-serif';
+    ctx.font = `500 20px ${fontFamily}`;
     ctx.fillStyle = '#7b869a';
-    ctx.fillText('Shared from PixAnony', 972, 1222);
-    ctx.textAlign = 'left';
+    ctx.fillText(sharedFromLabel, 972, 1222);
+    ctx.textAlign = locale === 'ar' ? 'right' : 'left';
   }
 
   const safeTitle = (title || 'artwork')

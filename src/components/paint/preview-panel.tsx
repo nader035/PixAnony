@@ -5,11 +5,13 @@ import { motion } from 'framer-motion';
 import { Maximize2, Minimize2 } from '@/components/ui/icons';
 import { usePaintStore } from '@/stores/paint-store';
 import { useState } from 'react';
+import { useI18n } from '@/components/i18n/locale-provider';
 
 export default function PreviewPanel() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { layers, gridSize, showPreview } = usePaintStore();
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const { t } = useI18n();
 
   // ===== RENDER PREVIEW =====
   const renderPreview = useCallback(() => {
@@ -68,12 +70,13 @@ export default function PreviewPanel() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
-          Preview
+          {t('paint.preview')}
         </span>
         <button
           onClick={() => setIsFullscreen(!isFullscreen)}
           className="rounded-lg p-1 text-text-muted transition-colors hover:bg-card-hover hover:text-text"
-          title={isFullscreen ? 'Minimize' : 'Fullscreen'}
+          title={isFullscreen ? t('paint.minimize') : t('paint.fullscreen')}
+          aria-label={isFullscreen ? t('paint.minimize') : t('paint.fullscreen')}
         >
           {isFullscreen ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
         </button>

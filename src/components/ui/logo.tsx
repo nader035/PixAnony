@@ -9,6 +9,7 @@ interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
   showText?: boolean;
   className?: string;
+  priority?: boolean;
 }
 
 const sizeConfig = {
@@ -17,7 +18,7 @@ const sizeConfig = {
   lg: { full: 'h-12 w-auto', icon: 'h-12 w-12' },
 };
 
-export function Logo({ size = 'md', showText = true, className }: LogoProps) {
+export function Logo({ size = 'md', showText = true, className, priority = false }: LogoProps) {
   const config = sizeConfig[size];
   const { resolvedTheme } = useTheme();
   const mounted = useSyncExternalStore(
@@ -51,6 +52,7 @@ export function Logo({ size = 'md', showText = true, className }: LogoProps) {
         width={showText ? 2012 : 128}
         height={showText ? 534 : 128}
         sizes={showText ? `${Math.round(height * (2012 / 534))}px` : `${height}px`}
+        priority={priority}
         className={cn('block shrink-0 object-contain', showText ? config.full : config.icon)}
       />
     </div>

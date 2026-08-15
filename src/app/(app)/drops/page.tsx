@@ -18,6 +18,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
 import { formatTimeAgo } from '@/lib/utils';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/components/i18n/locale-provider';
 
 type DropArtwork = {
   id: string;
@@ -39,6 +40,7 @@ export default function DropsPage() {
   const [received, setReceived] = useState<DropArtwork[]>([]);
   const [sent, setSent] = useState<DropArtwork[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t, locale } = useI18n();
 
   const loadDrops = useCallback(async () => {
     if (!user) {
@@ -76,16 +78,16 @@ export default function DropsPage() {
   const drops = activeTab === 'received' ? received : sent;
 
   const tabs: { id: TabId; label: string; count: number }[] = [
-    { id: 'received', label: 'Received', count: received.length },
-    { id: 'sent', label: 'Sent', count: sent.length },
+    { id: 'received', label: t('drops.received'), count: received.length },
+    { id: 'sent', label: t('drops.sent'), count: sent.length },
   ];
 
   return (
     <PageFrame width="wide">
       <PageHeader
-        eyebrow="Private collection"
-        title="Private Drops"
-        description="Pixel art sent directly between creators. Received drops and artwork you've sent privately."
+        eyebrow={t('drops.eyebrow')}
+        title={t('drops.title')}
+        description={t('drops.description')}
         actions={
           profile ? (
             <Link
@@ -98,7 +100,7 @@ export default function DropsPage() {
               )}
             >
               <Send size={14} />
-              Share profile
+              {t('drops.shareProfile')}
             </Link>
           ) : undefined
         }
@@ -121,7 +123,7 @@ export default function DropsPage() {
             {tab.label}
             {!loading && (
               <span className={cn(
-                'ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold',
+                'ms-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold',
                 activeTab === tab.id ? 'bg-primary/12 text-primary' : 'bg-surface text-text-muted',
               )}>
                 {tab.count}
@@ -156,15 +158,15 @@ export default function DropsPage() {
                     className="h-full w-full"
                   />
                   {index === 0 && (
-                    <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full border border-primary/25 bg-bg/80 px-2 py-1 text-[10px] font-semibold text-primary backdrop-blur">
+                    <span className="absolute end-3 top-3 flex items-center gap-1 rounded-full border border-primary/25 bg-bg/80 px-2 py-1 text-[10px] font-semibold text-primary backdrop-blur">
                       <Sparkles size={11} />
-                      Latest
+                      {t('drops.latest')}
                     </span>
                   )}
                 </div>
                 <div className="p-4">
                   <h2 className="truncate text-sm font-semibold text-text">
-                    {artwork.title || 'Anonymous artwork'}
+                    {artwork.title || t('drops.anonymousArtwork')}
                   </h2>
                   {artwork.caption && (
                     <p className="mt-1 line-clamp-2 text-xs leading-5 text-text-muted">{artwork.caption}</p>
@@ -173,7 +175,7 @@ export default function DropsPage() {
                     {artwork.is_anonymous ? (
                       <span className="flex items-center gap-1">
                         <LockKeyhole size={12} />
-                        Anonymous
+                        {t('common.anonymous')}
                       </span>
                     ) : (
                       <span className="flex min-w-0 items-center gap-2">
@@ -184,14 +186,14 @@ export default function DropsPage() {
                           showBadge={false}
                         />
                         <span className="min-w-0 truncate">
-                          {senderProfile?.display_name || senderProfile?.username || 'Signed sender'}
+                          {senderProfile?.display_name || senderProfile?.username || t('drops.signedSender')}
                         </span>
                         {senderProfile?.is_verified && (
                           <BadgeCheck size={11} className="shrink-0 text-primary" />
                         )}
                       </span>
                     )}
-                    <span>{formatTimeAgo(artwork.created_at ?? new Date().toISOString())}</span>
+                    <span>{formatTimeAgo(artwork.created_at ?? new Date().toISOString(), locale)}</span>
                   </div>
                 </div>
               </Link>
@@ -202,12 +204,12 @@ export default function DropsPage() {
         <div className="flex min-h-[360px] flex-col items-center justify-center rounded-3xl border border-dashed border-border px-6 text-center">
           <Inbox size={30} className="mb-4 text-primary" />
           <h2 className="text-lg font-semibold text-text">
-            {activeTab === 'received' ? 'Your private inbox is empty' : 'No sent drops yet'}
+            {activeTab === 'received' ? t('drops.receivedEmptyTitle') : t('drops.sentEmptyTitle')}
           </h2>
           <p className="mt-2 max-w-sm text-sm leading-6 text-text-muted">
             {activeTab === 'received'
-              ? 'Share your profile link so other creators can send anonymous or signed pixel art.'
-              : 'Use the pixel editor to create and send private artwork to other creators.'}
+              ? t('drops.receivedEmptyDescription')
+              : t('drops.sentEmptyDescription')}
           </p>
           <Link
             href={activeTab === 'received' && profile ? `/profile/${profile.username}` : '/paint'}
@@ -219,12 +221,12 @@ export default function DropsPage() {
             )}
           >
             {activeTab === 'received' ? (
-              <>View your profile</>
+              <>{t('drops.viewProfile')}</>
             ) : (
               <>
                 <Paintbrush size={15} />
-                Create artwork
-                <ArrowRight size={13} />
+                {t('feed.createArtwork')}
+                <ArrowRight size={13} className="rtl-flip" />
               </>
             )}
           </Link>

@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Loader2 } from '@/components/ui/icons';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
+import { useI18n } from '@/components/i18n/locale-provider';
 
 const protectedPrefixes = [
   '/home',
@@ -26,6 +27,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '/';
   const router = useRouter();
   const { loading, isAuthenticated } = useAuthProfile();
+  const { t } = useI18n();
   const protectedRoute = isProtectedPath(pathname);
 
   useEffect(() => {
@@ -38,7 +40,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-screen items-center justify-center bg-bg text-text">
         <div className="flex flex-col items-center gap-3 rounded-[28px] bg-card px-8 py-7 shadow-float">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          <p className="text-sm font-semibold text-text-muted">Checking your session</p>
+          <p className="text-sm font-semibold text-text-muted">{t('auth.checking')}</p>
         </div>
       </div>
     );
@@ -49,7 +51,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-screen items-center justify-center bg-bg text-text">
         <div className="flex flex-col items-center gap-3 rounded-[28px] bg-card px-8 py-7 shadow-float">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          <p className="text-sm font-semibold text-text-muted">Taking you to sign in</p>
+          <p className="text-sm font-semibold text-text-muted">{t('auth.redirecting')}</p>
         </div>
       </div>
     );

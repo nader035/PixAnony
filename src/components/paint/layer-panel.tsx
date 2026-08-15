@@ -7,6 +7,7 @@ import {
   ChevronUp, ChevronDown,
 } from '@/components/ui/icons';
 import { usePaintStore } from '@/stores/paint-store';
+import { useI18n } from '@/components/i18n/locale-provider';
 
 export default function LayerPanel() {
   const {
@@ -19,6 +20,7 @@ export default function LayerPanel() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const { t, locale } = useI18n();
 
   const handleStartRename = useCallback((layerId: string, currentName: string) => {
     setEditingId(layerId);
@@ -80,12 +82,13 @@ export default function LayerPanel() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <span className="text-[10px] font-semibold uppercase text-text-muted">
-          Layers
+          {t('paint.layers')}
         </span>
         <button
           onClick={addLayer}
           className="rounded-lg p-1 text-text-muted transition-colors hover:bg-card-hover hover:text-primary"
-          title="Add Layer"
+          title={t('paint.addLayer')}
+          aria-label={t('paint.addLayer')}
         >
           <Plus size={14} />
         </button>
@@ -170,12 +173,14 @@ export default function LayerPanel() {
                     }`}
                     onDoubleClick={() => handleStartRename(layer.id, layer.name)}
                   >
-                    {layer.name}
+                    {/^(Layer)\s+(\d+)$/i.test(layer.name)
+                      ? t('paint.layerName', { number: formatLocalNumber(Number(layer.name.match(/\d+/)?.[0] ?? 1), locale) })
+                      : layer.name}
                   </span>
                 )}
                 {!editingId && (
                   <span className="text-[9px] text-text-muted/60">
-                    {pixelCount > 0 ? `${pixelCount} px` : 'empty'}
+                    {pixelCount > 0 ? t('paint.pixelCount', { count: formatLocalNumber(pixelCount, locale) }) : t('paint.emptyLayer')}
                   </span>
                 )}
               </div>
@@ -193,7 +198,7 @@ export default function LayerPanel() {
                   }}
                   onClick={(e) => e.stopPropagation()}
                   className="w-full h-1 accent-primary cursor-pointer"
-                  title={`Opacity: ${Math.round(layer.opacity * 100)}%`}
+                  title={t('paint.opacity', { value: formatLocalNumber(Math.round(layer.opacity * 100), locale) })}
                 />
               </div>
 
@@ -207,7 +212,8 @@ export default function LayerPanel() {
                     handleDelete(layer.id);
                   }}
                   className="p-0.5 rounded text-text-muted/40 hover:text-red transition-colors flex-shrink-0"
-                  title="Delete Layer"
+                  title={t('paint.deleteLayer')}
+                  aria-label={t('paint.deleteLayer')}
                 >
                   <Trash2 size={11} />
                 </button>
@@ -225,7 +231,7 @@ export default function LayerPanel() {
           className="rounded-xl border border-red/30 bg-card p-2"
         >
           <p className="text-[10px] text-text-muted mb-2">
-            This layer has content. Delete anyway?
+            {t('paint.deleteLayerConfirm')}
           </p>
           <div className="flex gap-1.5">
             <button
@@ -233,18 +239,22 @@ export default function LayerPanel() {
               className="flex-1 px-2 py-1 text-[10px] font-medium bg-red/20 text-red
                          rounded-lg hover:bg-red/30 transition-colors"
             >
-              Delete
+              {t('common.delete')}
             </button>
             <button
               onClick={() => setConfirmDeleteId(null)}
               className="flex-1 px-2 py-1 text-[10px] font-medium bg-card-hover text-text-muted
                          rounded-lg hover:text-text transition-colors"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
           </div>
         </motion.div>
       )}
     </motion.div>
   );
+}
+
+function formatLocalNumber(value: number, locale: 'en' | 'ar') {
+  return new Intl.NumberFormat(locale === 'ar' ? 'ar-EG' : 'en-US').format(value);
 }

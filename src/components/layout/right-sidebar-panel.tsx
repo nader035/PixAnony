@@ -14,6 +14,7 @@ import { createClient } from '@/lib/supabase/client';
 import { PixelAvatar } from '@/components/ui/pixel-avatar';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { formatNumber } from '@/lib/utils';
+import { useI18n } from '@/components/i18n/locale-provider';
 
 type TrendingArtwork = {
   id: string;
@@ -34,6 +35,7 @@ export function RightSidebarPanel() {
   const supabase = useMemo(() => createClient(), []);
   const [artworks, setArtworks] = useState<TrendingArtwork[]>([]);
   const [profiles, setProfiles] = useState<SuggestedProfile[]>([]);
+  const { t, locale } = useI18n();
 
   useEffect(() => {
     let active = true;
@@ -68,10 +70,10 @@ export function RightSidebarPanel() {
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-card">
               <TrendingUp size={14} className="text-primary" />
             </span>
-            <h2 className="text-[13px] font-semibold text-text">Trending artwork</h2>
+            <h2 className="text-[13px] font-semibold text-text">{t('sidebar.trending')}</h2>
           </div>
           <Link href="/explore?filter=trending" className="text-xs font-semibold text-primary hover:text-primary-glow transition-colors">
-            View all
+            {t('sidebar.viewAll')}
           </Link>
         </div>
         {artworks.length ? (
@@ -87,22 +89,22 @@ export function RightSidebarPanel() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[13px] font-medium text-text group-hover:text-primary transition-colors">
-                    {artwork.title || 'Untitled pixel art'}
+                    {artwork.title || t('common.untitled')}
                   </p>
                   <p className="truncate text-[11px] text-text-muted mt-0.5">
-                    @{artwork.profile?.username || 'creator'}
+                    <span className="rtl-isolate">@{artwork.profile?.username || t('common.creator')}</span>
                   </p>
                 </div>
                 <span className="flex shrink-0 items-center gap-1 text-xs text-text-muted">
                   <Heart size={11} className="text-pink/60" />
-                  {formatNumber(artwork.likes_count ?? 0)}
+                  {formatNumber(artwork.likes_count ?? 0, locale)}
                 </span>
               </Link>
             ))}
           </div>
         ) : (
           <p className="rounded-xl bg-surface/70 p-3.5 text-xs leading-5 text-text-muted">
-            Trending work will appear after creators publish public artwork.
+            {t('sidebar.noTrending')}
           </p>
         )}
       </section>
@@ -113,10 +115,10 @@ export function RightSidebarPanel() {
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-card">
               <Users size={14} className="text-cyan" />
             </span>
-            <h2 className="text-[13px] font-semibold text-text">New creators</h2>
+            <h2 className="text-[13px] font-semibold text-text">{t('sidebar.newCreators')}</h2>
           </div>
           <Link href="/explore" className="text-xs font-semibold text-primary hover:text-primary-glow transition-colors">
-            Explore
+            {t('common.explore')}
           </Link>
         </div>
         {profiles.length ? (
@@ -135,15 +137,15 @@ export function RightSidebarPanel() {
                 />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[13px] font-medium text-text group-hover:text-primary transition-colors">{profile.display_name}</p>
-                  <p className="truncate text-[11px] text-text-muted mt-0.5">@{profile.username}</p>
+                  <p className="rtl-isolate truncate text-[11px] text-text-muted mt-0.5">@{profile.username}</p>
                 </div>
-                <ArrowRight size={12} className="text-text-muted/60 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary/60" />
+                <ArrowRight size={12} className="rtl-flip text-text-muted/60 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary/60" />
               </Link>
             ))}
           </div>
         ) : (
           <p className="rounded-xl bg-surface/70 p-3.5 text-xs leading-5 text-text-muted">
-            Creator recommendations will appear as profiles join.
+            {t('sidebar.noCreators')}
           </p>
         )}
       </section>
@@ -156,15 +158,15 @@ export function RightSidebarPanel() {
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-card">
             <Palette size={15} className="text-pink" />
           </span>
-          Open the pixel editor
+          {t('sidebar.openEditor')}
         </span>
         <span className="block text-xs leading-5 text-text-muted">
-          Publish to your profile or send an anonymous piece.
+          {t('sidebar.editorDescription')}
         </span>
         <span className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-primary transition-colors group-hover:text-primary-glow">
           <Sparkles size={12} />
-          Start drawing
-          <ArrowRight size={11} className="transition-transform duration-200 group-hover:translate-x-0.5" />
+          {t('sidebar.startCreating')}
+          <ArrowRight size={11} className="rtl-flip transition-transform duration-200 group-hover:translate-x-0.5" />
         </span>
       </Link>
 

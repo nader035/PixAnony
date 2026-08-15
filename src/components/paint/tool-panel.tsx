@@ -9,6 +9,8 @@ import { usePaintStore } from '@/stores/paint-store';
 import type { PaintTool } from '@/lib/types';
 import { PAINT_TOOL_SHORTCUTS } from '@/lib/paint-shortcuts';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/components/i18n/locale-provider';
+import type { TranslationKey } from '@/lib/i18n/translations';
 
 interface ToolConfig {
   id: PaintTool;
@@ -35,8 +37,20 @@ const TOOLS: ToolConfig[] = PAINT_TOOL_SHORTCUTS.map((item) => ({
   icon: iconMap[item.tool],
 }));
 
+const toolLabelKeys: Record<string, TranslationKey> = {
+  pencil: 'paint.tool.pencil',
+  eraser: 'paint.tool.eraser',
+  fill: 'paint.tool.fill',
+  line: 'paint.tool.line',
+  rectangle: 'paint.tool.rectangle',
+  circle: 'paint.tool.circle',
+  picker: 'paint.tool.picker',
+  move: 'paint.tool.move',
+};
+
 export default function ToolPanel({ compact = false }: { compact?: boolean }) {
   const { tool, setTool } = usePaintStore();
+  const { t } = useI18n();
 
   return (
     <motion.div
@@ -51,21 +65,22 @@ export default function ToolPanel({ compact = false }: { compact?: boolean }) {
       )}
     >
       <div className={cn('px-2 py-1.5 text-[10px] font-semibold uppercase text-text-muted', compact && 'hidden')}>
-        Tools
+        {t('paint.tools')}
       </div>
 
-      {TOOLS.map((t, i) => {
-        const isActive = tool === t.id;
-        const Icon = t.icon;
+      {TOOLS.map((toolOption, i) => {
+        const isActive = tool === toolOption.id;
+        const Icon = toolOption.icon;
+        const label = t(toolLabelKeys[toolOption.id]);
 
         return (
           <motion.button
-            key={t.id}
+            key={toolOption.id}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.2, delay: 0.05 * i }}
             whileTap={{ scale: 0.92 }}
-            onClick={() => setTool(t.id)}
+            onClick={() => setTool(toolOption.id)}
             className={cn(
               'group relative flex items-center gap-2.5 rounded-full text-sm transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]',
               compact ? 'h-11 min-w-11 justify-center px-3' : 'px-3 py-2.5',
@@ -74,7 +89,7 @@ export default function ToolPanel({ compact = false }: { compact?: boolean }) {
                 : 'bg-surface text-text-muted hover:bg-card-hover hover:text-text'
               ,
             )}
-            title={`${t.label} (${t.shortcut})`}
+            title={`${label} (${toolOption.shortcut})`}
           >
             {/* Active glow */}
             {isActive && (
@@ -92,8 +107,8 @@ export default function ToolPanel({ compact = false }: { compact?: boolean }) {
               size={16}
               className={cn('relative z-10', isActive ? 'text-bg' : '')}
             />
-            <span className={cn('relative z-10 flex-1 text-left text-xs font-medium', compact && 'sr-only')}>
-              {t.label}
+            <span className={cn('relative z-10 flex-1 text-start text-xs font-medium', compact && 'sr-only')}>
+              {label}
             </span>
             <span
               className={cn(
@@ -102,7 +117,7 @@ export default function ToolPanel({ compact = false }: { compact?: boolean }) {
                 compact && 'hidden'
               )}
             >
-              {t.shortcut}
+              {toolOption.shortcut}
             </span>
           </motion.button>
         );

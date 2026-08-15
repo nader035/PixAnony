@@ -5,6 +5,7 @@ import { useSyncExternalStore } from 'react';
 import { Sun, Moon, Monitor } from '@/components/ui/icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/components/i18n/locale-provider';
 
 interface ThemeToggleProps {
   className?: string;
@@ -12,13 +13,14 @@ interface ThemeToggleProps {
 }
 
 const themes = [
-  { value: 'light', icon: Sun, label: 'Light' },
-  { value: 'dark', icon: Moon, label: 'Dark' },
-  { value: 'system', icon: Monitor, label: 'System' },
+  { value: 'light', icon: Sun, labelKey: 'theme.light' },
+  { value: 'dark', icon: Moon, labelKey: 'theme.dark' },
+  { value: 'system', icon: Monitor, labelKey: 'theme.system' },
 ] as const;
 
 export function ThemeToggle({ className, showLabel = false }: ThemeToggleProps) {
   const { theme, setTheme } = useTheme();
+  const { t } = useI18n();
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -28,8 +30,8 @@ export function ThemeToggle({ className, showLabel = false }: ThemeToggleProps) 
   if (!mounted) {
     return (
       <div className={cn('flex items-center gap-1 rounded-xl bg-surface p-1', className)}>
-        {themes.map((t) => (
-          <div key={t.value} className="h-8 w-8 rounded-lg" />
+        {themes.map((themeOption) => (
+          <div key={themeOption.value} className="h-8 w-8 rounded-lg" />
         ))}
       </div>
     );
@@ -39,25 +41,26 @@ export function ThemeToggle({ className, showLabel = false }: ThemeToggleProps) 
     <div className={cn('flex flex-col gap-2', className)}>
       {showLabel && (
         <span className="text-xs font-medium text-text-muted uppercase tracking-wider px-1">
-          Theme
+          {t('theme.label')}
         </span>
       )}
       <div className="flex items-center gap-1 rounded-xl bg-surface p-1 border border-border">
-        {themes.map((t) => {
-          const isActive = theme === t.value;
-          const Icon = t.icon;
+        {themes.map((themeOption) => {
+          const isActive = theme === themeOption.value;
+          const Icon = themeOption.icon;
+          const label = t(themeOption.labelKey);
 
           return (
             <button
-              key={t.value}
-              onClick={() => setTheme(t.value)}
+              key={themeOption.value}
+              onClick={() => setTheme(themeOption.value)}
               className={cn(
                 'relative flex items-center justify-center rounded-lg h-8 w-8 transition-colors duration-200',
                 'hover:text-text',
                 isActive ? 'text-text' : 'text-text-muted'
               )}
-              title={t.label}
-              aria-label={`Set ${t.label} theme`}
+              title={label}
+              aria-label={t('theme.set', { theme: label })}
             >
               {isActive && (
                 <motion.div
@@ -68,7 +71,7 @@ export function ThemeToggle({ className, showLabel = false }: ThemeToggleProps) 
               )}
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={t.value}
+                  key={themeOption.value}
                   className="relative z-10"
                   initial={{ scale: 0.8, opacity: 0, rotate: -30 }}
                   animate={{ scale: 1, opacity: 1, rotate: 0 }}

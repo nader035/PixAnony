@@ -5,12 +5,13 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { normalizeArtwork } from '@/lib/supabase/data';
 import type { Artwork } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { getServerI18n } from '@/lib/i18n/server';
 
 const tabs = [
-  { label: 'For You', value: 'for-you', icon: Compass },
-  { label: 'Following', value: 'following', icon: Users },
-  { label: 'Trending', value: 'trending', icon: TrendingUp },
-  { label: 'Recent', value: 'recent', icon: Clock },
+  { labelKey: 'feed.forYou', value: 'for-you', icon: Compass },
+  { labelKey: 'feed.following', value: 'following', icon: Users },
+  { labelKey: 'feed.trending', value: 'trending', icon: TrendingUp },
+  { labelKey: 'feed.recent', value: 'recent', icon: Clock },
 ] as const;
 
 export default async function HomePage({
@@ -19,6 +20,7 @@ export default async function HomePage({
   searchParams: Promise<{ tab?: string }>;
 }) {
   const { tab = 'for-you' } = await searchParams;
+  const { t } = await getServerI18n();
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -81,10 +83,10 @@ export default async function HomePage({
           <div>
             <p className="mb-2 flex items-center gap-1.5 text-sm font-bold text-pink">
               <Sparkles size={12} />
-              Community feed
+              {t('feed.eyebrow')}
             </p>
             <h1 className="text-3xl font-bold text-text sm:text-4xl">
-              A little inspiration
+              {t('feed.title')}
             </h1>
           </div>
           <Link
@@ -96,13 +98,13 @@ export default async function HomePage({
             )}
           >
             <Palette size={14} />
-            Create artwork
+            {t('feed.createArtwork')}
           </Link>
         </div>
 
         {/* ===== TAB NAV ===== */}
-        <nav className="flex overflow-x-auto hide-scrollbar" aria-label="Feed filters">
-          {tabs.map(({ label, value, icon: Icon }) => (
+        <nav className="flex overflow-x-auto hide-scrollbar" aria-label={t('feed.filters')}>
+          {tabs.map(({ labelKey, value, icon: Icon }) => (
             <Link
               key={value}
               href={`/home?tab=${value}`}
@@ -120,7 +122,7 @@ export default async function HomePage({
                   tab === value ? 'text-primary' : ''
                 )}
               />
-              {label}
+              {t(labelKey)}
               {tab === value && (
                 <span className="absolute inset-x-5 bottom-0 h-1 rounded-full bg-pink" />
               )}
@@ -131,8 +133,8 @@ export default async function HomePage({
 
       <Link href="/paint" className="mt-6 flex items-center gap-3 rounded-[24px] bg-[var(--blush)] p-4 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5">
         <span className="grid h-11 w-11 place-items-center rounded-full bg-card"><Palette size={18} /></span>
-        <span className="min-w-0 flex-1 text-sm font-semibold text-text-muted">What would you like to make today?</span>
-        <span className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-bg">Create</span>
+        <span className="min-w-0 flex-1 text-sm font-semibold text-text-muted">{t('feed.prompt')}</span>
+        <span className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-bg">{t('nav.create')}</span>
       </Link>
 
       {/* ===== FEED / EMPTY STATE ===== */}
@@ -156,18 +158,18 @@ export default async function HomePage({
               <Palette size={36} className="text-white" />
             </span>
             {/* Decorative dot */}
-            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-pink text-[10px] text-white">
+            <span className="absolute -end-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-pink text-[10px] text-white">
               <Sparkles size={10} />
             </span>
           </div>
 
           <h2 className="text-[22px] font-semibold text-text sm:text-2xl">
-            {tab === 'following' ? 'Your following feed is quiet' : 'The canvas is waiting'}
+            {tab === 'following' ? t('feed.followingEmptyTitle') : t('feed.publicEmptyTitle')}
           </h2>
           <p className="mt-3 max-w-sm text-[15px] leading-7 text-text-muted">
             {tab === 'following'
-              ? 'Follow creators from Explore to build a personal feed full of inspiration.'
-              : 'No public artwork has been published yet. Be the first creator to put pixels on the wall.'}
+              ? t('feed.followingEmptyDescription')
+              : t('feed.publicEmptyDescription')}
           </p>
           <Link
             href={tab === 'following' ? '/explore' : '/paint'}
@@ -177,7 +179,7 @@ export default async function HomePage({
               'transition-all duration-200 hover:scale-[1.03] active:scale-[0.98]'
             )}
           >
-            {tab === 'following' ? 'Discover creators' : 'Create first artwork'}
+            {tab === 'following' ? t('feed.discoverCreators') : t('feed.createFirst')}
           </Link>
         </div>
       )}

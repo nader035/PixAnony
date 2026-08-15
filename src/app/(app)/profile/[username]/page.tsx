@@ -12,6 +12,7 @@ import { normalizeArtwork } from '@/lib/supabase/data';
 import { formatNumber } from '@/lib/utils';
 import type { Artwork } from '@/lib/types';
 import { createPublicPageMetadata } from '@/lib/seo';
+import { getServerI18n } from '@/lib/i18n/server';
 
 type TimelineItem = {
   kind: 'artwork' | 'repost';
@@ -45,17 +46,18 @@ export async function generateMetadata({
   params: Promise<{ username: string }>;
 }): Promise<Metadata> {
   const { username } = await params;
+  const { locale, t } = await getServerI18n();
   const profile = await getPublicProfile(username);
   if (!profile?.username) {
     return {
-      title: { absolute: 'Profile not found | PixAnony' },
+      title: { absolute: `${t('profile.notFound')} | PixAnony` },
       robots: { index: false, follow: false },
     };
   }
 
-  const title = `@${profile.username} on PixAnony`;
+  const title = t('profile.seoTitle', { username: profile.username });
   const bio = profile.bio?.trim().replace(/\s+/g, ' ') || '';
-  const fallbackDescription = `Discover pixel art, reposts, and creative activity from @${profile.username} on PixAnony.`;
+  const fallbackDescription = t('profile.seoDescription', { username: profile.username });
   const description = bio.length >= 80
     ? bio.slice(0, 160)
     : `${bio}${bio ? ' ' : ''}${fallbackDescription}`.slice(0, 160);
@@ -63,6 +65,7 @@ export async function generateMetadata({
     title,
     description,
     path: `/profile/${encodeURIComponent(profile.username)}`,
+    locale,
   });
 
   return {
@@ -86,6 +89,7 @@ export default async function ProfilePage({
   params: Promise<{ username: string }>;
 }) {
   const { username } = await params;
+  const { t, locale } = await getServerI18n();
   const supabase = await createServerSupabaseClient();
   const [{ data: { user } }, profile] = await Promise.all([
     supabase.auth.getUser(),
@@ -181,13 +185,13 @@ export default async function ProfilePage({
           {profile.is_verified && <BadgeCheck size={20} className="text-primary" />}
           {profile.is_pro && <span className="flex items-center gap-1 rounded-full border border-yellow/25 bg-yellow/10 px-2 py-1 text-[10px] font-bold text-yellow"><Crown size={11} /> PRO</span>}
         </div>
-        <p className="mt-1 text-sm text-text-muted">@{profile.username}</p>
+        <p className="rtl-isolate mt-1 text-sm text-text-muted">@{profile.username}</p>
         {profile.bio && <p className="mt-4 max-w-2xl text-[15px] leading-6 text-text/90">{profile.bio}</p>}
 
         <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-text-muted">
           {profile.location && <span className="flex items-center gap-1.5"><MapPin size={15} />{profile.location}</span>}
           {website && <a href={website} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-primary hover:underline"><LinkIcon size={15} />{profile.website}</a>}
-          {profile.created_at && <span className="flex items-center gap-1.5"><Calendar size={15} />Joined {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>}
+          {profile.created_at && <span className="flex items-center gap-1.5"><Calendar size={15} />{t('profile.joined', { date: new Date(profile.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { month: 'long', year: 'numeric' }) })}</span>}
         </div>
 
         <AnonymousInboxCard
@@ -199,21 +203,21 @@ export default async function ProfilePage({
 
         <div className="mt-6 grid grid-cols-2 gap-2 rounded-[24px] bg-surface p-2 sm:grid-cols-4">
           {[
-            ['Paints', profile.paints_count],
-            ['Followers', profile.followers_count],
-            ['Following', profile.following_count],
-            ['Likes', profile.likes_count],
+            [t('profile.artworks'), profile.paints_count],
+            [t('profile.followers'), profile.followers_count],
+            [t('profile.following'), profile.following_count],
+            [t('profile.likes'), profile.likes_count],
           ].map(([label, value]) => (
             <div key={String(label)} className="flex min-h-16 flex-col items-center justify-center rounded-[18px] bg-card">
-              <strong className="text-sm text-text">{formatNumber(Number(value ?? 0))}</strong>
+              <strong className="text-sm text-text">{formatNumber(Number(value ?? 0), locale)}</strong>
               <span className="mt-1 text-[11px] text-text-muted">{label}</span>
             </div>
           ))}
         </div>
 
         <div className="mt-8 flex items-center justify-between pb-3">
-          <h2 className="text-sm font-semibold text-text">Profile activity</h2>
-          {ownProfile && <Link href={`/profile/${profile.username}/received`} className="text-xs font-semibold text-primary">Received privately</Link>}
+          <h2 className="text-sm font-semibold text-text">{t('profile.activity')}</h2>
+          {ownProfile && <Link href={`/profile/${profile.username}/received`} className="text-xs font-semibold text-primary">{t('profile.receivedPrivately')}</Link>}
         </div>
       </section>
 
@@ -240,11 +244,11 @@ export default async function ProfilePage({
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             {ownProfile ? <Palette size={26} /> : <Repeat2 size={24} />}
           </div>
-          <h2 className="font-semibold text-text">No public activity yet</h2>
+          <h2 className="font-semibold text-text">{t('profile.emptyTitle')}</h2>
           <p className="mt-2 max-w-xs text-sm leading-6 text-text-muted">
-            {ownProfile ? 'Publish or repost artwork to start your profile timeline.' : 'This creator has not published or reposted anything yet.'}
+            {ownProfile ? t('profile.ownEmpty') : t('profile.otherEmpty')}
           </p>
-          {ownProfile && <Link href="/paint" className="mt-5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white">Create artwork</Link>}
+          {ownProfile && <Link href="/paint" className="mt-5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white">{t('feed.createArtwork')}</Link>}
         </div>
       )}
     </div>

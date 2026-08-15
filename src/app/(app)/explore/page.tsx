@@ -1,17 +1,22 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Heart, Search, Sparkles, TrendingUp } from '@/components/ui/icons';
+import { Eye, Heart, Search, Sparkles, TrendingUp } from '@/components/ui/icons';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { PixelArtRenderer } from '@/components/ui/pixel-art-renderer';
 import { PageFrame, PageHeader } from '@/components/ui/page-layout';
 import { formatNumber, cn } from '@/lib/utils';
 import { createPublicPageMetadata } from '@/lib/seo';
+import { getServerI18n } from '@/lib/i18n/server';
 
-export const metadata: Metadata = createPublicPageMetadata({
-  title: 'Explore Pixel Art',
-  description: 'Explore public pixel art, discover new creators, and find playful inspiration from the PixAnony community.',
-  path: '/explore',
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const { locale, t } = await getServerI18n();
+  return createPublicPageMetadata({
+    title: t('seo.exploreTitle'),
+    description: t('seo.exploreDescription'),
+    path: '/explore',
+    locale,
+  });
+}
 
 const filters = ['all', 'trending', 'new', 'popular'] as const;
 
@@ -21,10 +26,11 @@ export default async function ExplorePage({
   searchParams: Promise<{ q?: string; filter?: string }>;
 }) {
   const { q = '', filter = 'all' } = await searchParams;
+  const { t, locale } = await getServerI18n();
   const supabase = await createServerSupabaseClient();
   let query = supabase
     .from('artworks')
-    .select('id, title, pixel_data, grid_size, likes_count, created_at, profile:profiles!artworks_user_id_fkey(username)')
+    .select('id, title, pixel_data, grid_size, likes_count, views_count, created_at, profile:profiles!artworks_user_id_fkey(username)')
     .eq('visibility', 'public')
     .limit(48);
 
@@ -39,24 +45,24 @@ export default async function ExplorePage({
   return (
     <PageFrame width="wide">
       <PageHeader
-        eyebrow="Discover"
-        title="Explore pixel art"
-        description="Browse public work from real creators. Search is focused on artwork titles."
+        eyebrow={t('explore.eyebrow')}
+        title={t('explore.title')}
+        description={t('explore.description')}
       />
 
       <form className="surface-panel mb-4 flex items-center gap-2 rounded-2xl p-2 sm:gap-3">
-        <Search size={18} className="ml-2 text-text-muted" />
+        <Search size={18} className="ms-2 text-text-muted" />
         <input
           name="q"
           defaultValue={q}
-          placeholder="Search artwork titles"
+          placeholder={t('explore.searchPlaceholder')}
           className="h-11 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-text-muted"
         />
         <input type="hidden" name="filter" value={filter} />
-        <button className="h-10 shrink-0 rounded-xl bg-primary px-4 text-xs font-semibold text-white transition-colors hover:bg-primary-glow">Search</button>
+        <button className="h-10 shrink-0 rounded-xl bg-primary px-4 text-xs font-semibold text-white transition-colors hover:bg-primary-glow">{t('common.search')}</button>
       </form>
 
-      <nav className="mb-6 flex gap-2 overflow-x-auto pb-1" aria-label="Explore filters">
+      <nav className="mb-6 flex gap-2 overflow-x-auto pb-1" aria-label={t('explore.filters')}>
         {filters.map((item) => (
           <Link
             key={item}
@@ -68,7 +74,13 @@ export default async function ExplorePage({
                 : 'border-border bg-card text-text-muted hover:text-text'
             )}
           >
-            {item}
+            {item === 'all'
+              ? t('explore.all')
+              : item === 'trending'
+                ? t('explore.trending')
+                : item === 'popular'
+                  ? t('explore.popular')
+                  : t('explore.recent')}
           </Link>
         ))}
       </nav>
@@ -88,21 +100,21 @@ export default async function ExplorePage({
                 <div className="relative m-3 aspect-square overflow-hidden rounded-[20px] bg-card p-3 sm:m-4 sm:p-4">
                   <PixelArtRenderer pixels={pixels} gridSize={artwork.grid_size} className="h-full w-full" />
                   {index < 3 && filter === 'trending' && (
-                    <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full border border-pink/25 bg-bg/80 px-2 py-1 text-[10px] font-semibold text-pink backdrop-blur">
+                    <span className="absolute start-3 top-3 flex items-center gap-1 rounded-full border border-pink/25 bg-bg/80 px-2 py-1 text-[10px] font-semibold text-pink backdrop-blur">
                       <TrendingUp size={11} />
-                      Trending
+                      {t('explore.trending')}
                     </span>
                   )}
                 </div>
                 <div className="flex items-center gap-3 px-4 pb-4">
                   <div className="min-w-0 flex-1">
-                    <h2 className="truncate text-sm font-semibold text-text">{artwork.title || 'Untitled pixel art'}</h2>
-                    <p className="truncate text-xs text-text-muted">@{profile?.username || 'creator'}</p>
+                    <h2 className="truncate text-sm font-semibold text-text">{artwork.title || t('common.untitled')}</h2>
+                    <p className="rtl-isolate truncate text-xs text-text-muted">@{profile?.username || t('common.creator')}</p>
                   </div>
-                  <span className="flex items-center gap-1 text-xs text-text-muted">
-                    <Heart size={13} />
-                    {formatNumber(artwork.likes_count ?? 0)}
-                  </span>
+                  <div className="flex shrink-0 items-center gap-2.5 text-xs text-text-muted">
+                    <span className="flex items-center gap-1" aria-label={t('common.views', { count: artwork.views_count ?? 0 })}><Eye size={13} />{formatNumber(artwork.views_count ?? 0, locale)}</span>
+                    <span className="flex items-center gap-1" aria-label={t('common.likes', { count: artwork.likes_count ?? 0 })}><Heart size={13} />{formatNumber(artwork.likes_count ?? 0, locale)}</span>
+                  </div>
                 </div>
               </Link>
             );
@@ -111,11 +123,11 @@ export default async function ExplorePage({
       ) : (
         <div className="surface-panel flex min-h-[360px] flex-col items-center justify-center rounded-3xl px-6 text-center">
           <Sparkles size={30} className="mb-4 text-primary" />
-          <h2 className="text-lg font-semibold text-text">Nothing to explore yet</h2>
+          <h2 className="text-lg font-semibold text-text">{t('explore.emptyTitle')}</h2>
           <p className="mt-2 max-w-sm text-sm leading-6 text-text-muted">
-            Try another search, or publish the first public artwork.
+            {t('explore.emptyDescription')}
           </p>
-          <Link href="/paint" className="mt-6 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">Open editor</Link>
+          <Link href="/paint" className="mt-6 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">{t('explore.openEditor')}</Link>
         </div>
       )}
     </PageFrame>

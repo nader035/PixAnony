@@ -4,14 +4,22 @@ import { useRef, useEffect, useCallback, useState } from 'react';
 import { usePaintStore } from '@/stores/paint-store';
 import { floodFill, drawLine, drawRectangle, drawCircle } from '@/lib/utils';
 import { PAINT_TOOL_SHORTCUTS } from '@/lib/paint-shortcuts';
+import { useI18n } from '@/components/i18n/locale-provider';
+import type { TranslationKey } from '@/lib/i18n/translations';
 
 // ===== CONSTANTS =====
 const CHECKER_LIGHT = '#2a2a3e';
 const CHECKER_DARK = '#1e1e30';
 const GRID_COLOR = 'rgba(255, 255, 255, 0.12)';
 const GRID_COLOR_MAJOR = 'rgba(255, 255, 255, 0.25)';
+const toolLabelKeys: Record<string, TranslationKey> = {
+  pencil: 'paint.tool.pencil', eraser: 'paint.tool.eraser', fill: 'paint.tool.fill',
+  line: 'paint.tool.line', rectangle: 'paint.tool.rectangle', circle: 'paint.tool.circle',
+  picker: 'paint.tool.picker', move: 'paint.tool.move',
+};
 
 export default function PaintCanvas() {
+  const { t, locale } = useI18n();
   // ===== REFS =====
   const containerRef = useRef<HTMLDivElement>(null);
   const checkerCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -44,7 +52,8 @@ export default function PaintCanvas() {
   // ===== COMPUTED =====
   const zoomFactor = zoom / 100;
   const cellSize = canvasSize.width / gridSize;
-  const activeToolLabel = PAINT_TOOL_SHORTCUTS.find((item) => item.tool === tool)?.label ?? tool;
+  const activeTool = PAINT_TOOL_SHORTCUTS.find((item) => item.tool === tool);
+  const activeToolLabel = activeTool ? t(toolLabelKeys[activeTool.tool]) : tool;
 
   // ===== ACTIVE LAYER =====
   const activeLayer = layers.find(l => l.id === activeLayerId);
@@ -509,8 +518,8 @@ export default function PaintCanvas() {
       ref={containerRef}
       className="relative flex flex-1 items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_50%_10%,rgba(139,92,246,.14),transparent_34rem),linear-gradient(transparent_23px,rgba(148,163,184,.045)_24px),linear-gradient(90deg,transparent_23px,rgba(148,163,184,.045)_24px),var(--bg)] bg-[length:auto,24px_24px,24px_24px,auto] p-3 sm:p-5"
     >
-      <div className="pointer-events-none absolute left-4 top-4 z-20 hidden items-center gap-2 rounded-2xl border border-border/70 bg-bg/72 px-3 py-2 text-xs font-semibold text-text shadow-float backdrop-blur-xl md:flex">
-        <span className="text-primary">Board {gridSize} x {gridSize}</span>
+      <div className="pointer-events-none absolute start-4 top-4 z-20 hidden items-center gap-2 rounded-2xl border border-border/70 bg-bg/72 px-3 py-2 text-xs font-semibold text-text shadow-float backdrop-blur-xl md:flex">
+        <span className="text-primary">{t('paint.board', { size: new Intl.NumberFormat(locale === 'ar' ? 'ar-EG' : 'en-US').format(gridSize) })}</span>
         <span className="h-1 w-1 rounded-full bg-text-muted/50" />
         <span className="text-text-muted">{activeToolLabel}</span>
       </div>
@@ -578,9 +587,9 @@ export default function PaintCanvas() {
 
       {/* Zoom indicator */}
       <div className="pointer-events-none absolute bottom-4 left-1/2 hidden -translate-x-1/2 rounded-2xl border border-border/70 bg-bg/72 px-3 py-2 text-[11px] font-medium text-text-muted shadow-float backdrop-blur-xl md:block">
-        <span className="text-yellow">Tip:</span> Hold mouse to draw · Right click erases · Press ? for shortcuts
+        <span className="text-yellow">{t('paint.tipLabel')}</span> {t('paint.tip')}
       </div>
-      <div className="absolute bottom-4 right-4 rounded-xl border border-border/70 bg-bg/76 px-2.5 py-1.5 font-mono text-xs text-text-muted backdrop-blur-xl">
+      <div className="absolute bottom-4 end-4 rounded-xl border border-border/70 bg-bg/76 px-2.5 py-1.5 font-mono text-xs text-text-muted backdrop-blur-xl">
         {zoom}%
       </div>
     </div>

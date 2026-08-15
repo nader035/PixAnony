@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { Eraser, Save } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/components/i18n/locale-provider';
 
 const GRID_SIZE = 8;
 const DEFAULT_COLORS = ['#141c2c', '#005efe', '#db2777', '#0891b2', '#059669', '#f59e0b', '#f8fafc', 'transparent'];
@@ -61,6 +62,7 @@ export function DrawnAvatarEditor({
   const seeded = useMemo(() => seedPixels(username), [username]);
   const [pixels, setPixels] = useState<string[]>(seeded);
   const [activeColor, setActiveColor] = useState(DEFAULT_COLORS[1]);
+  const { t, locale } = useI18n();
 
   const paint = (index: number) => {
     if (disabled) return;
@@ -80,7 +82,7 @@ export function DrawnAvatarEditor({
               <button
                 key={index}
                 type="button"
-                aria-label={`Avatar pixel ${index + 1}`}
+                aria-label={t('avatar.pixel', { number: new Intl.NumberFormat(locale === 'ar' ? 'ar-EG' : 'en-US').format(index + 1) })}
                 onClick={() => paint(index)}
                 disabled={disabled}
                 className="aspect-square rounded-[3px] border border-border/40 disabled:cursor-not-allowed disabled:opacity-60"
@@ -93,9 +95,9 @@ export function DrawnAvatarEditor({
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h3 className="text-sm font-semibold text-text">Drawn avatar</h3>
+              <h3 className="text-sm font-semibold text-text">{t('avatar.title')}</h3>
               <p className="mt-1 text-xs leading-5 text-text-muted">
-                Create a tiny built-in avatar. PixAnony does not use profile photo uploads.
+                {t('avatar.description')}
               </p>
             </div>
             {value && (
@@ -111,7 +113,7 @@ export function DrawnAvatarEditor({
                 type="button"
                 onClick={() => setActiveColor(color)}
                 disabled={disabled}
-                aria-label={color === 'transparent' ? 'Transparent' : `Use ${color}`}
+                aria-label={color === 'transparent' ? t('avatar.transparent') : t('avatar.useColor', { color })}
                 className={cn(
                   'h-8 w-8 rounded-xl border transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-60',
                   activeColor === color ? 'border-primary ring-4 ring-primary/10' : 'border-border',
@@ -124,13 +126,13 @@ export function DrawnAvatarEditor({
 
           <div className="mt-4 flex flex-wrap gap-2">
             <Button type="button" size="sm" onClick={save} disabled={disabled} leftIcon={<Save size={13} />}>
-              Use avatar
+              {t('avatar.use')}
             </Button>
             <Button type="button" variant="secondary" size="sm" onClick={useSeed} disabled={disabled}>
-              Suggest one
+              {t('avatar.suggest')}
             </Button>
             <Button type="button" variant="ghost" size="sm" onClick={clear} disabled={disabled} leftIcon={<Eraser size={13} />}>
-              Clear
+              {t('avatar.clear')}
             </Button>
           </div>
         </div>

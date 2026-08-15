@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Send, UserPlus } from '@/components/ui/icons';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import { useI18n } from '@/components/i18n/locale-provider';
 
 export function ProfileActions({
   profileId,
@@ -20,18 +21,19 @@ export function ProfileActions({
   const supabase = useMemo(() => createClient(), []);
   const [following, setFollowing] = useState(initiallyFollowing);
   const [saving, setSaving] = useState(false);
+  const { t } = useI18n();
 
   if (viewerId === profileId) {
     return (
       <Link href="/settings" className="rounded-full bg-surface px-4 py-2.5 text-sm font-semibold text-text hover:bg-card-hover">
-        Edit profile
+        {t('profile.edit')}
       </Link>
     );
   }
 
   const toggleFollow = async () => {
     if (!viewerId) {
-      toast.error('Sign in to follow creators.');
+      toast.error(t('profile.signInFollow'));
       return;
     }
     setSaving(true);
@@ -40,7 +42,7 @@ export function ProfileActions({
       : await supabase.from('follows').insert({ follower_id: viewerId, following_id: profileId });
     setSaving(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(t('common.actionFailed'));
       return;
     }
     setFollowing(!following);
@@ -49,8 +51,8 @@ export function ProfileActions({
   return (
     <div className="flex gap-2">
       <Link href={`/send/${username}`} className="flex items-center gap-2 rounded-full bg-surface px-4 py-2.5 text-sm font-semibold text-text hover:bg-card-hover">
-        <Send size={16} />
-        Send pixel
+        <Send size={16} className="rtl-flip" />
+        {t('profile.sendArtwork')}
       </Link>
       <button
         onClick={() => void toggleFollow()}
@@ -58,7 +60,7 @@ export function ProfileActions({
         className="flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-bg disabled:opacity-60"
       >
         <UserPlus size={16} />
-        {following ? 'Following' : 'Follow'}
+        {following ? t('profile.following') : t('profile.follow')}
       </button>
     </div>
   );

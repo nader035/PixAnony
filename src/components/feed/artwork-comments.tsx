@@ -7,6 +7,7 @@ import { PixelAvatar } from '@/components/ui/pixel-avatar';
 import { createClient } from '@/lib/supabase/client';
 import { formatTimeAgo, cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useI18n } from '@/components/i18n/locale-provider';
 
 type CommentItem = {
   id: string;
@@ -28,13 +29,14 @@ export function ArtworkComments({
   const [comments, setComments] = useState(initialComments);
   const [content, setContent] = useState('');
   const [saving, setSaving] = useState(false);
+  const { t, locale } = useI18n();
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     const value = content.trim();
     if (!value) return;
     if (!viewer) {
-      toast.error('Sign in to comment.');
+      toast.error(t('comments.signIn'));
       return;
     }
     setSaving(true);
@@ -57,7 +59,7 @@ export function ArtworkComments({
           <MessageSquare size={15} className="text-primary" />
         </span>
         <h2 className="text-sm font-semibold text-text">
-          Comments
+          {t('comments.title')}
         </h2>
         <span className="rounded-full bg-card-hover px-2 py-0.5 text-[11px] font-semibold tabular-nums text-text-muted">
           {comments.length}
@@ -87,10 +89,10 @@ export function ArtworkComments({
                   href={comment.profile?.username ? `/profile/${comment.profile.username}` : '#'}
                   className="truncate text-[13px] font-semibold text-text transition-colors hover:text-primary"
                 >
-                  {comment.profile?.display_name || 'Creator'}
+                  {comment.profile?.display_name || t('comments.creator')}
                 </Link>
                 <time className="shrink-0 text-[11px] font-medium text-text-muted/70">
-                  {formatTimeAgo(comment.created_at)}
+                  {formatTimeAgo(comment.created_at, locale)}
                 </time>
               </div>
               <p className="mt-1 text-sm leading-relaxed text-text/85">
@@ -104,10 +106,10 @@ export function ArtworkComments({
               <MessageSquare size={20} className="text-text-muted/60" />
             </span>
             <p className="text-sm font-medium text-text-muted">
-              No comments yet
+              {t('comments.emptyTitle')}
             </p>
             <p className="mt-1 text-xs text-text-muted/60">
-              Start the conversation below
+              {t('comments.emptyDescription')}
             </p>
           </div>
         )}
@@ -122,7 +124,8 @@ export function ArtworkComments({
           value={content}
           onChange={(event) => setContent(event.target.value)}
           maxLength={500}
-          placeholder={viewer ? 'Write a thoughtful comment…' : 'Sign in to comment'}
+          placeholder={viewer ? t('comments.placeholder') : t('comments.signInPlaceholder')}
+          aria-label={viewer ? t('comments.placeholder') : t('comments.signInPlaceholder')}
           className={cn(
             'h-11 min-w-0 flex-1 rounded-xl border border-border/70 bg-surface px-4 text-sm text-text placeholder:text-text-muted/50',
             'outline-none transition-all duration-200',
@@ -138,7 +141,7 @@ export function ArtworkComments({
             'shadow-sm hover:shadow-[0_4px_15px_rgba(139,92,246,0.3)]'
           )}
         >
-          {saving ? <Loader2 size={17} className="animate-spin" /> : <Send size={17} />}
+          {saving ? <Loader2 size={17} className="animate-spin" /> : <Send size={17} className="rtl-flip" />}
         </button>
       </form>
     </section>

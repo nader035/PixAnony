@@ -6,6 +6,7 @@ import { PixelAvatar } from '@/components/ui/pixel-avatar';
 import { PageFrame, PageHeader } from '@/components/ui/page-layout';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { formatTimeAgo } from '@/lib/utils';
+import { getServerI18n } from '@/lib/i18n/server';
 
 export default async function ReceivedPage({
   params,
@@ -13,6 +14,7 @@ export default async function ReceivedPage({
   params: Promise<{ username: string }>;
 }) {
   const { username } = await params;
+  const { t, locale } = await getServerI18n();
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect(`/login?next=${encodeURIComponent(`/profile/${username}/received`)}`);
@@ -29,9 +31,9 @@ export default async function ReceivedPage({
   return (
     <PageFrame width="wide">
       <PageHeader
-        eyebrow="Private collection"
-        title="Received artwork"
-        description="Artwork sent directly to you. Anonymous deliveries stay hidden, while signed deliveries show the sender profile."
+        eyebrow={t('drops.eyebrow')}
+        title={t('drops.receivedTitle')}
+        description={t('drops.receivedDescription')}
         actions={<span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--lilac)] text-text"><Inbox size={21} /></span>}
       />
 
@@ -46,31 +48,31 @@ export default async function ReceivedPage({
                   className="h-full w-full"
                 />
                 {index === 0 && (
-                  <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full border border-primary/25 bg-bg/80 px-2 py-1 text-[10px] font-semibold text-primary backdrop-blur">
+                  <span className="absolute end-3 top-3 flex items-center gap-1 rounded-full border border-primary/25 bg-bg/80 px-2 py-1 text-[10px] font-semibold text-primary backdrop-blur">
                     <Sparkles size={11} />
-                    Latest
+                    {t('drops.latest')}
                   </span>
                 )}
               </div>
               <div className="px-4 pb-4">
-                <h2 className="truncate text-sm font-semibold text-text">{artwork.title || 'Anonymous artwork'}</h2>
+                <h2 className="truncate text-sm font-semibold text-text">{artwork.title || t('drops.anonymousArtwork')}</h2>
                 {artwork.caption && <p className="mt-1 line-clamp-2 text-xs leading-5 text-text-muted">{artwork.caption}</p>}
                 <div className="mt-3 flex items-center justify-between gap-3 text-[11px] text-text-muted">
                   {artwork.is_anonymous ? (
-                    <span className="flex items-center gap-1"><LockKeyhole size={12} />Anonymous</span>
+                    <span className="flex items-center gap-1"><LockKeyhole size={12} />{t('common.anonymous')}</span>
                   ) : (() => {
                     const profile = Array.isArray(artwork.profile) ? artwork.profile[0] : artwork.profile;
                     return (
                       <span className="flex min-w-0 items-center gap-2">
                         <PixelAvatar username={profile?.username || 'sender'} src={profile?.avatar_url ?? null} size="xs" showBadge={false} />
                         <span className="min-w-0 truncate">
-                          {profile?.display_name || profile?.username || 'Signed sender'}
+                          {profile?.display_name || profile?.username || t('drops.signedSender')}
                         </span>
                         {profile?.is_verified && <BadgeCheck size={11} className="shrink-0 text-primary" />}
                       </span>
                     );
                   })()}
-                  <span>{formatTimeAgo(artwork.created_at ?? new Date().toISOString())}</span>
+                  <span>{formatTimeAgo(artwork.created_at ?? new Date().toISOString(), locale)}</span>
                 </div>
               </div>
             </Link>
@@ -79,11 +81,11 @@ export default async function ReceivedPage({
       ) : (
         <div className="flex min-h-[360px] flex-col items-center justify-center rounded-3xl border border-dashed border-border px-6 text-center">
           <Inbox size={30} className="mb-4 text-primary" />
-          <h2 className="text-lg font-semibold text-text">Your private inbox is empty</h2>
+          <h2 className="text-lg font-semibold text-text">{t('drops.receivedEmptyTitle')}</h2>
           <p className="mt-2 max-w-sm text-sm leading-6 text-text-muted">
-            Share your profile link so other creators can send anonymous or signed artwork.
+            {t('drops.receivedEmptyDescription')}
           </p>
-          <Link href={`/profile/${username}`} className="mt-6 rounded-full bg-surface px-5 py-3 text-sm font-semibold text-text">Back to profile</Link>
+          <Link href={`/profile/${username}`} className="mt-6 rounded-full bg-surface px-5 py-3 text-sm font-semibold text-text">{t('drops.backProfile')}</Link>
         </div>
       )}
     </PageFrame>

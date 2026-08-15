@@ -6,19 +6,24 @@ import { motion } from 'framer-motion';
 import { Home, Compass, Plus, Bell, User, LogIn } from '@/components/ui/icons';
 import { PixelAvatar } from '@/components/ui/pixel-avatar';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber } from '@/lib/utils';
+import { useNotificationCenter } from '@/components/notifications/notification-center';
+import { useI18n } from '@/components/i18n/locale-provider';
 
 export function MobileNav() {
   const pathname = usePathname();
   const { profile, isAuthenticated } = useAuthProfile();
+  const { unreadCount } = useNotificationCenter();
+  const { t, locale } = useI18n();
 
   const items = [
-    { label: 'Home', href: '/home', icon: Home },
-    { label: 'Explore', href: '/explore', icon: Compass },
-    { label: 'Create', href: isAuthenticated ? '/paint' : '/login?next=%2Fpaint', icon: Plus, center: true },
-    { label: 'Alerts', href: isAuthenticated ? '/notifications' : '/login?next=%2Fnotifications', icon: Bell },
+    { id: 'home', label: t('nav.home'), href: '/home', icon: Home },
+    { id: 'explore', label: t('nav.explore'), href: '/explore', icon: Compass },
+    { id: 'create', label: t('nav.create'), href: isAuthenticated ? '/paint' : '/login?next=%2Fpaint', icon: Plus, center: true },
+    { id: 'alerts', label: t('nav.alerts'), href: isAuthenticated ? '/notifications' : '/login?next=%2Fnotifications', icon: Bell },
     {
-      label: profile ? 'Profile' : 'Sign in',
+      id: 'profile',
+      label: profile ? t('nav.profile') : t('nav.signIn'),
       href: profile ? `/profile/${profile.username}` : '/login',
       icon: profile ? User : LogIn,
       avatar: Boolean(profile),
@@ -39,7 +44,7 @@ export function MobileNav() {
           const active = pathname === item.href || (!item.href.includes('?') && pathname?.startsWith(`${item.href}/`));
           return (
             <Link
-              key={item.label}
+              key={`${locale}-${item.id}`}
               href={item.href}
               aria-current={active ? 'page' : undefined}
               className={cn(
@@ -66,6 +71,11 @@ export function MobileNav() {
                   <PixelAvatar username={profile.username} src={profile.avatar_url} size="xs" isVerified={profile.is_verified} showBadge={false} />
                 ) : (
                   <Icon size={item.center ? 24 : 21} strokeWidth={active ? 2.5 : 2} />
+                )}
+                {item.id === 'alerts' && unreadCount > 0 && (
+                  <span className="absolute -end-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-red px-1 text-[9px] font-bold text-white ring-2 ring-[var(--glass-bg)]">
+                    {unreadCount > 9 ? (locale === 'ar' ? '+٩' : '9+') : formatNumber(unreadCount, locale)}
+                  </span>
                 )}
               </span>
 

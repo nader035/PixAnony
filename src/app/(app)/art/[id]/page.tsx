@@ -8,6 +8,7 @@ import { PageFrame } from '@/components/ui/page-layout';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { normalizeArtwork } from '@/lib/supabase/data';
 import { PUBLIC_ROBOTS } from '@/lib/seo';
+import { getServerI18n } from '@/lib/i18n/server';
 
 export async function generateMetadata({
   params,
@@ -15,6 +16,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
+  const { locale, t } = await getServerI18n();
   const supabase = await createServerSupabaseClient();
   const { data } = await supabase
     .from('artworks')
@@ -24,15 +26,15 @@ export async function generateMetadata({
 
   if (!data) {
     return {
-      title: 'Artwork not found',
+      title: t('art.notFound'),
       robots: { index: false, follow: false },
     };
   }
 
   if (data.visibility === 'private') {
     return {
-      title: 'Private artwork',
-      description: 'This PixAnony artwork is available only to people with access.',
+      title: t('art.privateTitle'),
+      description: t('art.privateDescription'),
       robots: { index: false, follow: false },
     };
   }
@@ -43,14 +45,16 @@ export async function generateMetadata({
     display_name: string;
   } | null | undefined;
   const creator = data.is_anonymous
-    ? 'an anonymous artist'
+    ? t('art.anonymousArtist')
     : joinedProfile?.username
       ? `@${joinedProfile.username}`
-      : joinedProfile?.display_name || 'a PixAnony artist';
+      : joinedProfile?.display_name || t('art.communityArtist');
   const artworkTitle = data.title?.trim();
-  const seoTitle = artworkTitle ? `${artworkTitle} — Pixel Art by ${creator}` : `Pixel Art by ${creator}`;
+  const seoTitle = artworkTitle
+    ? t('art.withTitle', { title: artworkTitle, creator })
+    : t('art.by', { creator });
   const caption = data.caption?.trim().replace(/\s+/g, ' ') || '';
-  const fallbackDescription = `Discover pixel art shared by ${creator} in the PixAnony creative community.`;
+  const fallbackDescription = t('art.discover', { creator });
   const description = caption.length >= 80
     ? caption.slice(0, 160)
     : `${caption}${caption ? ' ' : ''}${fallbackDescription}`.slice(0, 160);
@@ -66,7 +70,7 @@ export async function generateMetadata({
       type: 'article',
       url: `/art/${id}`,
       siteName: 'PixAnony',
-      locale: 'en_US',
+      locale: locale === 'ar' ? 'ar_AR' : 'en_US',
     },
     twitter: {
       card: 'summary_large_image',
@@ -82,6 +86,7 @@ export default async function ArtworkDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const { t } = await getServerI18n();
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
   const { data } = await supabase
@@ -119,8 +124,8 @@ export default async function ArtworkDetailPage({
   return (
     <PageFrame width="compact">
       <Link href="/home" className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-text-muted hover:text-text">
-        <ArrowLeft size={16} />
-        Back to feed
+        <ArrowLeft className="rtl-flip" size={16} />
+        {t('art.backToFeed')}
       </Link>
       <div className="space-y-4">
         <FeedCard artwork={artwork} />

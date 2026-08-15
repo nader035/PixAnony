@@ -15,7 +15,7 @@ import {
   PaintBucket as PaintBucketIcon, Palette as PaletteIcon, PaperPlaneTilt, PencilSimple,
   Plus as PlusIcon, Question, Repeat as RepeatIcon, ShareNetwork, ShieldCheck, Sparkle,
   SpinnerGap, Square as SquareIcon, Star as StarIcon, Sun as SunIcon, SquaresFour,
-  Tray, Trash as TrashIcon, Trophy as TrophyIcon, UploadSimple, User as UserIcon,
+  Tray, Trash as TrashIcon, Trophy as TrophyIcon, Translate as TranslateIcon, UploadSimple, User as UserIcon,
   UserCheck as UserCheckIcon, UserPlus as UserPlusIcon, Users as UsersIcon, X as XIcon,
   XLogo,
   ChatCircle, Chats,
@@ -61,6 +61,7 @@ export const Home = House;
 export const Image = FileImageIcon;
 export const Inbox = Tray;
 export const LinkIcon = LinkSimple;
+export const Languages = TranslateIcon;
 export const Loader2 = SpinnerGap;
 export const Lock = LockKey;
 export const LockKeyhole = LockKey;

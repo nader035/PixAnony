@@ -5,13 +5,15 @@ export function FilterChips<T extends string>({
   items,
   active,
   hrefFor,
+  ariaLabel,
 }: {
   items: readonly T[];
   active: string;
   hrefFor: (item: T) => string;
+  ariaLabel?: string;
 }) {
   return (
-    <nav className="flex gap-2 overflow-x-auto pb-1" aria-label="Filters">
+    <nav className="flex gap-2 overflow-x-auto pb-1" aria-label={ariaLabel}>
       {items.map((item) => (
         <Link
           key={item}

@@ -4,13 +4,14 @@ export function cn(...inputs: ClassValue[]): string {
   return clsx(inputs);
 }
 
-export function formatNumber(num: number): string {
-  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-  return num.toString();
+export function formatNumber(num: number, locale: 'en' | 'ar' = 'en'): string {
+  return new Intl.NumberFormat(locale === 'ar' ? 'ar-EG' : 'en-US', {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(num);
 }
 
-export function formatTimeAgo(date: string): string {
+export function formatTimeAgo(date: string, locale: 'en' | 'ar' = 'en'): string {
   const now = new Date();
   const d = new Date(date);
   const diffMs = now.getTime() - d.getTime();
@@ -19,11 +20,14 @@ export function formatTimeAgo(date: string): string {
   const diffHour = Math.floor(diffMin / 60);
   const diffDay = Math.floor(diffHour / 24);
 
-  if (diffSec < 60) return 'just now';
-  if (diffMin < 60) return `${diffMin}m ago`;
-  if (diffHour < 24) return `${diffHour}h ago`;
-  if (diffDay < 7) return `${diffDay}d ago`;
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const intlLocale = locale === 'ar' ? 'ar-EG' : 'en-US';
+  const relative = new Intl.RelativeTimeFormat(intlLocale, { numeric: 'auto' });
+
+  if (diffSec < 60) return relative.format(0, 'second');
+  if (diffMin < 60) return relative.format(-diffMin, 'minute');
+  if (diffHour < 24) return relative.format(-diffHour, 'hour');
+  if (diffDay < 7) return relative.format(-diffDay, 'day');
+  return d.toLocaleDateString(intlLocale, { month: 'short', day: 'numeric' });
 }
 
 export function generateId(): string {

@@ -9,6 +9,8 @@ import { Logo } from '@/components/ui/logo';
 import { PixelCanvasMock } from '@/components/ui/pixel-canvas-mock';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import { useI18n } from '@/components/i18n/locale-provider';
+import { LanguageSwitcher } from '@/components/i18n/language-switcher';
 
 
 const fadeUp = {
@@ -46,9 +48,9 @@ function OAuthButton({
     >
       <div className="flex items-center gap-3">
         <Icon className="w-5 h-5 flex-shrink-0 transition-colors" style={{ color }} />
-        <span>Continue with {label}</span>
+        <span>{label}</span>
       </div>
-      <ArrowRight className="h-3.5 w-3.5 text-text-muted opacity-0 transition-opacity group-hover:opacity-100" />
+      <ArrowRight className="rtl-flip h-3.5 w-3.5 text-text-muted opacity-0 transition-opacity group-hover:opacity-100" />
     </motion.button>
   );
 }
@@ -157,6 +159,7 @@ function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = useMemo(() => createClient(), []);
+  const { t } = useI18n();
   const nextPath = useMemo(() => {
     const next = searchParams.get('next');
     return next?.startsWith('/') && !next.startsWith('//') ? next : '/home';
@@ -196,8 +199,8 @@ function LoginPageContent() {
         },
       });
       if (error) throw error;
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'OAuth authentication failed.');
+    } catch {
+      toast.error(t('auth.oauthFailed'));
       setLoading(false);
     }
   };
@@ -205,12 +208,12 @@ function LoginPageContent() {
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error('Please fill in all required fields.');
+      toast.error(t('auth.requiredFields'));
       return;
     }
 
     if (mode === 'signup' && !username) {
-      toast.error('Username is required for sign up.');
+      toast.error(t('auth.usernameRequired'));
       return;
     }
 
@@ -222,7 +225,7 @@ function LoginPageContent() {
           password,
         });
         if (error) throw error;
-        toast.success('Signed in. Redirecting.');
+        toast.success(t('auth.signedIn'));
         router.push(nextPath);
       } else {
         const { data, error } = await supabase.auth.signUp({
@@ -238,15 +241,15 @@ function LoginPageContent() {
         });
         if (error) throw error;
         if (data.session) {
-          toast.success('Account created. Redirecting.');
+          toast.success(t('auth.accountCreated'));
           router.push(nextPath);
           return;
         }
-        toast.success('Check your email for a confirmation link.');
+        toast.success(t('auth.checkEmail'));
         setMode('login');
       }
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Authentication failed. Please try again.');
+    } catch {
+      toast.error(t('auth.failed'));
     } finally {
       setLoading(false);
     }
@@ -264,23 +267,26 @@ function LoginPageContent() {
         >
           {/* Back + Logo */}
           <motion.div variants={fadeUp} className="mb-6">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-text transition-colors mb-6"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to home
-            </Link>
-            <Logo />
+            <div className="mb-6 flex items-center justify-between gap-3">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-text transition-colors"
+              >
+                <ArrowLeft className="rtl-flip h-4 w-4" />
+                {t('auth.backHome')}
+              </Link>
+              <LanguageSwitcher showLabel={false} />
+            </div>
+            <Logo priority />
           </motion.div>
 
           {/* Heading */}
           <motion.div variants={fadeUp} className="mb-6">
             <h1 className="mb-2 text-2xl font-semibold text-text sm:text-3xl">
-              {mode === 'login' ? 'Welcome back' : 'Create your account'}
+              {mode === 'login' ? t('auth.welcomeBack') : t('auth.joinTitle')}
             </h1>
             <p className="text-text-muted text-sm">
-              {isContinuingSendDraft ? 'Sign in to deliver your saved private canvas.' : mode === 'login' ? 'Come back to your art and your community.' : 'Create a profile and start drawing.'}
+              {isContinuingSendDraft ? t('auth.continueDraft') : mode === 'login' ? t('auth.signInDescription') : t('auth.signUpDescription')}
             </p>
           </motion.div>
 
@@ -295,14 +301,14 @@ function LoginPageContent() {
               >
                 <OAuthButton
                   icon={Google}
-                  label="Google"
+                  label={t('auth.continueGoogle')}
                   color="#4285F4"
                   onClick={() => handleOAuthLogin('google')}
                   disabled={loading}
                 />
                 <OAuthButton
                   icon={XSocial}
-                  label="X"
+                  label={t('auth.continueX')}
                   color="#111111"
                   onClick={() => handleOAuthLogin('x')}
                   disabled={loading}
@@ -312,7 +318,7 @@ function LoginPageContent() {
 
                 <motion.div variants={fadeUp} className="flex items-center gap-4 my-6">
                   <div className="flex-1 h-px bg-border" />
-                  <span className="text-xs font-semibold uppercase text-text-muted">or</span>
+                  <span className="text-xs font-semibold uppercase text-text-muted">{t('common.or')}</span>
                   <div className="flex-1 h-px bg-border" />
                 </motion.div>
 
@@ -325,7 +331,7 @@ function LoginPageContent() {
                   className="flex w-full items-center justify-center gap-3 rounded-2xl border border-primary/25 bg-primary/10 px-4 py-3.5 text-sm font-semibold text-primary transition-all hover:bg-primary/15"
                 >
                   <Mail className="w-5 h-5 text-primary" />
-                  Continue with Email
+                  {t('auth.continueEmail')}
                 </motion.button>
               </motion.div>
             ) : (
@@ -340,32 +346,32 @@ function LoginPageContent() {
                 {mode === 'signup' && (
                   <>
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold uppercase text-text/80">Username</label>
+                      <label className="text-xs font-semibold uppercase text-text/80">{t('auth.username')}</label>
                       <div className="relative">
-                        <User className="absolute left-3.5 top-3.5 h-5 w-5 text-text-muted" />
+                        <User className="absolute start-3.5 top-3.5 h-5 w-5 text-text-muted" />
                         <input
                           type="text"
                           required
                           minLength={3}
                           maxLength={30}
-                          placeholder="pixel_master"
+                          placeholder={t('auth.usernamePlaceholder')}
                           value={username}
                           onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
-                          className="w-full rounded-2xl border border-border bg-card/70 py-3 pl-11 pr-4 text-sm transition-colors focus:border-primary/70 focus:outline-none"
+                          className="w-full rounded-2xl border border-border bg-card/70 py-3 ps-11 pe-4 text-sm transition-colors focus:border-primary/70 focus:outline-none"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold uppercase text-text/80">Display name</label>
+                      <label className="text-xs font-semibold uppercase text-text/80">{t('auth.displayName')}</label>
                       <div className="relative">
-                        <User className="absolute left-3.5 top-3.5 h-5 w-5 text-text-muted opacity-50" />
+                        <User className="absolute start-3.5 top-3.5 h-5 w-5 text-text-muted opacity-50" />
                         <input
                           type="text"
-                          placeholder="Pixel Master (Optional)"
+                          placeholder={t('auth.displayNamePlaceholder')}
                           value={displayName}
                           onChange={(e) => setDisplayName(e.target.value)}
-                          className="w-full rounded-2xl border border-border bg-card/70 py-3 pl-11 pr-4 text-sm transition-colors focus:border-primary/70 focus:outline-none"
+                          className="w-full rounded-2xl border border-border bg-card/70 py-3 ps-11 pe-4 text-sm transition-colors focus:border-primary/70 focus:outline-none"
                         />
                       </div>
                     </div>
@@ -373,36 +379,37 @@ function LoginPageContent() {
                 )}
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold uppercase text-text/80">Email address</label>
+                  <label className="text-xs font-semibold uppercase text-text/80">{t('auth.email')}</label>
                   <div className="relative">
-                    <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-text-muted" />
+                    <Mail className="absolute start-3.5 top-3.5 h-5 w-5 text-text-muted" />
                     <input
                       type="email"
                       required
                       placeholder="you@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full rounded-2xl border border-border bg-card/70 py-3 pl-11 pr-4 text-sm transition-colors focus:border-primary/70 focus:outline-none"
+                      className="w-full rounded-2xl border border-border bg-card/70 py-3 ps-11 pe-4 text-sm transition-colors focus:border-primary/70 focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold uppercase text-text/80">Password</label>
+                  <label className="text-xs font-semibold uppercase text-text/80">{t('auth.password')}</label>
                   <div className="relative">
-                    <Lock className="absolute left-3.5 top-3.5 h-5 w-5 text-text-muted" />
+                    <Lock className="absolute start-3.5 top-3.5 h-5 w-5 text-text-muted" />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full rounded-2xl border border-border bg-card/70 py-3 pl-11 pr-11 text-sm transition-colors focus:border-primary/70 focus:outline-none"
+                      className="w-full rounded-2xl border border-border bg-card/70 py-3 ps-11 pe-11 text-sm transition-colors focus:border-primary/70 focus:outline-none"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-3.5 text-text-muted hover:text-text transition-colors"
+                      className="absolute end-3.5 top-3.5 text-text-muted hover:text-text transition-colors"
+                      aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
@@ -416,7 +423,7 @@ function LoginPageContent() {
                     disabled={loading}
                     className="flex-1 rounded-2xl border border-border bg-card px-4 py-3.5 text-sm font-semibold text-text transition-colors hover:bg-card-hover"
                   >
-                    Back
+                    {t('auth.back')}
                   </button>
                   <button
                     type="submit"
@@ -426,9 +433,9 @@ function LoginPageContent() {
                     {loading ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
                     ) : mode === 'login' ? (
-                      'Sign In'
+                      t('auth.signIn')
                     ) : (
-                      'Sign Up'
+                      t('auth.signUp')
                     )}
                   </button>
                 </div>
@@ -438,18 +445,18 @@ function LoginPageContent() {
 
           {/* Toggle */}
           <motion.p variants={fadeUp} className="text-center text-sm text-text-muted mt-8">
-            {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
+            {mode === 'login' ? t('auth.noAccount') : t('auth.haveAccount')}{' '}
             <button
               onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
               className="text-primary hover:text-primary-glow font-medium transition-colors"
             >
-              {mode === 'login' ? 'Sign up' : 'Sign in'}
+              {mode === 'login' ? t('auth.switchSignUp') : t('auth.switchSignIn')}
             </button>
           </motion.p>
 
           {/* Terms */}
           <motion.p variants={fadeUp} className="text-center text-xs text-text-muted mt-6 leading-relaxed">
-            By continuing, you agree to our <Link href="/terms" className="font-semibold text-text">terms</Link> and <Link href="/privacy" className="font-semibold text-text">privacy policy</Link>.
+            {t('auth.termsPrefix')} <Link href="/terms" className="font-semibold text-text">{t('auth.terms')}</Link> {t('auth.and')} <Link href="/privacy" className="font-semibold text-text">{t('auth.privacy')}</Link>.
           </motion.p>
         </motion.div>
       </div>
@@ -464,14 +471,14 @@ function LoginPageContent() {
         >
           <div className="mb-4 flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-bold text-pink">Private canvas</p>
-              <h2 className="mt-1 text-2xl font-bold text-text">Make it, then share it your way.</h2>
+              <p className="text-sm font-bold text-pink">{t('auth.privateCanvas')}</p>
+              <h2 className="mt-1 text-2xl font-bold text-text">{t('auth.privateCanvasTitle')}</h2>
             </div>
             <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">PixAnony</span>
           </div>
           <PixelCanvasMock className="min-h-[340px]" />
           <p className="mt-4 text-sm leading-6 text-text-muted">
-            Your canvas stays ready while you sign in. Continue with the same private delivery flow when you return.
+            {t('auth.privateCanvasDescription')}
           </p>
         </motion.div>
       </div>

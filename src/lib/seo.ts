@@ -38,10 +38,12 @@ export function createPublicPageMetadata({
   title,
   description,
   path,
+  locale = 'en',
 }: {
   title: string;
   description: string;
   path: string;
+  locale?: 'en' | 'ar';
 }): Metadata {
   const socialTitle = `${title} | PixAnony`;
   return {
@@ -55,7 +57,7 @@ export function createPublicPageMetadata({
       type: 'website',
       url: path,
       siteName: BRAND.name,
-      locale: 'en_US',
+      locale: locale === 'ar' ? 'ar_AR' : 'en_US',
       images: [DEFAULT_SOCIAL_IMAGE],
     },
     twitter: {

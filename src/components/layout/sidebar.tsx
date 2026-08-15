@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -21,54 +20,37 @@ import {
 import { Logo } from '@/components/ui/logo';
 import { UserMenu } from '@/components/auth/user-menu';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
-import { createClient } from '@/lib/supabase/client';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber } from '@/lib/utils';
+import { useNotificationCenter } from '@/components/notifications/notification-center';
+import { LanguageSwitcher } from '@/components/i18n/language-switcher';
+import { useI18n } from '@/components/i18n/locale-provider';
 
 /* ===== Sidebar navigation items ===== */
 type NavItem = {
   id: string;
-  label: string;
+  labelKey: 'nav.home' | 'nav.explore' | 'nav.create' | 'nav.challenges' | 'nav.bookmarks' | 'nav.drops' | 'nav.notifications' | 'nav.profile' | 'nav.settings';
   href: string;
   icon: LucideIcon;
   requiresAuth?: boolean;
 };
 
 const navItems: NavItem[] = [
-  { id: 'home', label: 'Home', href: '/home', icon: Home },
-  { id: 'explore', label: 'Explore', href: '/explore', icon: Compass },
-  { id: 'paint', label: 'Create', href: '/paint', icon: Paintbrush },
-  { id: 'challenges', label: 'Challenges', href: '/challenges', icon: Trophy },
-  { id: 'bookmarks', label: 'Bookmarks', href: '/bookmarks', icon: Bookmark },
-  { id: 'drops', label: 'Private Drops', href: '/drops', icon: Inbox, requiresAuth: true },
-  { id: 'notifications', label: 'Notifications', href: '/notifications', icon: Bell },
-  { id: 'profile', label: 'Profile', href: '/profile', icon: User, requiresAuth: true },
-  { id: 'settings', label: 'Settings', href: '/settings', icon: Settings },
+  { id: 'home', labelKey: 'nav.home', href: '/home', icon: Home },
+  { id: 'explore', labelKey: 'nav.explore', href: '/explore', icon: Compass },
+  { id: 'paint', labelKey: 'nav.create', href: '/paint', icon: Paintbrush },
+  { id: 'challenges', labelKey: 'nav.challenges', href: '/challenges', icon: Trophy },
+  { id: 'bookmarks', labelKey: 'nav.bookmarks', href: '/bookmarks', icon: Bookmark },
+  { id: 'drops', labelKey: 'nav.drops', href: '/drops', icon: Inbox, requiresAuth: true },
+  { id: 'notifications', labelKey: 'nav.notifications', href: '/notifications', icon: Bell },
+  { id: 'profile', labelKey: 'nav.profile', href: '/profile', icon: User, requiresAuth: true },
+  { id: 'settings', labelKey: 'nav.settings', href: '/settings', icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
-  const supabase = useMemo(() => createClient(), []);
-  const { profile, user, signOut } = useAuthProfile();
-  const [unread, setUnread] = useState(0);
-
-  useEffect(() => {
-    let active = true;
-    void (async () => {
-      if (!user || !active) {
-        if (active) setUnread(0);
-        return;
-      }
-      const { count } = await supabase
-        .from('notifications')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .eq('read', false);
-      if (active) setUnread(count ?? 0);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [supabase, user]);
+  const { profile, signOut } = useAuthProfile();
+  const { unreadCount } = useNotificationCenter();
+  const { locale, t } = useI18n();
 
   /* Resolve auth-dependent hrefs at render time.
      Profile href uses the real username; everything else stays stable. */
@@ -88,22 +70,22 @@ export function Sidebar() {
       )}
     >
       <div
-        className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-[var(--lilac)] opacity-80"
+        className="pointer-events-none absolute -end-10 -top-10 h-28 w-28 rounded-full bg-[var(--lilac)] opacity-80"
         aria-hidden="true"
       />
 
       <div className="relative">
         <div
-          className="pointer-events-none absolute -left-8 top-4 h-16 w-16 rounded-full bg-[var(--blush)] opacity-70"
+          className="pointer-events-none absolute -start-8 top-4 h-16 w-16 rounded-full bg-[var(--blush)] opacity-70"
           aria-hidden="true"
         />
         <Link href="/home" className="relative flex h-24 items-center px-2">
-          <Logo size="md" />
+          <Logo size="md" priority />
         </Link>
       </div>
 
       {/* ===== Navigation ===== */}
-      <nav aria-label="Primary navigation" className="relative flex-1 space-y-1 overflow-y-auto py-2">
+      <nav aria-label={t('nav.primary')} className="relative flex-1 space-y-1 overflow-y-auto py-2">
         {resolvedItems.map((item) => {
           const Icon = item.icon;
           const active =
@@ -112,7 +94,7 @@ export function Sidebar() {
               : item.id === 'drops'
                 ? pathname === item.href || pathname?.startsWith('/drops')
                 : pathname === item.href || pathname?.startsWith(`${item.href}/`);
-          const badge = item.id === 'notifications' ? unread : 0;
+          const badge = item.id === 'notifications' ? unreadCount : 0;
 
           return (
             <Link
@@ -138,16 +120,16 @@ export function Sidebar() {
               <span className="relative flex items-center justify-center">
                 <Icon size={18} strokeWidth={active ? 2.4 : 1.8} />
                 {badge > 0 && (
-                  <span className="absolute -right-2.5 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-red px-1 text-[9px] font-bold text-white ring-2 ring-sidebar">
-                    {badge > 9 ? '9+' : badge}
+                  <span className="absolute -end-2.5 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-red px-1 text-[9px] font-bold text-white ring-2 ring-sidebar">
+                    {badge > 9 ? (locale === 'ar' ? '+٩' : '9+') : formatNumber(badge, locale)}
                   </span>
                 )}
               </span>
 
-              <span>{item.label}</span>
+              <span>{t(item.labelKey)}</span>
 
               {!active && (
-                <span className="pointer-events-none absolute left-3 h-1.5 w-1.5 rounded-full bg-pink opacity-0 transition-opacity duration-700 group-hover:opacity-100" aria-hidden="true" />
+                <span className="pointer-events-none absolute start-3 h-1.5 w-1.5 rounded-full bg-pink opacity-0 transition-opacity duration-700 group-hover:opacity-100" aria-hidden="true" />
               )}
             </Link>
           );
@@ -166,15 +148,16 @@ export function Sidebar() {
           >
             <span className="relative flex items-center gap-2.5">
               <Paintbrush size={16} />
-              Create
+              {t('nav.create')}
             </span>
-            <ArrowRight size={15} className="relative transition-transform duration-200 group-hover/create:translate-x-0.5" />
+            <ArrowRight size={15} className="rtl-flip relative transition-transform duration-200 group-hover/create:translate-x-0.5" />
           </Link>
         </div>
       </nav>
 
       {/* ===== User Card ===== */}
       <div className="relative pb-5 pt-4">
+        <LanguageSwitcher className="mb-2 w-full" />
         {profile ? (
           <UserMenu profile={profile} signOut={signOut} />
         ) : (
@@ -187,7 +170,7 @@ export function Sidebar() {
             )}
           >
             <LogIn size={17} />
-            Sign in
+            {t('nav.signIn')}
           </Link>
         )}
       </div>

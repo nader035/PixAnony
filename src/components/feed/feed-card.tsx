@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo, memo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef, memo } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -23,6 +23,7 @@ import { formatNumber, formatTimeAgo, cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import type { Artwork } from '@/lib/types';
+import { useI18n } from '@/components/i18n/locale-provider';
 
 interface FeedCardProps {
   artwork: Artwork & { profile?: { username: string; display_name: string; avatar_url: string | null; is_verified: boolean; is_pro: boolean } };
@@ -32,6 +33,22 @@ interface FeedCardProps {
     username: string;
     createdAt: string;
   };
+}
+
+const VIEWER_TOKEN_KEY = 'pixanony:artwork-viewer';
+
+function getAnonymousViewerToken() {
+  try {
+    const current = window.localStorage.getItem(VIEWER_TOKEN_KEY);
+    if (current) return current;
+    const token = typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
+    window.localStorage.setItem(VIEWER_TOKEN_KEY, token);
+    return token;
+  } catch {
+    return `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
+  }
 }
 
 // Heart burst particles for like animation
@@ -72,10 +89,13 @@ function HeartBurstParticles() {
 
 function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
   const supabase = useMemo(() => createClient(), []);
+  const { t, locale } = useI18n();
+  const cardRef = useRef<HTMLElement>(null);
   const [liked, setLiked] = useState(artwork.liked_by_user ?? false);
   const [likesCount, setLikesCount] = useState(artwork.likes_count);
   const [reposted, setReposted] = useState(artwork.reposted_by_user ?? false);
   const [repostsCount, setRepostsCount] = useState(artwork.reposts_count);
+  const [viewsCount, setViewsCount] = useState(artwork.views_count);
   const [bookmarked, setBookmarked] = useState(artwork.bookmarked_by_user ?? false);
   const [showBurst, setShowBurst] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -91,13 +111,57 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
     }
   })();
 
+  useEffect(() => {
+    const element = cardRef.current;
+    if (!element) return;
+
+    let recorded = false;
+    let viewTimer: number | undefined;
+
+    const recordView = async () => {
+      if (recorded) return;
+      recorded = true;
+      const { data, error } = await supabase.rpc('record_artwork_view', {
+        target_artwork_id: artwork.id,
+        anonymous_viewer_token: getAnonymousViewerToken(),
+      });
+      if (!error && typeof data === 'number') setViewsCount(data);
+    };
+
+    const beginView = () => {
+      if (recorded || viewTimer !== undefined) return;
+      viewTimer = window.setTimeout(() => void recordView(), 800);
+    };
+    const cancelView = () => {
+      if (viewTimer === undefined) return;
+      window.clearTimeout(viewTimer);
+      viewTimer = undefined;
+    };
+
+    if (!('IntersectionObserver' in window)) {
+      beginView();
+      return cancelView;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && entry.intersectionRatio >= 0.45) beginView();
+      else cancelView();
+    }, { threshold: [0.45] });
+    observer.observe(element);
+
+    return () => {
+      cancelView();
+      observer.disconnect();
+    };
+  }, [artwork.id, supabase]);
+
   const toggleRelation = useCallback(async (
     table: 'likes' | 'reposts' | 'bookmarks',
     active: boolean
   ) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      toast.error('Sign in to interact with artwork.');
+      toast.error(t('feed.signInInteract'));
       return false;
     }
     const query = active
@@ -109,7 +173,7 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
       return false;
     }
     return true;
-  }, [artwork.id, supabase]);
+  }, [artwork.id, supabase, t]);
 
   const handleLike = useCallback(async () => {
     const next = !liked;
@@ -145,13 +209,14 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
     }
   }, [bookmarked, toggleRelation]);
 
-  const displayName = isAnonymous ? 'Anonymous' : profile?.display_name || 'Unknown';
+  const displayName = isAnonymous ? t('feed.anonymousArtist') : profile?.display_name || t('common.creator');
   const username = isAnonymous ? 'anonymous' : profile?.username || 'unknown';
   const cardTones = ['var(--powder)', 'var(--butter)', 'var(--blush)', 'var(--lilac)', 'var(--mint)'];
   const cardTone = cardTones[artwork.id.charCodeAt(0) % cardTones.length];
 
   return (
     <motion.article
+      ref={cardRef}
       initial={false}
       animate={{ opacity: 1, y: 0 }}
       style={{ background: cardTone }}
@@ -167,10 +232,10 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
         <div className="flex items-center gap-2 border-b border-border/40 bg-green/[0.04] px-4 py-2.5 text-xs font-semibold text-text-muted sm:px-5">
           <Repeat2 size={13} className="text-green" />
           <Link href={`/profile/${repostContext.username}`} className="truncate text-text transition-colors hover:text-primary">
-            Reposted by {repostContext.displayName}
+            {t('feed.reposted', { name: repostContext.displayName })}
           </Link>
           <span className="text-text-muted/50">·</span>
-          <time className="shrink-0">{formatTimeAgo(repostContext.createdAt)}</time>
+          <time className="shrink-0">{formatTimeAgo(repostContext.createdAt, locale)}</time>
         </div>
       )}
 
@@ -217,31 +282,31 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
               {isAnonymous ? (
                 <>
                   <EyeOff size={9} />
-                  Anon
+                  {t('common.anonymous')}
                 </>
               ) : artwork.visibility === 'private' ? (
                 <>
                   <Lock size={9} />
-                  Private
+                  {t('common.private')}
                 </>
               ) : (
                 <>
                   <Globe size={9} />
-                  Public
+                  {t('common.public')}
                 </>
               )}
             </span>
           </div>
           <div className="mt-0.5 flex items-center gap-1.5 text-xs text-text-muted">
-            {!isAnonymous && <span className="truncate">@{username}</span>}
+            {!isAnonymous && <span className="rtl-isolate truncate">@{username}</span>}
             <span className="text-text-muted/50">·</span>
-            <time className="shrink-0">{formatTimeAgo(artwork.created_at)}</time>
+            <time className="shrink-0">{formatTimeAgo(artwork.created_at, locale)}</time>
           </div>
         </div>
 
         <button
           className="flex items-center justify-center w-9 h-9 rounded-xl text-text-muted hover:text-text hover:bg-card-hover transition-colors shrink-0"
-          aria-label="More post options"
+          aria-label={t('feed.moreOptions')}
         >
           <MoreHorizontal size={18} />
         </button>
@@ -285,7 +350,7 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
           <button
             onClick={() => void handleLike()}
             className="relative group flex min-h-10 items-center gap-1.5 px-2.5 sm:px-3 rounded-xl hover:bg-red/8 transition-colors"
-            aria-label={liked ? 'Unlike artwork' : 'Like artwork'}
+            aria-label={liked ? t('feed.unlike') : t('feed.like')}
             aria-pressed={liked}
           >
             <div className="relative">
@@ -311,7 +376,7 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
                 liked ? 'text-red' : 'text-text-muted'
               )}
             >
-              {formatNumber(likesCount)}
+              {formatNumber(likesCount, locale)}
             </span>
           </button>
 
@@ -319,14 +384,14 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
           <Link
             href={`/art/${artwork.id}`}
             className="group flex min-h-10 items-center gap-1.5 px-2.5 sm:px-3 rounded-xl hover:bg-cyan/8 transition-colors"
-            aria-label={`View ${artwork.comments_count} comments`}
+            aria-label={t('comments.viewCount', { count: formatNumber(artwork.comments_count, locale) })}
           >
             <MessageCircle
               size={18}
               className="text-text-muted group-hover:text-cyan transition-colors duration-200"
             />
             <span className="text-xs font-semibold tabular-nums text-text-muted">
-              {formatNumber(artwork.comments_count)}
+              {formatNumber(artwork.comments_count, locale)}
             </span>
           </Link>
 
@@ -334,7 +399,7 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
           <button
             onClick={() => void handleRepost()}
             className="group flex min-h-10 items-center gap-1.5 px-2.5 sm:px-3 rounded-xl hover:bg-green/8 transition-colors"
-            aria-label={reposted ? 'Undo repost' : 'Repost artwork'}
+            aria-label={reposted ? t('feed.undoRepost') : t('feed.repost')}
             aria-pressed={reposted}
           >
             <motion.div
@@ -355,14 +420,14 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
                 reposted ? 'text-green' : 'text-text-muted'
               )}
             >
-              {formatNumber(repostsCount)}
+              {formatNumber(repostsCount, locale)}
             </span>
           </button>
 
           {/* Views */}
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 text-text-muted/70">
+          <div className="flex items-center gap-1.5 px-2 py-1.5 text-text-muted/70" aria-label={t('common.views', { count: formatNumber(viewsCount, locale) })}>
             <Eye size={15} />
-            <span className="text-[11px] font-medium tabular-nums">{formatNumber(artwork.views_count)}</span>
+            <span className="text-[11px] font-medium tabular-nums">{formatNumber(viewsCount, locale)}</span>
           </div>
         </div>
 
@@ -371,7 +436,7 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
           <button
             onClick={() => void handleBookmark()}
             className="group flex items-center justify-center w-10 h-10 rounded-xl hover:bg-primary/8 transition-colors"
-            aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark artwork'}
+            aria-label={bookmarked ? t('feed.removeBookmark') : t('feed.bookmark')}
             aria-pressed={bookmarked}
           >
             <motion.div
@@ -394,14 +459,14 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
           <button
             onClick={() => setShareOpen(true)}
             className="group flex h-10 items-center justify-center gap-1.5 rounded-xl px-3 transition-colors hover:bg-cyan/8"
-            aria-label="Share artwork"
+            aria-label={t('feed.shareArtwork')}
             aria-haspopup="dialog"
           >
             <Share2
               size={16}
               className="text-text-muted group-hover:text-cyan transition-colors duration-200"
             />
-            <span className="hidden text-xs font-semibold text-text-muted transition-colors group-hover:text-text sm:inline">Share</span>
+            <span className="hidden text-xs font-semibold text-text-muted transition-colors group-hover:text-text sm:inline">{t('common.share')}</span>
           </button>
         </div>
       </div>

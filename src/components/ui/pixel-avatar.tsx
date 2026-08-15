@@ -17,11 +17,11 @@ interface PixelAvatarProps {
 }
 
 const sizeConfig = {
-  xs: { container: 'h-6 w-6', text: 'text-[10px]', badge: 10, badgeOffset: '-right-0.5 -bottom-0.5' },
-  sm: { container: 'h-8 w-8', text: 'text-xs', badge: 12, badgeOffset: '-right-0.5 -bottom-0.5' },
-  md: { container: 'h-10 w-10', text: 'text-sm', badge: 14, badgeOffset: '-right-1 -bottom-1' },
-  lg: { container: 'h-12 w-12', text: 'text-base', badge: 16, badgeOffset: '-right-1 -bottom-1' },
-  xl: { container: 'h-24 w-24', text: 'text-2xl', badge: 22, badgeOffset: '-right-1.5 -bottom-1.5' },
+  xs: { container: 'h-6 w-6', text: 'text-[10px]', badge: 10, badgeOffset: '-end-0.5 -bottom-0.5' },
+  sm: { container: 'h-8 w-8', text: 'text-xs', badge: 12, badgeOffset: '-end-0.5 -bottom-0.5' },
+  md: { container: 'h-10 w-10', text: 'text-sm', badge: 14, badgeOffset: '-end-1 -bottom-1' },
+  lg: { container: 'h-12 w-12', text: 'text-base', badge: 16, badgeOffset: '-end-1 -bottom-1' },
+  xl: { container: 'h-24 w-24', text: 'text-2xl', badge: 22, badgeOffset: '-end-1.5 -bottom-1.5' },
 };
 
 function getAvatarColor(username: string): string {

@@ -9,6 +9,7 @@ import {
 import { usePaintStore } from '@/stores/paint-store';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/components/i18n/locale-provider';
 
 interface ActionsPanelProps {
   compact?: boolean;
@@ -26,6 +27,7 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
   const handleClearCanvas = onClearCanvas ?? clearCanvas;
+  const { t } = useI18n();
 
   // ===== EXPORT PNG =====
   const exportPNG = useCallback(() => {
@@ -57,9 +59,9 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
       a.download = `pixanony-${gridSize}x${gridSize}-${Date.now()}.png`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success('PNG downloaded.');
+      toast.success(t('paint.pngDownloaded'));
     }, 'image/png');
-  }, [layers, gridSize]);
+  }, [gridSize, layers, t]);
 
   // ===== EXPORT SVG =====
   const exportSVG = useCallback(() => {
@@ -84,8 +86,8 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
     a.download = `pixanony-${gridSize}x${gridSize}-${Date.now()}.svg`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success('SVG downloaded.');
-  }, [layers, gridSize]);
+    toast.success(t('paint.svgDownloaded'));
+  }, [gridSize, layers, t]);
 
   // ===== COPY TO CLIPBOARD =====
   const copyImage = useCallback(async () => {
@@ -117,18 +119,18 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
       await navigator.clipboard.write([
         new ClipboardItem({ 'image/png': blob }),
       ]);
-      toast.success('Image copied to clipboard.');
+      toast.success(t('paint.imageCopied'));
     } catch {
-      toast.error('Failed to copy image');
+      toast.error(t('paint.imageCopyFailed'));
     }
-  }, [layers, gridSize]);
+  }, [gridSize, layers, t]);
 
   // ===== SYMMETRY OPTIONS =====
   const symmetryOptions: { mode: typeof symmetryMode; label: string }[] = [
-    { mode: 'off', label: 'Off' },
-    { mode: 'horizontal', label: 'H' },
-    { mode: 'vertical', label: 'V' },
-    { mode: 'both', label: 'Both' },
+    { mode: 'off', label: t('paint.symmetryOff') },
+    { mode: 'horizontal', label: t('paint.symmetryHorizontal') },
+    { mode: 'vertical', label: t('paint.symmetryVertical') },
+    { mode: 'both', label: t('paint.symmetryBoth') },
   ];
 
   return (
@@ -143,7 +145,7 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
     >
       {/* Header */}
       <div className={cn('text-[10px] font-semibold text-text-muted uppercase tracking-wider', compact && 'hidden')}>
-        Actions
+        {t('paint.actions')}
       </div>
 
       {/* Undo / Redo */}
@@ -151,7 +153,7 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
         <button
           onClick={undo}
           disabled={!canUndo}
-          aria-label="Undo"
+          aria-label={t('paint.undo')}
           className={`flex-1 flex items-center justify-center gap-1.5 ${compact ? 'h-10 w-10 px-0' : 'px-2 py-1.5'} text-[10px] font-medium
                      rounded-xl border transition-colors
                      ${canUndo
@@ -159,12 +161,12 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
                        : 'bg-card/50 border-border/50 text-text-muted/30 cursor-not-allowed'
                      }`}
         >
-          <Undo2 size={14} /> <span className={compact ? 'sr-only' : ''}>Undo</span>
+          <Undo2 size={14} /> <span className={compact ? 'sr-only' : ''}>{t('paint.undo')}</span>
         </button>
         <button
           onClick={redo}
           disabled={!canRedo}
-          aria-label="Redo"
+          aria-label={t('paint.redo')}
           className={`flex-1 flex items-center justify-center gap-1.5 ${compact ? 'h-10 w-10 px-0' : 'px-2 py-1.5'} text-[10px] font-medium
                      rounded-xl border transition-colors
                      ${canRedo
@@ -172,7 +174,7 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
                        : 'bg-card/50 border-border/50 text-text-muted/30 cursor-not-allowed'
                      }`}
         >
-          <Redo2 size={14} /> <span className={compact ? 'sr-only' : ''}>Redo</span>
+          <Redo2 size={14} /> <span className={compact ? 'sr-only' : ''}>{t('paint.redo')}</span>
         </button>
       </div>
 
@@ -183,18 +185,18 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
           className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] font-medium
                      bg-card border border-border rounded-xl text-text-muted
                      hover:text-text hover:bg-card-hover transition-colors"
-          title="Flip Horizontal"
+          title={t('paint.flipHorizontal')}
         >
-          <FlipHorizontal size={12} /> Flip X
+          <FlipHorizontal size={12} /> {t('paint.flipX')}
         </button>
         <button
           onClick={flipVertical}
           className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] font-medium
                      bg-card border border-border rounded-xl text-text-muted
                      hover:text-text hover:bg-card-hover transition-colors"
-          title="Flip Vertical"
+          title={t('paint.flipVertical')}
         >
-          <FlipVertical size={12} /> Flip Y
+          <FlipVertical size={12} /> {t('paint.flipY')}
         </button>
       </div>
 
@@ -206,13 +208,13 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
           compact && 'hidden'
         )}
       >
-        <Trash2 size={12} /> Clear Board
+        <Trash2 size={12} /> {t('paint.clearBoard')}
       </button>
 
       {/* Symmetry */}
       <div className={compact ? 'hidden' : ''}>
         <div className="text-[9px] font-semibold text-text-muted uppercase tracking-wider mb-1.5">
-          Symmetry
+          {t('paint.symmetry')}
         </div>
         <div className="flex gap-1">
           {symmetryOptions.map(opt => (
@@ -234,7 +236,7 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
       {/* Export */}
       <div className={compact ? 'hidden' : ''}>
         <div className="text-[9px] font-semibold text-text-muted uppercase tracking-wider mb-1.5">
-          Export
+          {t('paint.export')}
         </div>
         <div className="flex flex-col gap-1">
           <button
@@ -243,7 +245,7 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
                        bg-card border border-border rounded-xl text-text-muted
                        hover:text-text hover:bg-card-hover transition-colors"
           >
-            <Download size={11} /> Download PNG
+            <Download size={11} /> {t('paint.downloadPng')}
           </button>
           <button
             onClick={exportSVG}
@@ -251,7 +253,7 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
                        bg-card border border-border rounded-xl text-text-muted
                        hover:text-text hover:bg-card-hover transition-colors"
           >
-            <ImageIcon size={11} /> Download SVG
+            <ImageIcon size={11} /> {t('paint.downloadSvg')}
           </button>
           <button
             onClick={copyImage}
@@ -259,7 +261,7 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
                        bg-card border border-border rounded-xl text-text-muted
                        hover:text-text hover:bg-card-hover transition-colors"
           >
-            <Copy size={11} /> Copy Image
+            <Copy size={11} /> {t('paint.copyImage')}
           </button>
         </div>
       </div>

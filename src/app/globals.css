@@ -1,5 +1,29 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("/assets/fonts/thmanyah/thmanyahsans/woff2/thmanyahsans-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("/assets/fonts/thmanyah/thmanyahsans/woff2/thmanyahsans-Medium.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("/assets/fonts/thmanyah/thmanyahsans/woff2/thmanyahsans-Bold.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700 800;
+  font-display: swap;
+}
+
 @theme {
   --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   --font-pixel: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
@@ -50,6 +74,31 @@ button, a { touch-action: manipulation; }
 button:disabled { cursor: not-allowed; }
 input, textarea, select { color-scheme: light; }
 .dark input, .dark textarea, .dark select { color-scheme: dark; }
+
+html[lang="ar"] {
+  --font-sans: "Thmanyah Sans", Tahoma, Arial, sans-serif;
+  --font-pixel: "Thmanyah Sans", Tahoma, Arial, sans-serif;
+  --font-retro: "Thmanyah Sans", Tahoma, Arial, sans-serif;
+}
+html[lang="ar"] body { font-family: "Thmanyah Sans", Tahoma, Arial, sans-serif; }
+.font-ar,
+.font-ar body,
+.font-ar .font-sans,
+.font-ar .font-pixel,
+.font-ar .font-retro { font-family: "Thmanyah Sans", Tahoma, Arial, sans-serif !important; }
+html[lang="ar"] h1,
+html[lang="ar"] h2,
+html[lang="ar"] h3,
+html[lang="ar"] h4,
+html[lang="ar"] .tracking-wide,
+html[lang="ar"] .tracking-wider,
+html[lang="ar"] [class*="tracking-"] { letter-spacing: 0; }
+html[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
+html[dir="rtl"] .rtl-isolate { direction: ltr; unicode-bidi: isolate; }
+html[dir="rtl"] input[type="email"],
+html[dir="rtl"] input[type="url"] { direction: ltr; text-align: right; }
+html[dir="rtl"] canvas,
+html[dir="rtl"] .pixel-art { direction: ltr; }
 
 .site-container { width: calc(100% - 2rem); max-width: 1280px; margin-inline: auto; }
 @media (min-width: 640px) { .site-container { width: calc(100% - 3rem); } }
@@ -106,7 +155,7 @@ input, textarea, select { color-scheme: light; }
 
 *:focus-visible { outline: 3px solid color-mix(in srgb,var(--brand) 62%,white); outline-offset: 3px; }
 ::selection { background: var(--powder); color: var(--text); }
-.skip-link { position: fixed; left: 16px; top: -80px; z-index: 100; border-radius: 999px; background: var(--primary); color: var(--bg); padding: 12px 16px; font-weight: 700; }
+.skip-link { position: fixed; inset-inline-start: 16px; top: -80px; z-index: 100; border-radius: 999px; background: var(--primary); color: var(--bg); padding: 12px 16px; font-weight: 700; }
 .skip-link:focus { top: 16px; }
 .bg-primary.text-bg, .bg-primary.text-white, .bg-primary.text-primary-contrast { color: var(--primary-contrast); }
 @media (max-width: 639px) { html { scroll-padding-bottom: 5rem; } body { font-size: 15px; } }

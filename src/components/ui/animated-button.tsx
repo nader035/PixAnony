@@ -87,7 +87,7 @@ export const AnimatedButton = forwardRef<HTMLButtonElement, AnimatedButtonProps>
         {isLoading ? (
           <>
             <Loader2 size={size === 'sm' ? 14 : 16} className="animate-spin" />
-            {children && <span className="ml-1.5">{children}</span>}
+            {children && <span className="ms-1.5">{children}</span>}
           </>
         ) : (
           <>

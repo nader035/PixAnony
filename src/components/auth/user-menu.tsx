@@ -18,6 +18,7 @@ import {
 import { PixelAvatar } from '@/components/ui/pixel-avatar';
 import type { AuthProfile } from '@/hooks/use-auth-profile';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/components/i18n/locale-provider';
 
 type UserMenuProps = {
   profile: AuthProfile;
@@ -28,6 +29,7 @@ type UserMenuProps = {
 
 export function UserMenu({ profile, signOut, compact = false, className }: UserMenuProps) {
   const router = useRouter();
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState<{
     top?: number;
@@ -106,12 +108,12 @@ export function UserMenu({ profile, signOut, compact = false, className }: UserM
   }, [open, updateMenuPosition]);
 
   const menuItems = [
-    { label: 'Dashboard', href: '/home', icon: Home },
-    { label: 'Create', href: '/paint', icon: Paintbrush },
-    { label: 'Profile', href: `/profile/${profile.username}`, icon: User },
-    { label: 'Private Drops', href: '/drops', icon: Inbox },
-    { label: 'Bookmarks', href: '/bookmarks', icon: Bookmark },
-    { label: 'Settings', href: '/settings', icon: Settings },
+    { label: t('nav.dashboard'), href: '/home', icon: Home },
+    { label: t('nav.create'), href: '/paint', icon: Paintbrush },
+    { label: t('nav.profile'), href: `/profile/${profile.username}`, icon: User },
+    { label: t('nav.drops'), href: '/drops', icon: Inbox },
+    { label: t('nav.bookmarks'), href: '/bookmarks', icon: Bookmark },
+    { label: t('nav.settings'), href: '/settings', icon: Settings },
   ] as const;
 
   const handleLogout = async () => {
@@ -142,9 +144,9 @@ export function UserMenu({ profile, signOut, compact = false, className }: UserM
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls="account-menu"
-        aria-label={open ? 'Close account menu' : 'Open account menu'}
+        aria-label={open ? t('common.close') : t('nav.account')}
         className={cn(
-          'flex w-full min-h-11 items-center gap-2 rounded-full border border-border bg-card/80 px-2.5 py-1.5 text-left transition hover:border-primary/25 hover:bg-card focus:outline-none focus:ring-4 focus:ring-primary/15',
+          'flex w-full min-h-11 items-center gap-2 rounded-full border border-border bg-card/80 px-2.5 py-1.5 text-start transition hover:border-primary/25 hover:bg-card focus:outline-none focus:ring-4 focus:ring-primary/15',
           compact && 'h-11 w-11 justify-center rounded-2xl p-0',
         )}
       >
@@ -161,7 +163,7 @@ export function UserMenu({ profile, signOut, compact = false, className }: UserM
               <span className="block truncate text-sm font-semibold text-text">{profile.display_name}</span>
               <span className="block truncate text-xs text-text-muted">@{profile.username}</span>
             </span>
-            <ChevronDown size={12} className={cn('ml-auto shrink-0 text-text-muted transition-transform', open && 'rotate-180')} />
+            <ChevronDown size={12} className={cn('ms-auto shrink-0 text-text-muted transition-transform', open && 'rotate-180')} />
           </>
         )}
       </button>
@@ -171,7 +173,7 @@ export function UserMenu({ profile, signOut, compact = false, className }: UserM
           ref={dropdownRef}
           id="account-menu"
           role="menu"
-          aria-label="Account navigation"
+          aria-label={t('nav.account')}
           style={{
             top: menuPosition.top,
             bottom: menuPosition.bottom,
@@ -193,7 +195,7 @@ export function UserMenu({ profile, signOut, compact = false, className }: UserM
                 triggerRef.current?.focus();
               }}
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-text-muted transition hover:bg-card hover:text-text focus:bg-card focus:text-text focus:outline-none"
-              aria-label="Close account menu"
+              aria-label={t('common.close')}
             >
               <X size={14} />
             </button>
@@ -216,10 +218,10 @@ export function UserMenu({ profile, signOut, compact = false, className }: UserM
             type="button"
             role="menuitem"
             onClick={() => void handleLogout()}
-            className="mt-1 flex w-full items-center gap-3 rounded-xl border-t border-border/60 px-3 py-2.5 text-left text-sm font-semibold text-red transition hover:bg-red/8 focus:bg-red/8 focus:outline-none"
+            className="mt-1 flex w-full items-center gap-3 rounded-xl border-t border-border/60 px-3 py-2.5 text-start text-sm font-semibold text-red transition hover:bg-red/8 focus:bg-red/8 focus:outline-none"
           >
             <LogOut size={15} />
-            Logout
+            {t('nav.signOut')}
           </button>
         </div>,
         document.body,

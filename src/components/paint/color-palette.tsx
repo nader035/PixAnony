@@ -6,6 +6,13 @@ import { Plus, ChevronDown, Check } from '@/components/ui/icons';
 import { usePaintStore } from '@/stores/paint-store';
 import { PALETTES } from '@/lib/constants';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/components/i18n/locale-provider';
+import type { TranslationKey } from '@/lib/i18n/translations';
+
+const paletteLabelKeys: Record<string, TranslationKey> = {
+  Neon: 'paint.palette.neon', Retro: 'paint.palette.retro', GameBoy: 'paint.palette.gameboy',
+  NES: 'paint.palette.nes', Pastel: 'paint.palette.pastel', Sunset: 'paint.palette.sunset',
+};
 
 export default function ColorPalette({ compact = false }: { compact?: boolean }) {
   const {
@@ -16,6 +23,7 @@ export default function ColorPalette({ compact = false }: { compact?: boolean })
   const [hexInput, setHexInput] = useState(color);
   const [showPaletteDropdown, setShowPaletteDropdown] = useState(false);
   const [customColors, setCustomColors] = useState<string[]>([]);
+  const { t } = useI18n();
 
   const currentPalette = PALETTES.find(p => p.name === activePalette) ?? PALETTES[0];
 
@@ -64,7 +72,7 @@ export default function ColorPalette({ compact = false }: { compact?: boolean })
     >
       {/* Header */}
       <div className={cn('text-[10px] font-semibold uppercase text-text-muted', compact && 'hidden')}>
-        Colors
+        {t('paint.colors')}
       </div>
 
       {/* Current Color + Hex */}
@@ -113,7 +121,7 @@ export default function ColorPalette({ compact = false }: { compact?: boolean })
           onClick={() => setShowPaletteDropdown(!showPaletteDropdown)}
           className="flex w-full items-center justify-between rounded-xl border border-border bg-card px-2.5 py-1.5 text-xs text-text transition-colors hover:bg-card-hover"
         >
-          <span className="font-medium">{activePalette}</span>
+          <span className="font-medium">{t(paletteLabelKeys[activePalette] ?? 'paint.palette.neon')}</span>
           <ChevronDown size={12} className={`transition-transform ${showPaletteDropdown ? 'rotate-180' : ''}`} />
         </button>
 
@@ -122,7 +130,7 @@ export default function ColorPalette({ compact = false }: { compact?: boolean })
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            className="absolute z-20 left-0 right-0 top-full mt-1 overflow-hidden rounded-xl border border-border bg-card
+            className="absolute z-20 inset-x-0 top-full mt-1 overflow-hidden rounded-xl border border-border bg-card
                        shadow-lg overflow-hidden"
           >
             {PALETTES.map(p => (
@@ -132,7 +140,7 @@ export default function ColorPalette({ compact = false }: { compact?: boolean })
                   setActivePalette(p.name);
                   setShowPaletteDropdown(false);
                 }}
-                className={`w-full flex items-center gap-2 px-3 py-2 text-xs text-left transition-colors
+                className={`w-full flex items-center gap-2 px-3 py-2 text-xs text-start transition-colors
                   ${p.name === activePalette
                     ? 'bg-primary/10 text-primary'
                     : 'text-text-muted hover:bg-card-hover hover:text-text'
@@ -148,7 +156,7 @@ export default function ColorPalette({ compact = false }: { compact?: boolean })
                     />
                   ))}
                 </div>
-                <span className="flex-1">{p.name}</span>
+                <span className="flex-1">{t(paletteLabelKeys[p.name] ?? 'paint.palette.neon')}</span>
                 {p.name === activePalette && <Check size={12} />}
               </button>
             ))}
@@ -190,7 +198,7 @@ export default function ColorPalette({ compact = false }: { compact?: boolean })
       {!compact && customColors.length > 0 && (
         <div>
           <div className="mb-1.5 text-[9px] font-semibold uppercase text-text-muted">
-            Custom
+            {t('paint.customColors')}
           </div>
           <div className="flex flex-wrap gap-1">
             {customColors.map((c, i) => (
@@ -218,14 +226,14 @@ export default function ColorPalette({ compact = false }: { compact?: boolean })
         hidden={compact}
       >
         <Plus size={10} />
-        Add Current Color
+        {t('paint.addCurrentColor')}
       </button>
 
       {/* Recent Colors */}
       {!compact && recentColors.length > 0 && (
         <div>
           <div className="mb-1.5 text-[9px] font-semibold uppercase text-text-muted">
-            Recent
+            {t('paint.recentColors')}
           </div>
           <div className="flex flex-wrap gap-1">
             {recentColors.map((c, i) => (

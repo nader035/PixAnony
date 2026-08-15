@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { createArtworkShareImage, downloadArtworkShareImage } from '@/lib/artwork-share-image';
 import { toast } from 'sonner';
 import type { Artwork } from '@/lib/types';
+import { useI18n } from '@/components/i18n/locale-provider';
 
 type ShareArtwork = Artwork & {
   profile?: {
@@ -31,9 +32,10 @@ interface ArtworkShareSheetProps {
 export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [imageBusy, setImageBusy] = useState(false);
+  const { t, locale } = useI18n();
   const isPrivate = artwork.visibility === 'private';
   const isAnonymous = artwork.is_anonymous;
-  const displayName = isAnonymous ? 'Anonymous artist' : artwork.profile?.display_name || 'PixAnony artist';
+  const displayName = isAnonymous ? t('feed.anonymousArtist') : artwork.profile?.display_name || t('common.creator');
   const username = isAnonymous ? 'anonymous' : artwork.profile?.username || 'pixanony';
   const shareUrl = typeof window === 'undefined'
     ? `/art/${artwork.id}`
@@ -49,9 +51,9 @@ export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetP
   }, [artwork.pixel_data]);
 
   const shareText = useMemo(() => {
-    const subject = artwork.title || artwork.caption?.trim() || 'A new artwork';
-    return `${subject.slice(0, 120)} — shared by ${displayName} on PixAnony`;
-  }, [artwork.caption, artwork.title, displayName]);
+    const subject = artwork.title || artwork.caption?.trim() || t('share.newArtwork');
+    return t('share.sharedBy', { subject: subject.slice(0, 120), name: displayName });
+  }, [artwork.caption, artwork.title, displayName, t]);
 
   useEffect(() => {
     if (!open) return;
@@ -72,10 +74,10 @@ export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetP
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
-      toast.success('Artwork link copied.');
+      toast.success(t('share.linkCopied'));
       onClose();
     } catch {
-      toast.error('Could not copy the link. Please try again.');
+      toast.error(t('share.copyFailed'));
     }
   };
 
@@ -86,14 +88,14 @@ export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetP
     }
     try {
       await navigator.share({
-        title: artwork.title || 'Artwork on PixAnony',
+        title: artwork.title || t('share.artworkOnPixanony'),
         text: shareText,
         url: shareUrl,
       });
       onClose();
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') return;
-      toast.error('Could not open the share menu.');
+      toast.error(t('share.menuFailed'));
     }
   };
 
@@ -103,16 +105,21 @@ export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetP
       const file = await createArtworkShareImage({
         pixels,
         gridSize: artwork.grid_size,
-        title: artwork.title || 'Artwork on PixAnony',
+        title: artwork.title || t('share.artworkOnPixanony'),
         caption: artwork.caption,
         displayName,
         username,
         isAnonymous,
+        locale,
+        untitledLabel: t('common.untitled'),
+        anonymousArtistLabel: t('feed.anonymousArtist'),
+        tagline: t('share.tagline'),
+        sharedFromLabel: t('share.sharedFrom'),
       });
       const shareData = {
         files: [file],
-        title: artwork.title || 'Artwork on PixAnony',
-        text: `Created by ${displayName} on PixAnony`,
+        title: artwork.title || t('share.artworkOnPixanony'),
+        text: t('share.createdBy', { name: displayName }),
       };
 
       if (navigator.share && navigator.canShare?.(shareData)) {
@@ -122,10 +129,10 @@ export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetP
       }
 
       downloadArtworkShareImage(file);
-      toast.success('Branded artwork image downloaded.');
+      toast.success(t('share.imageDownloaded'));
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') return;
-      toast.error(error instanceof Error ? error.message : 'Could not create the share image.');
+      toast.error(t('share.imageFailed'));
     } finally {
       setImageBusy(false);
     }
@@ -159,16 +166,16 @@ export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetP
           >
             <div className="mb-4 flex items-start justify-between gap-4 px-1">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">Pass it on</p>
-                <h2 id={`share-title-${artwork.id}`} className="mt-1 text-2xl font-bold text-text">Share this artwork</h2>
-                <p className="mt-1 text-sm text-text-muted">Choose a ready-to-post image or share the link.</p>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">{t('share.eyebrow')}</p>
+                <h2 id={`share-title-${artwork.id}`} className="mt-1 text-2xl font-bold text-text">{t('share.title')}</h2>
+                <p className="mt-1 text-sm text-text-muted">{t('share.description')}</p>
               </div>
               <button
                 ref={closeButtonRef}
                 type="button"
                 onClick={onClose}
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-bg text-text-muted transition-colors hover:bg-card-hover hover:text-text"
-                aria-label="Close share dialog"
+                aria-label={t('share.close')}
               >
                 <X size={17} />
               </button>
@@ -183,7 +190,7 @@ export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetP
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-bold text-text">{displayName}</p>
-                  <p className="truncate text-xs text-text-muted">{isAnonymous ? 'Identity protected' : `@${username}`}</p>
+                  <p className={cn('truncate text-xs text-text-muted', !isAnonymous && 'rtl-isolate')}>{isAnonymous ? t('feed.identityProtected') : `@${username}`}</p>
                 </div>
                 <Logo size="sm" />
               </div>
@@ -194,11 +201,11 @@ export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetP
               )}
               <div className="px-1 pb-1 pt-3">
                 <p className="line-clamp-2 text-sm font-semibold leading-5 text-text">
-                  {artwork.title || artwork.caption || 'A fresh artwork from the PixAnony community.'}
+                  {artwork.title || artwork.caption || t('share.freshArtwork')}
                 </p>
                 <div className="mt-2 flex items-center gap-1.5 text-xs font-medium text-text-muted">
                   {isPrivate ? <Lock size={12} /> : <Globe size={12} />}
-                  {isPrivate ? 'Only people with access can open this link' : 'Public artwork · ready to share'}
+                  {isPrivate ? t('share.privateAccess') : t('share.publicReady')}
                 </div>
               </div>
             </div>
@@ -208,8 +215,8 @@ export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetP
                 <ImageIcon size={22} />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-text">Share a branded image</p>
-                <p className="mt-0.5 text-xs leading-5 text-text-muted">A polished 4:5 PNG with your art and the PixAnony name.</p>
+                <p className="text-sm font-bold text-text">{t('share.imageTitle')}</p>
+                <p className="mt-0.5 text-xs leading-5 text-text-muted">{t('share.imageDescription')}</p>
               </div>
               <button
                 type="button"
@@ -218,14 +225,14 @@ export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetP
                 className="flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-text px-4 text-xs font-bold text-card transition-transform hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-50"
               >
                 {imageBusy ? <Loader2 size={16} className="animate-spin" /> : <Share2 size={16} />}
-                <span className="hidden sm:inline">Share image</span>
-                <span className="sm:hidden">Image</span>
+                <span className="hidden sm:inline">{t('share.shareImage')}</span>
+                <span className="sm:hidden">{t('share.image')}</span>
               </button>
             </div>
 
             <div className="my-4 flex items-center gap-3 px-1">
               <div className="h-px flex-1 bg-border" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">Or share link only</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('share.linkOnly')}</span>
               <div className="h-px flex-1 bg-border" />
             </div>
 
@@ -239,7 +246,7 @@ export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetP
                   className="flex min-h-20 flex-col items-center justify-center gap-2 rounded-[20px] bg-text px-3 text-center text-sm font-bold text-card transition-transform hover:-translate-y-0.5"
                 >
                   <XSocial size={20} />
-                  Share on X
+                  {t('share.onX')}
                 </a>
               )}
               <button
@@ -248,7 +255,7 @@ export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetP
                 className="flex min-h-20 flex-col items-center justify-center gap-2 rounded-[20px] bg-[var(--lilac)] px-3 text-center text-sm font-bold text-text transition-transform hover:-translate-y-0.5"
               >
                 <Share2 size={20} />
-                Share anywhere
+                {t('share.anywhere')}
               </button>
               <button
                 type="button"
@@ -256,13 +263,13 @@ export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetP
                 className="flex min-h-20 flex-col items-center justify-center gap-2 rounded-[20px] bg-[var(--mint)] px-3 text-center text-sm font-bold text-text transition-transform hover:-translate-y-0.5"
               >
                 <Copy size={20} />
-                Copy link
+                {t('share.copyLink')}
               </button>
             </div>
 
             <div className="mt-3 flex items-center gap-2 rounded-2xl bg-bg px-3 py-2.5 text-xs text-text-muted">
               <LinkIcon size={14} className="shrink-0" />
-              <span className="truncate">{shareUrl}</span>
+              <span className="rtl-isolate truncate">{shareUrl}</span>
             </div>
           </motion.section>
         </motion.div>
