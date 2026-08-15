@@ -11,16 +11,17 @@ export function TopBar() {
   const createHref = isAuthenticated ? '/paint' : '/login?next=%2Fpaint';
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center gap-3 bg-[var(--glass-bg)] px-4 backdrop-blur-2xl lg:hidden">
+    <header className="sticky top-0 z-40 flex h-16 items-center gap-2 bg-[var(--glass-bg)] px-3 backdrop-blur-2xl sm:gap-3 sm:px-4 lg:hidden">
       <Link href="/home" aria-label="PixAnony home" className="shrink-0">
         <Logo size="sm" showText={false} />
       </Link>
       <Link
         href="/explore"
-        className="group flex h-10 min-w-0 flex-1 items-center gap-2.5 rounded-full bg-surface px-3.5 text-sm text-text-muted transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-card-hover hover:text-text"
+        className="group flex h-10 min-w-0 flex-1 items-center gap-2 rounded-full bg-surface px-3 text-sm text-text-muted transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-card-hover hover:text-text sm:gap-2.5 sm:px-3.5"
       >
         <Search size={15} className="shrink-0 text-text-muted/70 transition-colors group-hover:text-primary/70" />
-        <span className="truncate">Search art and creators</span>
+        <span className="truncate max-[379px]:hidden">Search art and creators</span>
+        <span className="hidden truncate max-[379px]:inline">Search</span>
       </Link>
       <Link
         href={createHref}
@@ -34,7 +35,7 @@ export function TopBar() {
           <Link
             href="/notifications"
             aria-label="Notifications"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-transparent text-text-muted transition-all duration-200 hover:border-border hover:bg-card hover:text-text"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-transparent text-text-muted transition-all duration-200 hover:border-border hover:bg-card hover:text-text max-[359px]:hidden"
           >
             <Bell size={19} />
           </Link>
