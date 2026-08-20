@@ -95,7 +95,7 @@ export default async function ArtworkOpenGraphImage({
                   alt=""
                   width="500"
                   height="540"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 />
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

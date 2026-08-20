@@ -91,6 +91,24 @@ To provision your database:
 2. Apply the SQL files sequentially in your Supabase SQL Editor:
    *   [20260609000000_production_hardening.sql](file:///d:/NewNader/PixAnony/pixanony-app/supabase/migrations/20260609000000_production_hardening.sql): Establishes tables (profiles, artworks, comments, likes, follows, notifications, messages), user creation triggers, and RLS policies.
    *   [20260609001000_privacy_and_username_followup.sql](file:///d:/NewNader/PixAnony/pixanony-app/supabase/migrations/20260609001000_privacy_and_username_followup.sql): Contains updates to username normalization and profile editing access control.
+   *   `20260820000000_rbac_moderation_dashboard.sql`: Adds locked role/permission mappings, reports, moderation audit records, staff RPCs, and role-aware RLS policies.
+   *   `20260820001000_rbac_advisor_hardening.sql`: Consolidates staff visibility policies and adds the supporting foreign-key indexes.
+   *   `20260820002000_fix_report_policy_recursion.sql`: Keeps reported-artwork staff visibility recursion-safe across the reports and artworks RLS policies.
+   *   `20260820003000_report_privacy.sql`: Keeps internal report targets staff-only while regular users retain insert-only reporting access.
+
+### Staff role bootstrap
+
+All existing and new accounts are deliberately assigned the `user` role. After applying the RBAC migrations, select the first administrator explicitly in the Supabase SQL editor:
+
+```sql
+update public.user_roles
+set role = 'admin', updated_at = now()
+where user_id = (
+  select id from public.profiles where username = 'your_username'
+);
+```
+
+After that one-time bootstrap, use `/dashboard` to assign `admin`, `moderator`, or `user` to other accounts. Direct role-table access is revoked from browser clients, dashboard role changes require `roles.manage`, self-role changes are rejected, and every role change is audited.
 
 ---
 

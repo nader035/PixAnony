@@ -19,6 +19,7 @@ import {
 import { PixelAvatar } from '@/components/ui/pixel-avatar';
 import { PixelArtRenderer } from '@/components/ui/pixel-art-renderer';
 import { ArtworkShareSheet } from '@/components/feed/artwork-share-sheet';
+import { ReportArtworkDialog } from '@/components/feed/report-artwork-dialog';
 import { formatNumber, formatTimeAgo, cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
@@ -99,6 +100,7 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
   const [bookmarked, setBookmarked] = useState(artwork.bookmarked_by_user ?? false);
   const [showBurst, setShowBurst] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   const profile = artwork.profile;
   const isAnonymous = artwork.is_anonymous;
@@ -305,8 +307,10 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
         </div>
 
         <button
+          type="button"
+          onClick={() => setReportOpen(true)}
           className="flex items-center justify-center w-9 h-9 rounded-xl text-text-muted hover:text-text hover:bg-card-hover transition-colors shrink-0"
-          aria-label={t('feed.moreOptions')}
+          aria-label="Report artwork"
         >
           <MoreHorizontal size={18} />
         </button>
@@ -474,6 +478,12 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
         artwork={artwork}
         open={shareOpen}
         onClose={() => setShareOpen(false)}
+      />
+      <ReportArtworkDialog
+        artworkId={artwork.id}
+        ownerId={artwork.user_id}
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
       />
     </motion.article>
   );

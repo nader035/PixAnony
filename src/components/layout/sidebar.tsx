@@ -15,6 +15,7 @@ import {
   LogIn,
   ArrowRight,
   User,
+  Shield,
   type LucideIcon,
 } from '@/components/ui/icons';
 import { Logo } from '@/components/ui/logo';
@@ -28,7 +29,7 @@ import { useI18n } from '@/components/i18n/locale-provider';
 /* ===== Sidebar navigation items ===== */
 type NavItem = {
   id: string;
-  labelKey: 'nav.home' | 'nav.explore' | 'nav.create' | 'nav.challenges' | 'nav.bookmarks' | 'nav.drops' | 'nav.notifications' | 'nav.profile' | 'nav.settings';
+  labelKey: 'nav.home' | 'nav.explore' | 'nav.create' | 'nav.challenges' | 'nav.bookmarks' | 'nav.drops' | 'nav.notifications' | 'nav.profile' | 'nav.settings' | 'nav.dashboard';
   href: string;
   icon: LucideIcon;
   requiresAuth?: boolean;
@@ -48,13 +49,20 @@ const navItems: NavItem[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { profile, signOut } = useAuthProfile();
+  const { profile, signOut, isStaff } = useAuthProfile();
   const { unreadCount } = useNotificationCenter();
   const { locale, t } = useI18n();
 
   /* Resolve auth-dependent hrefs at render time.
      Profile href uses the real username; everything else stays stable. */
-  const resolvedItems = navItems.map((item) => {
+  const staffAwareItems = isStaff
+    ? [
+        ...navItems.slice(0, -1),
+        { id: 'dashboard', labelKey: 'nav.dashboard' as const, href: '/dashboard', icon: Shield },
+        navItems[navItems.length - 1],
+      ]
+    : navItems;
+  const resolvedItems = staffAwareItems.map((item) => {
     if (item.id === 'profile' && profile) {
       return { ...item, href: `/profile/${profile.username}` };
     }

@@ -646,7 +646,7 @@ export const translations = {
     'nav.alerts': 'التنبيهات',
     'nav.profile': 'ملفي',
     'nav.settings': 'الإعدادات',
-    'nav.dashboard': 'المنشورات',
+    'nav.dashboard': 'لوحة التحكم',
     'nav.signIn': 'تسجيل الدخول',
     'nav.signOut': 'تسجيل الخروج',
     'nav.account': 'قائمة الحساب',
