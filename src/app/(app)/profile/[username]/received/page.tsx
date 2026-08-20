@@ -24,7 +24,7 @@ export default async function ReceivedPage({
 
   const { data: artworks } = await supabase
     .from('artworks')
-    .select('id, title, caption, pixel_data, grid_size, created_at, is_anonymous, profile:profiles!artworks_user_id_fkey(username, display_name, avatar_url, is_verified)')
+    .select('id, title, caption, pixel_data, grid_size, grid_width, grid_height, created_at, is_anonymous, profile:profiles!artworks_user_id_fkey(username, display_name, avatar_url, is_verified)')
     .eq('receiver_id', user.id)
     .order('created_at', { ascending: false });
 
@@ -41,10 +41,12 @@ export default async function ReceivedPage({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {artworks.map((artwork, index) => (
             <Link key={artwork.id} href={`/art/${artwork.id}`} style={{ background: ['var(--powder)', 'var(--butter)', 'var(--blush)', 'var(--lilac)', 'var(--mint)'][index % 5] }} className="group interactive-surface overflow-hidden rounded-[28px] shadow-[0_10px_30px_rgba(44,40,58,.06)]">
-              <div className="relative m-4 aspect-square overflow-hidden rounded-[20px] bg-card p-4">
+              <div className="relative m-4 overflow-hidden rounded-[20px] bg-card p-4" style={{ aspectRatio: `${artwork.grid_width} / ${artwork.grid_height}` }}>
                 <PixelArtRenderer
                   pixels={Array.isArray(artwork.pixel_data) ? artwork.pixel_data as string[] : []}
                   gridSize={artwork.grid_size}
+                  gridWidth={artwork.grid_width}
+                  gridHeight={artwork.grid_height}
                   className="h-full w-full"
                 />
                 {index === 0 && (

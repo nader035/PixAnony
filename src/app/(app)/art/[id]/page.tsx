@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft } from '@/components/ui/icons';
 import { FeedCard } from '@/components/feed/feed-card';
 import { ArtworkComments } from '@/components/feed/artwork-comments';
+import { ArtworkDetailBack } from '@/components/feed/artwork-detail-back';
+import { PixelArtRenderer } from '@/components/ui/pixel-art-renderer';
 import { PageFrame } from '@/components/ui/page-layout';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { normalizeArtwork } from '@/lib/supabase/data';
@@ -122,14 +122,24 @@ export default async function ArtworkDetailPage({
   }));
 
   return (
-    <PageFrame width="compact">
-      <Link href="/home" className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-text-muted hover:text-text">
-        <ArrowLeft className="rtl-flip" size={16} />
-        {t('art.backToFeed')}
-      </Link>
-      <div className="space-y-4">
-        <FeedCard artwork={artwork} />
-        <ArtworkComments artworkId={id} initialComments={normalizedComments} viewer={viewerProfile} />
+    <PageFrame width="wide">
+      <ArtworkDetailBack label={t('art.backToFeed')} />
+      <div className="overflow-hidden rounded-[32px] border border-border/70 bg-card shadow-[0_24px_70px_rgba(44,40,58,.1)] lg:grid lg:grid-cols-[minmax(0,1.4fr)_minmax(340px,.75fr)]">
+        <div className="flex min-h-[340px] items-center justify-center bg-surface p-4 sm:p-8 lg:min-h-[calc(100dvh-10rem)]">
+          <PixelArtRenderer
+            pixels={JSON.parse(artwork.pixel_data) as string[]}
+            gridSize={artwork.grid_size}
+            gridWidth={artwork.grid_width}
+            gridHeight={artwork.grid_height}
+            className="max-h-[calc(100dvh-13rem)] max-w-full !rounded-[24px]"
+          />
+        </div>
+        <aside className="min-w-0 border-t border-border/70 bg-bg/40 p-3 lg:max-h-[calc(100dvh-8rem)] lg:overflow-y-auto lg:border-s lg:border-t-0 sm:p-4">
+          <div className="space-y-4">
+            <FeedCard artwork={artwork} showArtwork={false} />
+            <ArtworkComments artworkId={id} initialComments={normalizedComments} viewer={viewerProfile} />
+          </div>
+        </aside>
       </div>
     </PageFrame>
   );

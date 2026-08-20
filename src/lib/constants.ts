@@ -1,4 +1,4 @@
-import type { ColorPalette, GridSizeOption } from './types';
+import type { CanvasPreset, ColorPalette, GridSizeOption } from './types';
 
 // ===== GRID SIZES =====
 export const GRID_SIZES: GridSizeOption[] = [
@@ -7,6 +7,20 @@ export const GRID_SIZES: GridSizeOption[] = [
   { size: 32, label: '32×32', difficulty: 'Advanced', pixels: 1024 },
   { size: 64, label: '64×64', difficulty: 'Pro', pixels: 4096 },
   { size: 128, label: '128×128', difficulty: 'Master', pixels: 16384 },
+];
+
+// Social-friendly ratios at pixel-art scale. These are logical drawing grids,
+// not export resolutions, so every cell remains comfortable to edit.
+export const CANVAS_PRESETS: CanvasPreset[] = [
+  { id: 'square-8', width: 8, height: 8, ratio: '1:1', label: '8×8' },
+  { id: 'square-16', width: 16, height: 16, ratio: '1:1', label: '16×16' },
+  { id: 'square-32', width: 32, height: 32, ratio: '1:1', label: '32×32' },
+  { id: 'square-64', width: 64, height: 64, ratio: '1:1', label: '64×64' },
+  { id: 'square-128', width: 128, height: 128, ratio: '1:1', label: '128×128' },
+  { id: 'portrait-4-5', width: 32, height: 40, ratio: '4:5', label: '32×40' },
+  { id: 'portrait-3-4', width: 24, height: 32, ratio: '3:4', label: '24×32' },
+  { id: 'story-9-16', width: 27, height: 48, ratio: '9:16', label: '27×48' },
+  { id: 'landscape-16-9', width: 48, height: 27, ratio: '16:9', label: '48×27' },
 ];
 
 // ===== COLOR PALETTES =====

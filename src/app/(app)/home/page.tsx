@@ -6,6 +6,7 @@ import { normalizeArtwork } from '@/lib/supabase/data';
 import type { Artwork } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { getServerI18n } from '@/lib/i18n/server';
+import { MasonryGrid, MasonryItem } from '@/components/ui/masonry-grid';
 
 const tabs = [
   { labelKey: 'feed.forYou', value: 'for-you', icon: Compass },
@@ -29,6 +30,7 @@ export default async function HomePage({
     .from('artworks')
     .select('*, profile:profiles!artworks_user_id_fkey(*)')
     .eq('visibility', 'public')
+    .in('artwork_kind', ['standard', 'challenge_submission', 'admin_delivery'])
     .limit(30);
 
   if (tab === 'trending') {
@@ -76,7 +78,7 @@ export default async function HomePage({
   }
 
   return (
-    <div className="page-enter mx-auto w-full max-w-[780px] px-4 pb-16 sm:px-8">
+    <div className="page-enter mx-auto w-full max-w-[1180px] px-4 pb-16 sm:px-6 xl:px-8">
       {/* ===== HEADER ===== */}
       <header className="sticky top-16 z-30 -mx-4 bg-card/90 px-4 pt-8 backdrop-blur-2xl sm:-mx-8 sm:px-8 lg:top-0">
         <div className="mb-5 flex items-end justify-between gap-4">
@@ -139,17 +141,17 @@ export default async function HomePage({
 
       {/* ===== FEED / EMPTY STATE ===== */}
       {artworks.length ? (
-        <div className="space-y-5 py-6">
+        <MasonryGrid className="py-6">
           {artworks.map((artwork, i) => (
-            <div
+            <MasonryItem
               key={artwork.id}
               className="animate-slide-up"
               style={{ animationDelay: `${Math.min(i * 50, 300)}ms`, animationFillMode: 'both' }}
             >
               <FeedCard artwork={artwork} />
-            </div>
+            </MasonryItem>
           ))}
-        </div>
+        </MasonryGrid>
       ) : (
         <div className="surface-panel mt-8 flex min-h-[420px] flex-col items-center justify-center rounded-3xl px-6 py-12 text-center animate-fade-in">
           {/* Large decorative icon */}

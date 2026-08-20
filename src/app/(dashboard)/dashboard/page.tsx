@@ -44,6 +44,8 @@ type DashboardArtwork = {
   caption: string | null;
   pixel_data: unknown;
   grid_size: number;
+  grid_width: number;
+  grid_height: number;
   visibility: string;
   is_anonymous: boolean;
   likes_count?: number;
@@ -142,7 +144,7 @@ export default async function DashboardPage({
       reporter:profiles!reports_reporter_id_fkey(id, username, display_name, avatar_url),
       target_owner:profiles!reports_target_owner_id_fkey(id, username, display_name, avatar_url),
       artwork:artworks!reports_artwork_id_fkey(
-        id, title, caption, pixel_data, grid_size, visibility, is_anonymous,
+        id, title, caption, pixel_data, grid_size, grid_width, grid_height, visibility, is_anonymous,
         likes_count, views_count, created_at,
         profile:profiles!artworks_user_id_fkey(id, username, display_name, avatar_url)
       )
@@ -155,7 +157,7 @@ export default async function DashboardPage({
 
   let contentQuery = supabase
     .from('artworks')
-    .select('id, title, caption, pixel_data, grid_size, visibility, is_anonymous, likes_count, views_count, created_at, profile:profiles!artworks_user_id_fkey(id, username, display_name, avatar_url)')
+    .select('id, title, caption, pixel_data, grid_size, grid_width, grid_height, visibility, is_anonymous, likes_count, views_count, created_at, profile:profiles!artworks_user_id_fkey(id, username, display_name, avatar_url)')
     .order('created_at', { ascending: false })
     .limit(24);
   if (q.trim()) contentQuery = contentQuery.ilike('title', `%${q.trim()}%`);
@@ -290,7 +292,7 @@ export default async function DashboardPage({
                   <div className="grid min-h-56 sm:grid-cols-[190px_minmax(0,1fr)]">
                     <div className="flex min-h-48 items-center justify-center bg-[#f7f8fa] p-4 dark:bg-surface">
                       {artwork && pixels.length ? (
-                        <PixelArtRenderer pixels={pixels} gridSize={artwork.grid_size} className="h-full w-full" />
+                        <PixelArtRenderer pixels={pixels} gridSize={artwork.grid_size} gridWidth={artwork.grid_width} gridHeight={artwork.grid_height} className="h-full w-full" />
                       ) : (
                         <div className="text-center text-xs text-[#8a94a6]">
                           <FileImage size={28} className="mx-auto mb-2" />
@@ -401,7 +403,7 @@ export default async function DashboardPage({
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#f4f6f9] p-1 dark:bg-surface">
-                              <PixelArtRenderer pixels={pixelsFrom(artwork.pixel_data)} gridSize={artwork.grid_size} className="h-full w-full" />
+                              <PixelArtRenderer pixels={pixelsFrom(artwork.pixel_data)} gridSize={artwork.grid_size} gridWidth={artwork.grid_width} gridHeight={artwork.grid_height} className="h-full w-full" />
                             </div>
                             <div className="min-w-0">
                               <Link href={`/art/${artwork.id}`} className="block max-w-64 truncate font-bold text-[#172033] hover:text-[#005efe] dark:text-text">

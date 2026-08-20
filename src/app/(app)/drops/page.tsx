@@ -26,6 +26,8 @@ type DropArtwork = {
   caption: string | null;
   pixel_data: unknown;
   grid_size: number;
+  grid_width: number;
+  grid_height: number;
   created_at: string | null;
   is_anonymous: boolean;
   profile: { username: string; display_name: string; avatar_url: string | null; is_verified: boolean } | null;
@@ -53,12 +55,12 @@ export default function DropsPage() {
     const [receivedResult, sentResult] = await Promise.all([
       supabase
         .from('artworks')
-        .select('id, title, caption, pixel_data, grid_size, created_at, is_anonymous, profile:profiles!artworks_user_id_fkey(username, display_name, avatar_url, is_verified)')
+        .select('id, title, caption, pixel_data, grid_size, grid_width, grid_height, created_at, is_anonymous, profile:profiles!artworks_user_id_fkey(username, display_name, avatar_url, is_verified)')
         .eq('receiver_id', user.id)
         .order('created_at', { ascending: false }),
       supabase
         .from('artworks')
-        .select('id, title, caption, pixel_data, grid_size, created_at, is_anonymous, profile:profiles!artworks_user_id_fkey(username, display_name, avatar_url, is_verified)')
+        .select('id, title, caption, pixel_data, grid_size, grid_width, grid_height, created_at, is_anonymous, profile:profiles!artworks_user_id_fkey(username, display_name, avatar_url, is_verified)')
         .eq('user_id', user.id)
         .not('receiver_id', 'is', null)
         .order('created_at', { ascending: false }),
@@ -151,10 +153,12 @@ export default function DropsPage() {
                 style={{ background: ['var(--powder)', 'var(--butter)', 'var(--blush)', 'var(--lilac)', 'var(--mint)'][index % 5] }}
                 className="group interactive-surface overflow-hidden rounded-[28px] shadow-[0_10px_30px_rgba(44,40,58,.06)]"
               >
-                <div className="relative m-4 aspect-square overflow-hidden rounded-[20px] bg-card p-4">
+                <div className="relative m-4 overflow-hidden rounded-[20px] bg-card p-4" style={{ aspectRatio: `${artwork.grid_width} / ${artwork.grid_height}` }}>
                   <PixelArtRenderer
                     pixels={Array.isArray(artwork.pixel_data) ? artwork.pixel_data as string[] : []}
                     gridSize={artwork.grid_size}
+                    gridWidth={artwork.grid_width}
+                    gridHeight={artwork.grid_height}
                     className="h-full w-full"
                   />
                   {index === 0 && (

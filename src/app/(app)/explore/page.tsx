@@ -7,6 +7,7 @@ import { PageFrame, PageHeader } from '@/components/ui/page-layout';
 import { formatNumber, cn } from '@/lib/utils';
 import { createPublicPageMetadata } from '@/lib/seo';
 import { getServerI18n } from '@/lib/i18n/server';
+import { MasonryGrid, MasonryItem } from '@/components/ui/masonry-grid';
 
 export async function generateMetadata(): Promise<Metadata> {
   const { locale, t } = await getServerI18n();
@@ -30,8 +31,9 @@ export default async function ExplorePage({
   const supabase = await createServerSupabaseClient();
   let query = supabase
     .from('artworks')
-    .select('id, title, pixel_data, grid_size, likes_count, views_count, created_at, profile:profiles!artworks_user_id_fkey(username)')
+    .select('id, title, pixel_data, grid_size, grid_width, grid_height, likes_count, views_count, created_at, profile:profiles!artworks_user_id_fkey(username)')
     .eq('visibility', 'public')
+    .in('artwork_kind', ['standard', 'challenge_submission', 'admin_delivery'])
     .limit(48);
 
   if (q.trim()) query = query.ilike('title', `%${q.trim()}%`);
@@ -86,19 +88,19 @@ export default async function ExplorePage({
       </nav>
 
       {data?.length ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+        <MasonryGrid>
           {data.map((artwork, index) => {
             const profile = Array.isArray(artwork.profile) ? artwork.profile[0] : artwork.profile;
             const pixels = Array.isArray(artwork.pixel_data) ? artwork.pixel_data as string[] : [];
             return (
+              <MasonryItem key={artwork.id}>
               <Link
-                key={artwork.id}
                 href={`/art/${artwork.id}`}
                 style={{ background: ['var(--powder)', 'var(--butter)', 'var(--blush)', 'var(--lilac)', 'var(--mint)'][index % 5] }}
                 className="group interactive-surface overflow-hidden rounded-[28px] shadow-[0_10px_30px_rgba(44,40,58,.06)]"
               >
-                <div className="relative m-3 aspect-square overflow-hidden rounded-[20px] bg-card p-3 sm:m-4 sm:p-4">
-                  <PixelArtRenderer pixels={pixels} gridSize={artwork.grid_size} className="h-full w-full" />
+                <div className="relative m-3 overflow-hidden rounded-[20px] bg-card p-3 sm:m-4 sm:p-4" style={{ aspectRatio: `${artwork.grid_width} / ${artwork.grid_height}` }}>
+                  <PixelArtRenderer pixels={pixels} gridSize={artwork.grid_size} gridWidth={artwork.grid_width} gridHeight={artwork.grid_height} className="h-full w-full" />
                   {index < 3 && filter === 'trending' && (
                     <span className="absolute start-3 top-3 flex items-center gap-1 rounded-full border border-pink/25 bg-bg/80 px-2 py-1 text-[10px] font-semibold text-pink backdrop-blur">
                       <TrendingUp size={11} />
@@ -117,9 +119,10 @@ export default async function ExplorePage({
                   </div>
                 </div>
               </Link>
+              </MasonryItem>
             );
           })}
-        </div>
+        </MasonryGrid>
       ) : (
         <div className="surface-panel flex min-h-[360px] flex-col items-center justify-center rounded-3xl px-6 text-center">
           <Sparkles size={30} className="mb-4 text-primary" />

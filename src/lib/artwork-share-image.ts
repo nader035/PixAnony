@@ -1,6 +1,8 @@
 type ArtworkShareImageOptions = {
   pixels: string[];
   gridSize: number;
+  gridWidth?: number;
+  gridHeight?: number;
   title: string;
   caption?: string | null;
   displayName: string;
@@ -80,7 +82,8 @@ function drawWrappedText(
 function drawArtwork(
   ctx: CanvasRenderingContext2D,
   pixels: string[],
-  gridSize: number,
+  gridWidth: number,
+  gridHeight: number,
   x: number,
   y: number,
   size: number,
@@ -91,13 +94,17 @@ function drawArtwork(
   ctx.fillStyle = '#f6f4f0';
   ctx.fillRect(x, y, size, size);
 
-  const cellSize = size / gridSize;
-  for (let row = 0; row < gridSize; row += 1) {
-    for (let column = 0; column < gridSize; column += 1) {
+  const cellSize = Math.min(size / gridWidth, size / gridHeight);
+  const artworkWidth = gridWidth * cellSize;
+  const artworkHeight = gridHeight * cellSize;
+  const artworkX = x + (size - artworkWidth) / 2;
+  const artworkY = y + (size - artworkHeight) / 2;
+  for (let row = 0; row < gridHeight; row += 1) {
+    for (let column = 0; column < gridWidth; column += 1) {
       ctx.fillStyle = (row + column) % 2 === 0 ? '#f7f5f1' : '#efede8';
       ctx.fillRect(
-        Math.floor(x + column * cellSize),
-        Math.floor(y + row * cellSize),
+        Math.floor(artworkX + column * cellSize),
+        Math.floor(artworkY + row * cellSize),
         Math.ceil(cellSize),
         Math.ceil(cellSize),
       );
@@ -107,12 +114,12 @@ function drawArtwork(
   ctx.imageSmoothingEnabled = false;
   pixels.forEach((color, index) => {
     if (!color || color === 'transparent') return;
-    const column = index % gridSize;
-    const row = Math.floor(index / gridSize);
+    const column = index % gridWidth;
+    const row = Math.floor(index / gridWidth);
     ctx.fillStyle = color;
     ctx.fillRect(
-      Math.floor(x + column * cellSize),
-      Math.floor(y + row * cellSize),
+      Math.floor(artworkX + column * cellSize),
+      Math.floor(artworkY + row * cellSize),
       Math.ceil(cellSize),
       Math.ceil(cellSize),
     );
@@ -135,6 +142,8 @@ function canvasToFile(canvas: HTMLCanvasElement, fileName: string) {
 export async function createArtworkShareImage({
   pixels,
   gridSize,
+  gridWidth = gridSize,
+  gridHeight = gridSize,
   title,
   caption,
   displayName,
@@ -201,7 +210,7 @@ export async function createArtworkShareImage({
   ctx.fillText(tagline, 958, 134);
   ctx.textAlign = 'left';
 
-  drawArtwork(ctx, pixels, gridSize, 106, 188, 868);
+  drawArtwork(ctx, pixels, gridWidth, gridHeight, 106, 188, 868);
 
   ctx.fillStyle = '#141c2c';
   ctx.textBaseline = 'alphabetic';

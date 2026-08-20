@@ -9,7 +9,7 @@ import { useI18n } from '@/components/i18n/locale-provider';
 
 export default function PreviewPanel() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { layers, gridSize, showPreview } = usePaintStore();
+  const { layers, gridWidth, gridHeight, showPreview } = usePaintStore();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const { t } = useI18n();
 
@@ -21,14 +21,14 @@ export default function PreviewPanel() {
     if (!ctx) return;
 
     // Set canvas to exact grid resolution
-    canvas.width = gridSize;
-    canvas.height = gridSize;
-    ctx.clearRect(0, 0, gridSize, gridSize);
+    canvas.width = gridWidth;
+    canvas.height = gridHeight;
+    ctx.clearRect(0, 0, gridWidth, gridHeight);
     ctx.imageSmoothingEnabled = false;
 
     // Draw checkerboard at pixel level
-    for (let y = 0; y < gridSize; y++) {
-      for (let x = 0; x < gridSize; x++) {
+    for (let y = 0; y < gridHeight; y++) {
+      for (let x = 0; x < gridWidth; x++) {
         ctx.fillStyle = (x + y) % 2 === 0 ? '#2a2a3e' : '#1e1e30';
         ctx.fillRect(x, y, 1, 1);
       }
@@ -41,15 +41,15 @@ export default function PreviewPanel() {
       for (let i = 0; i < layer.pixels.length; i++) {
         const pixel = layer.pixels[i];
         if (pixel === 'transparent') continue;
-        const x = i % gridSize;
-        const y = Math.floor(i / gridSize);
+        const x = i % gridWidth;
+        const y = Math.floor(i / gridWidth);
         ctx.fillStyle = pixel;
         ctx.fillRect(x, y, 1, 1);
       }
     }
 
     ctx.globalAlpha = 1;
-  }, [layers, gridSize]);
+  }, [layers, gridHeight, gridWidth]);
 
   // Re-render when layers change
   useEffect(() => {
@@ -86,8 +86,9 @@ export default function PreviewPanel() {
       <div
         className={`
           relative mx-auto overflow-hidden rounded-2xl border border-border bg-card
-          ${isFullscreen ? 'w-full aspect-square' : 'w-full max-w-[140px] aspect-square'}
+          ${isFullscreen ? 'w-full' : 'w-full max-w-[140px]'}
         `}
+        style={{ aspectRatio: `${gridWidth} / ${gridHeight}` }}
       >
         <canvas
           ref={canvasRef}
@@ -98,7 +99,7 @@ export default function PreviewPanel() {
 
       {/* Info */}
       <div className="text-center font-mono text-[9px] text-text-muted/60">
-        {gridSize}×{gridSize} px
+        {gridWidth}×{gridHeight} px
       </div>
     </motion.div>
   );

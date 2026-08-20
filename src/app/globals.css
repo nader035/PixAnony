@@ -110,9 +110,12 @@ html[dir="rtl"] .pixel-art { direction: ltr; }
 .app-backdrop::after { width: 15rem; height: 15rem; right: -7rem; top: 28%; background: var(--powder); }
 .app-shell-grid { display: grid; grid-template-columns: minmax(0,1fr); }
 @media (min-width: 1024px) { .app-shell-grid { grid-template-columns: 240px minmax(0,1fr); gap: 16px; padding: 16px; } }
+@media (min-width: 1024px) { .app-shell-grid--collapsed { grid-template-columns: 72px minmax(0,1fr); } }
 @media (min-width: 1536px) {
   .app-shell-grid--right { grid-template-columns: 240px minmax(0,900px) 304px; justify-content: center; }
   .app-shell-grid--plain { grid-template-columns: 240px minmax(0,1040px); justify-content: center; }
+  .app-shell-grid--right.app-shell-grid--collapsed { grid-template-columns: 72px minmax(0,900px) 304px; }
+  .app-shell-grid--plain.app-shell-grid--collapsed { grid-template-columns: 72px minmax(0,1040px); }
 }
 
 .surface-panel { background: var(--card); border: 1px solid var(--border-muted); box-shadow: var(--shadow-card); }

@@ -21,7 +21,7 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
     undo, redo, clearCanvas, flipHorizontal, flipVertical,
     symmetryMode, setSymmetryMode,
     historyIndex, history,
-    layers, gridSize,
+    layers, gridWidth, gridHeight,
   } = usePaintStore();
 
   const canUndo = historyIndex > 0;
@@ -32,8 +32,8 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
   // ===== EXPORT PNG =====
   const exportPNG = useCallback(() => {
     const canvas = document.createElement('canvas');
-    canvas.width = gridSize;
-    canvas.height = gridSize;
+    canvas.width = gridWidth;
+    canvas.height = gridHeight;
     const ctx = canvas.getContext('2d')!;
     ctx.imageSmoothingEnabled = false;
 
@@ -44,8 +44,8 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
       for (let i = 0; i < layer.pixels.length; i++) {
         const pixel = layer.pixels[i];
         if (pixel === 'transparent') continue;
-        const x = i % gridSize;
-        const y = Math.floor(i / gridSize);
+        const x = i % gridWidth;
+        const y = Math.floor(i / gridWidth);
         ctx.fillStyle = pixel;
         ctx.fillRect(x, y, 1, 1);
       }
@@ -56,12 +56,12 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `pixanony-${gridSize}x${gridSize}-${Date.now()}.png`;
+      a.download = `pixanony-${gridWidth}x${gridHeight}-${Date.now()}.png`;
       a.click();
       URL.revokeObjectURL(url);
       toast.success(t('paint.pngDownloaded'));
     }, 'image/png');
-  }, [gridSize, layers, t]);
+  }, [gridHeight, gridWidth, layers, t]);
 
   // ===== EXPORT SVG =====
   const exportSVG = useCallback(() => {
@@ -71,31 +71,31 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
       for (let i = 0; i < layer.pixels.length; i++) {
         const pixel = layer.pixels[i];
         if (pixel === 'transparent') continue;
-        const x = i % gridSize;
-        const y = Math.floor(i / gridSize);
+        const x = i % gridWidth;
+        const y = Math.floor(i / gridWidth);
         const opacity = layer.opacity < 1 ? ` opacity="${layer.opacity}"` : '';
         rects += `  <rect x="${x}" y="${y}" width="1" height="1" fill="${pixel}"${opacity}/>\n`;
       }
     }
 
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${gridSize} ${gridSize}" shape-rendering="crispEdges">\n${rects}</svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${gridWidth} ${gridHeight}" shape-rendering="crispEdges">\n${rects}</svg>`;
     const blob = new Blob([svg], { type: 'image/svg+xml' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `pixanony-${gridSize}x${gridSize}-${Date.now()}.svg`;
+    a.download = `pixanony-${gridWidth}x${gridHeight}-${Date.now()}.svg`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success(t('paint.svgDownloaded'));
-  }, [gridSize, layers, t]);
+  }, [gridHeight, gridWidth, layers, t]);
 
   // ===== COPY TO CLIPBOARD =====
   const copyImage = useCallback(async () => {
     const canvas = document.createElement('canvas');
     // Export at higher resolution for clipboard
-    const scale = Math.max(1, Math.floor(512 / gridSize));
-    canvas.width = gridSize * scale;
-    canvas.height = gridSize * scale;
+    const scale = Math.max(1, Math.floor(512 / Math.max(gridWidth, gridHeight)));
+    canvas.width = gridWidth * scale;
+    canvas.height = gridHeight * scale;
     const ctx = canvas.getContext('2d')!;
     ctx.imageSmoothingEnabled = false;
 
@@ -105,8 +105,8 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
       for (let i = 0; i < layer.pixels.length; i++) {
         const pixel = layer.pixels[i];
         if (pixel === 'transparent') continue;
-        const x = (i % gridSize) * scale;
-        const y = Math.floor(i / gridSize) * scale;
+        const x = (i % gridWidth) * scale;
+        const y = Math.floor(i / gridWidth) * scale;
         ctx.fillStyle = pixel;
         ctx.fillRect(x, y, scale, scale);
       }
@@ -123,7 +123,7 @@ export default function ActionsPanel({ compact = false, onClearCanvas }: Actions
     } catch {
       toast.error(t('paint.imageCopyFailed'));
     }
-  }, [gridSize, layers, t]);
+  }, [gridHeight, gridWidth, layers, t]);
 
   // ===== SYMMETRY OPTIONS =====
   const symmetryOptions: { mode: typeof symmetryMode; label: string }[] = [

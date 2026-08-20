@@ -105,6 +105,8 @@ export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetP
       const file = await createArtworkShareImage({
         pixels,
         gridSize: artwork.grid_size,
+        gridWidth: artwork.grid_width,
+        gridHeight: artwork.grid_height,
         title: artwork.title || t('share.artworkOnPixanony'),
         caption: artwork.caption,
         displayName,
@@ -195,8 +197,8 @@ export function ArtworkShareSheet({ artwork, open, onClose }: ArtworkShareSheetP
                 <Logo size="sm" />
               </div>
               {pixels.length > 0 && (
-                <div className="relative mt-3 aspect-[16/9] overflow-hidden rounded-[18px] bg-card">
-                  <PixelArtRenderer pixels={pixels} gridSize={artwork.grid_size} className="absolute inset-0 h-full w-full !rounded-none" />
+                <div className="relative mt-3 overflow-hidden rounded-[18px] bg-card" style={{ aspectRatio: `${artwork.grid_width} / ${artwork.grid_height}` }}>
+                  <PixelArtRenderer pixels={pixels} gridSize={artwork.grid_size} gridWidth={artwork.grid_width} gridHeight={artwork.grid_height} className="absolute inset-0 h-full w-full !rounded-none" />
                 </div>
               )}
               <div className="px-1 pb-1 pt-3">

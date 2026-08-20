@@ -26,6 +26,8 @@ export interface Artwork {
   title: string | null;
   caption: string | null;
   grid_size: GridSize;
+  grid_width: number;
+  grid_height: number;
   pixel_data: string; // JSON stringified pixel array
   layers: string; // JSON stringified layers
   preview_url: string | null;
@@ -36,12 +38,21 @@ export interface Artwork {
   comments_count: number;
   views_count: number;
   created_at: string;
+  artwork_kind: ArtworkKind;
+  source_challenge_id: string | null;
   // Joined
   profile?: Profile;
   liked_by_user?: boolean;
   reposted_by_user?: boolean;
   bookmarked_by_user?: boolean;
 }
+
+export type ArtworkKind =
+  | 'standard'
+  | 'challenge_template'
+  | 'challenge_submission'
+  | 'admin_studio'
+  | 'admin_delivery';
 
 export interface PixelLayer {
   id: string;
@@ -108,11 +119,24 @@ export interface Bookmark {
 
 export interface Challenge {
   id: string;
+  slug: string;
   title: string;
   theme: string;
-  description: string;
+  description: string | null;
+  instructions: string | null;
+  starts_at: string;
   ends_at: string;
+  status: 'draft' | 'published' | 'archived';
+  grid_width: number;
+  grid_height: number;
+  template_artwork_id: string | null;
+  template_mode: 'editable' | 'locked';
+  cover_artwork_id: string | null;
+  created_by: string | null;
   participants_count: number;
+  created_at: string;
+  updated_at: string;
+  template?: Artwork;
 }
 
 // Paint Editor Types
@@ -132,6 +156,8 @@ export interface PaintState {
   tool: PaintTool;
   color: string;
   gridSize: GridSize;
+  gridWidth: number;
+  gridHeight: number;
   zoom: number;
   panX: number;
   panY: number;
@@ -156,6 +182,14 @@ export interface GridSizeOption {
   label: string;
   difficulty: string;
   pixels: number;
+}
+
+export interface CanvasPreset {
+  id: string;
+  width: number;
+  height: number;
+  ratio: '1:1' | '4:5' | '3:4' | '9:16' | '16:9';
+  label: string;
 }
 
 export interface ShareOptions {

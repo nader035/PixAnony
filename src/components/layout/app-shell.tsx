@@ -1,7 +1,8 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Sidebar } from './sidebar';
 import { RightSidebarPanel } from './right-sidebar-panel';
 import { MobileNav } from './mobile-nav';
@@ -32,12 +33,12 @@ export function AppShell({
   className,
 }: AppShellProps) {
   const pathname = usePathname();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const reduceMotion = useReducedMotion();
 
   /* Detect prefers-reduced-motion on client.
      Falls back to false during SSR so the animation markup is always present. */
-  const prefersReduced =
-    typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const prefersReduced = reduceMotion ?? false;
 
   const variants = prefersReduced ? reducedMotionVariants : contentVariants;
 
@@ -48,11 +49,18 @@ export function AppShell({
           className={cn(
             'app-shell-grid relative z-10 min-h-screen w-full',
             showRightSidebar ? 'app-shell-grid--right' : 'app-shell-grid--plain',
+            sidebarCollapsed && 'app-shell-grid--collapsed',
           )}
         >
-          <Sidebar />
+          <Sidebar
+            collapsed={sidebarCollapsed}
+            onToggle={() => setSidebarCollapsed((value) => !value)}
+          />
 
-          <main
+          <motion.main
+            layout="position"
+            initial={false}
+            transition={prefersReduced ? { duration: 0 } : { duration: 0.15, ease: 'easeOut' }}
             id="main-content"
             className={cn(
               'min-w-0 overflow-hidden bg-card pb-[calc(5.25rem+env(safe-area-inset-bottom))] lg:min-h-[calc(100dvh-2rem)] lg:rounded-[32px] lg:pb-0 lg:shadow-[0_20px_70px_rgba(44,40,58,0.1)]',
@@ -82,7 +90,7 @@ export function AppShell({
             >
               {children}
             </motion.div>
-          </main>
+          </motion.main>
 
           {showRightSidebar && <RightSidebarPanel />}
         </div>

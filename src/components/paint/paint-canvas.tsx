@@ -19,7 +19,7 @@ const toolLabelKeys: Record<string, TranslationKey> = {
 };
 
 export default function PaintCanvas() {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   // ===== REFS =====
   const containerRef = useRef<HTMLDivElement>(null);
   const checkerCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -42,7 +42,7 @@ export default function PaintCanvas() {
 
   // ===== STORE =====
   const {
-    tool, color, gridSize, zoom, panX, panY, showGrid,
+    tool, color, gridWidth, gridHeight, zoom, panX, panY, showGrid,
     layers, activeLayerId, symmetryMode,
     setPixels, setLayerPixels, setColor,
     setPan, pushHistory,
@@ -51,7 +51,7 @@ export default function PaintCanvas() {
 
   // ===== COMPUTED =====
   const zoomFactor = zoom / 100;
-  const cellSize = canvasSize.width / gridSize;
+  const cellSize = canvasSize.width / gridWidth;
   const activeTool = PAINT_TOOL_SHORTCUTS.find((item) => item.tool === tool);
   const activeToolLabel = activeTool ? t(toolLabelKeys[activeTool.tool]) : tool;
 
@@ -66,22 +66,30 @@ export default function PaintCanvas() {
     const observer = new ResizeObserver(entries => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
-        const size = Math.floor(Math.min(width, height));
-        setCanvasSize({ width: size, height: size });
+        // contentRect already excludes this element's padding. Keeping the
+        // container independently sized avoids a ResizeObserver feedback loop
+        // where the board shrinks its own parent on every notification.
+        const availableWidth = Math.max(1, width);
+        const availableHeight = Math.max(1, height);
+        const scale = Math.min(availableWidth / gridWidth, availableHeight / gridHeight);
+        setCanvasSize({
+          width: Math.max(1, Math.floor(gridWidth * scale)),
+          height: Math.max(1, Math.floor(gridHeight * scale)),
+        });
       }
     });
 
     observer.observe(container);
     return () => observer.disconnect();
-  }, []);
+  }, [gridHeight, gridWidth]);
 
   // ===== OFFSCREEN CANVAS =====
   useEffect(() => {
     const canvas = document.createElement('canvas');
-    canvas.width = gridSize;
-    canvas.height = gridSize;
+    canvas.width = gridWidth;
+    canvas.height = gridHeight;
     offscreenRef.current = canvas;
-  }, [gridSize]);
+  }, [gridHeight, gridWidth]);
 
   // ===== DRAW CHECKERBOARD =====
   const drawCheckerboard = useCallback(() => {
@@ -94,13 +102,13 @@ export default function PaintCanvas() {
     canvas.height = canvasSize.height;
 
     const cSize = cellSize;
-    for (let y = 0; y < gridSize; y++) {
-      for (let x = 0; x < gridSize; x++) {
+    for (let y = 0; y < gridHeight; y++) {
+      for (let x = 0; x < gridWidth; x++) {
         ctx.fillStyle = (x + y) % 2 === 0 ? CHECKER_LIGHT : CHECKER_DARK;
         ctx.fillRect(x * cSize, y * cSize, cSize, cSize);
       }
     }
-  }, [canvasSize.width, canvasSize.height, gridSize, cellSize]);
+  }, [canvasSize.width, canvasSize.height, gridWidth, gridHeight, cellSize]);
 
   // ===== DRAW GRID =====
   const drawGrid = useCallback(() => {
@@ -118,24 +126,29 @@ export default function PaintCanvas() {
     const cSize = cellSize;
 
     // Draw grid lines
-    for (let i = 0; i <= gridSize; i++) {
-      const isMajor = i % 8 === 0 && gridSize >= 16;
+    for (let i = 0; i <= gridWidth; i++) {
+      const isMajor = i % 8 === 0 && gridWidth >= 16;
       ctx.strokeStyle = isMajor ? GRID_COLOR_MAJOR : GRID_COLOR;
       ctx.lineWidth = isMajor ? 1 : 0.5;
 
       // Vertical
       ctx.beginPath();
       ctx.moveTo(i * cSize, 0);
-      ctx.lineTo(i * cSize, gridSize * cSize);
-      ctx.stroke();
-
-      // Horizontal
-      ctx.beginPath();
-      ctx.moveTo(0, i * cSize);
-      ctx.lineTo(gridSize * cSize, i * cSize);
+      ctx.lineTo(i * cSize, gridHeight * cSize);
       ctx.stroke();
     }
-  }, [canvasSize.width, canvasSize.height, gridSize, cellSize, showGrid]);
+
+    for (let i = 0; i <= gridHeight; i++) {
+      const isMajor = i % 8 === 0 && gridHeight >= 16;
+      ctx.strokeStyle = isMajor ? GRID_COLOR_MAJOR : GRID_COLOR;
+      ctx.lineWidth = isMajor ? 1 : 0.5;
+
+      ctx.beginPath();
+      ctx.moveTo(0, i * cSize);
+      ctx.lineTo(gridWidth * cSize, i * cSize);
+      ctx.stroke();
+    }
+  }, [canvasSize.width, canvasSize.height, gridWidth, gridHeight, cellSize, showGrid]);
 
   // ===== COMPOSITE & DRAW MAIN CANVAS =====
   const drawMain = useCallback(() => {
@@ -161,15 +174,15 @@ export default function PaintCanvas() {
       for (let i = 0; i < layer.pixels.length; i++) {
         const pixel = layer.pixels[i];
         if (pixel === 'transparent') continue;
-        const x = (i % gridSize) * cSize;
-        const y = Math.floor(i / gridSize) * cSize;
+        const x = (i % gridWidth) * cSize;
+        const y = Math.floor(i / gridWidth) * cSize;
         ctx.fillStyle = pixel;
         ctx.fillRect(x, y, cSize, cSize);
       }
     }
 
     ctx.globalAlpha = 1;
-  }, [canvasSize.width, canvasSize.height, gridSize, cellSize, layers]);
+  }, [canvasSize.width, canvasSize.height, gridWidth, cellSize, layers]);
 
   // ===== DRAW INTERACTION OVERLAY =====
   const drawInteraction = useCallback((hoverX?: number, hoverY?: number, previewIndices?: number[]) => {
@@ -189,20 +202,20 @@ export default function PaintCanvas() {
       ctx.globalAlpha = 0.5;
       ctx.fillStyle = tool === 'eraser' ? 'rgba(255,255,255,0.3)' : color;
       for (const idx of previewIndices) {
-        const px = (idx % gridSize) * cSize;
-        const py = Math.floor(idx / gridSize) * cSize;
+        const px = (idx % gridWidth) * cSize;
+        const py = Math.floor(idx / gridWidth) * cSize;
         ctx.fillRect(px, py, cSize, cSize);
       }
       ctx.globalAlpha = 1;
     }
 
     // Draw hover cursor
-    if (hoverX !== undefined && hoverY !== undefined && hoverX >= 0 && hoverX < gridSize && hoverY >= 0 && hoverY < gridSize) {
+    if (hoverX !== undefined && hoverY !== undefined && hoverX >= 0 && hoverX < gridWidth && hoverY >= 0 && hoverY < gridHeight) {
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
       ctx.lineWidth = 1.5;
       ctx.strokeRect(hoverX * cSize + 0.5, hoverY * cSize + 0.5, cSize - 1, cSize - 1);
     }
-  }, [canvasSize.width, canvasSize.height, gridSize, cellSize, tool, color]);
+  }, [canvasSize.width, canvasSize.height, gridWidth, gridHeight, cellSize, tool, color]);
 
   // ===== RENDER ALL =====
   const renderAll = useCallback(() => {
@@ -239,27 +252,27 @@ export default function PaintCanvas() {
   // ===== SYMMETRY HELPER =====
   const getSymmetryIndices = useCallback((x: number, y: number): number[] => {
     const indices: number[] = [];
-    if (x < 0 || x >= gridSize || y < 0 || y >= gridSize) return indices;
+    if (x < 0 || x >= gridWidth || y < 0 || y >= gridHeight) return indices;
 
-    indices.push(y * gridSize + x);
+    indices.push(y * gridWidth + x);
 
     if (symmetryMode === 'horizontal' || symmetryMode === 'both') {
-      const mx = gridSize - 1 - x;
-      if (mx >= 0 && mx < gridSize) indices.push(y * gridSize + mx);
+      const mx = gridWidth - 1 - x;
+      if (mx >= 0 && mx < gridWidth) indices.push(y * gridWidth + mx);
     }
     if (symmetryMode === 'vertical' || symmetryMode === 'both') {
-      const my = gridSize - 1 - y;
-      if (my >= 0 && my < gridSize) indices.push(my * gridSize + x);
+      const my = gridHeight - 1 - y;
+      if (my >= 0 && my < gridHeight) indices.push(my * gridWidth + x);
     }
     if (symmetryMode === 'both') {
-      const mx = gridSize - 1 - x;
-      const my = gridSize - 1 - y;
-      if (mx >= 0 && mx < gridSize && my >= 0 && my < gridSize) {
-        indices.push(my * gridSize + mx);
+      const mx = gridWidth - 1 - x;
+      const my = gridHeight - 1 - y;
+      if (mx >= 0 && mx < gridWidth && my >= 0 && my < gridHeight) {
+        indices.push(my * gridWidth + mx);
       }
     }
     return [...new Set(indices)];
-  }, [gridSize, symmetryMode]);
+  }, [gridHeight, gridWidth, symmetryMode]);
 
   // ===== PAN STATE =====
   const panStartRef = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
@@ -289,7 +302,7 @@ export default function PaintCanvas() {
     }
 
     if (!activeLayer || activeLayer.locked) return;
-    if (x < 0 || x >= gridSize || y < 0 || y >= gridSize) return;
+    if (x < 0 || x >= gridWidth || y < 0 || y >= gridHeight) return;
 
     isDrawingRef.current = true;
     setIsDrawing(true);
@@ -302,15 +315,15 @@ export default function PaintCanvas() {
       const indices = getSymmetryIndices(x, y);
       setPixels(activeLayerId, indices, drawColor);
     } else if (activeTool === 'fill') {
-      const idx = y * gridSize + x;
+      const idx = y * gridWidth + x;
       const drawColor = color;
-      const newPixels = floodFill(activeLayer.pixels, gridSize, idx, drawColor);
+      const newPixels = floodFill(activeLayer.pixels, gridWidth, idx, drawColor, gridHeight);
       setLayerPixels(activeLayerId, newPixels);
       pushHistory();
       isDrawingRef.current = false;
       setIsDrawing(false);
     } else if (activeTool === 'picker') {
-      const idx = y * gridSize + x;
+      const idx = y * gridWidth + x;
       // Read color from composite (check layers top to bottom)
       let pickedColor: string | null = null;
       for (let i = layers.length - 1; i >= 0; i--) {
@@ -333,7 +346,7 @@ export default function PaintCanvas() {
       preDrawPixelsRef.current = [...activeLayer.pixels];
     }
   }, [
-    tool, color, gridSize, activeLayer, activeLayerId, layers,
+    tool, color, gridWidth, gridHeight, activeLayer, activeLayerId, layers,
     panX, panY,
     screenToGrid, getSymmetryIndices,
     setPixels, setLayerPixels, setColor, setTool,
@@ -363,12 +376,12 @@ export default function PaintCanvas() {
       const sy = drawStartRef.current.y;
 
       if (activeTool === 'line') {
-        previewIndices = drawLine(sx, sy, x, y, gridSize);
+        previewIndices = drawLine(sx, sy, x, y, gridWidth, gridHeight);
       } else if (activeTool === 'rectangle') {
-        previewIndices = drawRectangle(sx, sy, x, y, gridSize);
+        previewIndices = drawRectangle(sx, sy, x, y, gridWidth, gridHeight);
       } else if (activeTool === 'circle') {
         const radius = Math.round(Math.sqrt((x - sx) ** 2 + (y - sy) ** 2));
-        previewIndices = drawCircle(sx, sy, radius, gridSize);
+        previewIndices = drawCircle(sx, sy, radius, gridWidth, gridHeight);
       }
 
       drawInteraction(x, y, previewIndices);
@@ -383,7 +396,7 @@ export default function PaintCanvas() {
 
     // Continuous drawing (pencil/eraser)
     if (!activeLayer || activeLayer.locked) return;
-    if (x < 0 || x >= gridSize || y < 0 || y >= gridSize) return;
+    if (x < 0 || x >= gridWidth || y < 0 || y >= gridHeight) return;
 
     if (activeTool === 'pencil' || activeTool === 'eraser') {
       const drawColor = activeTool === 'eraser' ? 'transparent' : color;
@@ -391,11 +404,11 @@ export default function PaintCanvas() {
 
       if (last) {
         // Interpolate for smooth lines
-        const lineIndices = drawLine(last.x, last.y, x, y, gridSize);
+        const lineIndices = drawLine(last.x, last.y, x, y, gridWidth, gridHeight);
         const allIndices: number[] = [];
         for (const idx of lineIndices) {
-          const lx = idx % gridSize;
-          const ly = Math.floor(idx / gridSize);
+          const lx = idx % gridWidth;
+          const ly = Math.floor(idx / gridWidth);
           allIndices.push(...getSymmetryIndices(lx, ly));
         }
         setPixels(activeLayerId, [...new Set(allIndices)], drawColor);
@@ -408,7 +421,7 @@ export default function PaintCanvas() {
 
     drawInteraction(x, y);
   }, [
-    tool, color, gridSize, activeLayer, activeLayerId,
+    tool, color, gridWidth, gridHeight, activeLayer, activeLayerId,
     screenToGrid, getSymmetryIndices,
     setPixels, setPan, drawInteraction,
   ]);
@@ -425,30 +438,30 @@ export default function PaintCanvas() {
       const sy = drawStartRef.current.y;
 
       if (activeTool === 'line') {
-        const indices = drawLine(sx, sy, x, y, gridSize);
+        const indices = drawLine(sx, sy, x, y, gridWidth, gridHeight);
         const allIndices: number[] = [];
         for (const idx of indices) {
-          const lx = idx % gridSize;
-          const ly = Math.floor(idx / gridSize);
+          const lx = idx % gridWidth;
+          const ly = Math.floor(idx / gridWidth);
           allIndices.push(...getSymmetryIndices(lx, ly));
         }
         setPixels(activeLayerId, [...new Set(allIndices)], color);
       } else if (activeTool === 'rectangle') {
-        const indices = drawRectangle(sx, sy, x, y, gridSize);
+        const indices = drawRectangle(sx, sy, x, y, gridWidth, gridHeight);
         const allIndices: number[] = [];
         for (const idx of indices) {
-          const lx = idx % gridSize;
-          const ly = Math.floor(idx / gridSize);
+          const lx = idx % gridWidth;
+          const ly = Math.floor(idx / gridWidth);
           allIndices.push(...getSymmetryIndices(lx, ly));
         }
         setPixels(activeLayerId, [...new Set(allIndices)], color);
       } else if (activeTool === 'circle') {
         const radius = Math.round(Math.sqrt((x - sx) ** 2 + (y - sy) ** 2));
-        const indices = drawCircle(sx, sy, radius, gridSize);
+        const indices = drawCircle(sx, sy, radius, gridWidth, gridHeight);
         const allIndices: number[] = [];
         for (const idx of indices) {
-          const lx = idx % gridSize;
-          const ly = Math.floor(idx / gridSize);
+          const lx = idx % gridWidth;
+          const ly = Math.floor(idx / gridWidth);
           allIndices.push(...getSymmetryIndices(lx, ly));
         }
         setPixels(activeLayerId, [...new Set(allIndices)], color);
@@ -474,7 +487,7 @@ export default function PaintCanvas() {
       e.currentTarget.releasePointerCapture(e.pointerId);
     }
   }, [
-    tool, color, gridSize, activeLayer, activeLayerId,
+    tool, color, gridWidth, gridHeight, activeLayer, activeLayerId,
     screenToGrid, getSymmetryIndices,
     setPixels, pushHistory, setIsDrawing, setDrawStart, drawInteraction,
   ]);
@@ -516,10 +529,10 @@ export default function PaintCanvas() {
   return (
     <div
       ref={containerRef}
-      className="relative flex flex-1 items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_50%_10%,rgba(139,92,246,.14),transparent_34rem),linear-gradient(transparent_23px,rgba(148,163,184,.045)_24px),linear-gradient(90deg,transparent_23px,rgba(148,163,184,.045)_24px),var(--bg)] bg-[length:auto,24px_24px,24px_24px,auto] p-3 sm:p-5"
+      className="relative flex h-full min-h-0 w-full min-w-0 items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_50%_10%,rgba(139,92,246,.14),transparent_34rem),linear-gradient(transparent_23px,rgba(148,163,184,.045)_24px),linear-gradient(90deg,transparent_23px,rgba(148,163,184,.045)_24px),var(--bg)] bg-[length:auto,24px_24px,24px_24px,auto] p-3 sm:p-5"
     >
       <div className="pointer-events-none absolute start-4 top-4 z-20 hidden items-center gap-2 rounded-2xl border border-border/70 bg-bg/72 px-3 py-2 text-xs font-semibold text-text shadow-float backdrop-blur-xl md:flex">
-        <span className="text-primary">{t('paint.board', { size: new Intl.NumberFormat(locale === 'ar' ? 'ar-EG' : 'en-US').format(gridSize) })}</span>
+        <span className="text-primary">{gridWidth}×{gridHeight}</span>
         <span className="h-1 w-1 rounded-full bg-text-muted/50" />
         <span className="text-text-muted">{activeToolLabel}</span>
       </div>

@@ -75,12 +75,13 @@ export function PixelArtRenderer({
     <div
       className={cn(
         'relative flex items-center justify-center overflow-hidden rounded-lg',
-        !width && !height && 'w-full aspect-square',
+        !width && !height && 'w-full',
         className
       )}
       style={{
         width: width ? `${width}px` : undefined,
         height: height ? `${height}px` : undefined,
+        aspectRatio: !width && !height ? `${columns} / ${rows}` : undefined,
       }}
     >
       <canvas

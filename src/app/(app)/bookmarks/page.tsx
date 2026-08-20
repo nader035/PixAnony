@@ -15,7 +15,7 @@ export default async function BookmarksPage() {
 
   const { data } = await supabase
     .from('bookmarks')
-    .select('id, artwork:artworks(id, title, pixel_data, grid_size, likes_count, views_count, profile:profiles!artworks_user_id_fkey(username))')
+    .select('id, artwork:artworks(id, title, pixel_data, grid_size, grid_width, grid_height, likes_count, views_count, profile:profiles!artworks_user_id_fkey(username))')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
@@ -37,8 +37,8 @@ export default async function BookmarksPage() {
             const profile = Array.isArray(artwork.profile) ? artwork.profile[0] : artwork.profile;
             return (
               <Link key={artwork.id} href={`/art/${artwork.id}`} style={{ background: ['var(--powder)', 'var(--butter)', 'var(--blush)', 'var(--lilac)', 'var(--mint)'][index % 5] }} className="interactive-surface overflow-hidden rounded-[28px] shadow-[0_10px_30px_rgba(44,40,58,.06)]">
-                <div className="m-3 aspect-square overflow-hidden rounded-[20px] bg-card p-3">
-                  <PixelArtRenderer pixels={Array.isArray(artwork.pixel_data) ? artwork.pixel_data as string[] : []} gridSize={artwork.grid_size} className="h-full w-full" />
+                <div className="m-3 overflow-hidden rounded-[20px] bg-card p-3" style={{ aspectRatio: `${artwork.grid_width} / ${artwork.grid_height}` }}>
+                  <PixelArtRenderer pixels={Array.isArray(artwork.pixel_data) ? artwork.pixel_data as string[] : []} gridSize={artwork.grid_size} gridWidth={artwork.grid_width} gridHeight={artwork.grid_height} className="h-full w-full" />
                 </div>
                 <div className="flex items-center gap-3 px-4 pb-4">
                   <div className="min-w-0 flex-1">

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowRight,
   Heart,
@@ -36,6 +37,7 @@ export function RightSidebarPanel() {
   const [artworks, setArtworks] = useState<TrendingArtwork[]>([]);
   const [profiles, setProfiles] = useState<SuggestedProfile[]>([]);
   const { t, locale } = useI18n();
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     let active = true;
@@ -45,6 +47,7 @@ export function RightSidebarPanel() {
           .from('artworks')
           .select('id, title, likes_count, profile:profiles!artworks_user_id_fkey(username)')
           .eq('visibility', 'public')
+          .in('artwork_kind', ['standard', 'challenge_submission', 'admin_delivery'])
           .order('likes_count', { ascending: false })
           .limit(5),
         supabase
@@ -63,7 +66,12 @@ export function RightSidebarPanel() {
   }, [supabase]);
 
   return (
-    <aside className="page-enter sticky top-4 hidden h-[calc(100dvh-2rem)] min-w-0 overflow-y-auto rounded-[32px] bg-sidebar px-4 py-5 shadow-[0_20px_70px_rgba(44,40,58,0.1)] 2xl:flex 2xl:flex-col 2xl:gap-4">
+    <motion.aside
+      layout="position"
+      initial={false}
+      transition={reduceMotion ? { duration: 0 } : { duration: 0.15, ease: 'easeOut' }}
+      className="page-enter sticky top-4 hidden h-[calc(100dvh-2rem)] min-w-0 overflow-y-auto rounded-[32px] bg-sidebar px-4 py-5 shadow-[0_20px_70px_rgba(44,40,58,0.1)] 2xl:flex 2xl:flex-col 2xl:gap-4"
+    >
       <section className="rounded-[24px] bg-[var(--powder)] p-4">
         <div className="mb-3.5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
@@ -173,6 +181,6 @@ export function RightSidebarPanel() {
       <div className="mt-auto rounded-[24px] bg-[var(--lilac)] p-3.5">
         <ThemeToggle showLabel />
       </div>
-    </aside>
+    </motion.aside>
   );
 }

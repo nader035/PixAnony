@@ -32,9 +32,9 @@ import ColorPalette from '@/components/paint/color-palette';
 import LayerPanel from '@/components/paint/layer-panel';
 import PreviewPanel from '@/components/paint/preview-panel';
 import ActionsPanel from '@/components/paint/actions-panel';
+import { CanvasPresetSelect } from '@/components/paint/canvas-preset-select';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { Logo } from '@/components/ui/logo';
-import { GridSize } from '@/lib/types';
 import { PixelAvatar } from '@/components/ui/pixel-avatar';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { useI18n } from '@/components/i18n/locale-provider';
@@ -67,8 +67,8 @@ export default function SendToUserPage() {
   // Store
   const {
     color,
-    gridSize,
-    setGridSize,
+    gridWidth,
+    gridHeight,
     showGrid,
     toggleGrid,
     showPreview,
@@ -108,7 +108,7 @@ export default function SendToUserPage() {
   });
 
   const compositeArtwork = useCallback(() => {
-    const compositePixels = Array(gridSize * gridSize).fill('transparent');
+    const compositePixels = Array(gridWidth * gridHeight).fill('transparent');
     for (const layer of layers) {
       if (!layer.visible) continue;
       for (let i = 0; i < layer.pixels.length; i++) {
@@ -117,13 +117,15 @@ export default function SendToUserPage() {
       }
     }
     return compositePixels;
-  }, [gridSize, layers]);
+  }, [gridHeight, gridWidth, layers]);
 
   const buildCurrentDraft = useCallback((): SendDraft => ({
     version: SEND_DRAFT_VERSION,
     recipientUsername: normalizeSendDraftRecipient(username),
     canvas: {
-      gridSize,
+      gridSize: gridWidth,
+      gridWidth,
+      gridHeight,
       pixelData: compositeArtwork(),
       layers,
       activeLayerId,
@@ -143,7 +145,8 @@ export default function SendToUserPage() {
     caption,
     color,
     compositeArtwork,
-    gridSize,
+    gridHeight,
+    gridWidth,
     layers,
     recentColors,
     sendAnonymously,
@@ -209,7 +212,9 @@ export default function SendToUserPage() {
 
       if (draft) {
         restoreSnapshot({
-          gridSize: draft.canvas.gridSize,
+          gridSize: 16,
+          gridWidth: draft.canvas.gridWidth,
+          gridHeight: draft.canvas.gridHeight,
           layers: draft.canvas.layers,
           activeLayerId: draft.canvas.activeLayerId,
           color: draft.canvas.color,
@@ -387,7 +392,9 @@ export default function SendToUserPage() {
           ? t('paint.defaultAnonymousTitle')
           : t('paint.defaultSignedTitle', { username: senderName }),
         caption: captionText,
-        grid_size: gridSize,
+        grid_size: gridWidth,
+        grid_width: gridWidth,
+        grid_height: gridHeight,
         pixel_data: compositeArtwork(),
         layers: layers,
         visibility: sendAnonymously ? 'anonymous' : 'private',
@@ -440,20 +447,7 @@ export default function SendToUserPage() {
 
           <div className="hidden sm:block h-5 w-px bg-border" />
           
-          {/* Grid Size Dropdown */}
-          <div className="flex items-center gap-2">
-            <select
-              value={gridSize}
-              onChange={(e) => setGridSize(Number(e.target.value) as GridSize)}
-              aria-label={t('paint.gridSize')}
-              className="h-10 max-w-[78px] rounded-xl border border-border bg-card px-2 text-xs font-semibold transition-colors hover:bg-card-hover focus:outline-none sm:max-w-none sm:px-3"
-            >
-              <option value="8">8x8</option>
-              <option value="16">16x16</option>
-              <option value="32">32x32</option>
-              <option value="64">64x64</option>
-            </select>
-          </div>
+          <CanvasPresetSelect className="max-w-[104px] sm:max-w-[164px]" />
         </div>
 
         {/* Top Controls */}

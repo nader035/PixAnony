@@ -34,25 +34,26 @@ export function generateId(): string {
   return crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
 }
 
-export function createEmptyPixelArray(size: number): string[] {
-  return new Array(size * size).fill('transparent');
+export function createEmptyPixelArray(width: number, height: number = width): string[] {
+  return new Array(width * height).fill('transparent');
 }
 
 export function pixelDataToImageData(
   pixels: string[],
-  gridSize: number,
-  scale: number = 1
+  gridWidth: number,
+  scale: number = 1,
+  gridHeight: number = gridWidth,
 ): ImageData {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d')!;
-  canvas.width = gridSize * scale;
-  canvas.height = gridSize * scale;
+  canvas.width = gridWidth * scale;
+  canvas.height = gridHeight * scale;
 
   for (let i = 0; i < pixels.length; i++) {
     const color = pixels[i];
     if (color === 'transparent') continue;
-    const x = (i % gridSize) * scale;
-    const y = Math.floor(i / gridSize) * scale;
+    const x = (i % gridWidth) * scale;
+    const y = Math.floor(i / gridWidth) * scale;
     ctx.fillStyle = color;
     ctx.fillRect(x, y, scale, scale);
   }
@@ -63,7 +64,7 @@ export function pixelDataToImageData(
 export function renderPixelArtToCanvas(
   ctx: CanvasRenderingContext2D,
   pixels: string[],
-  gridSize: number,
+  gridWidth: number,
   cellSize: number,
   offsetX: number = 0,
   offsetY: number = 0
@@ -71,8 +72,8 @@ export function renderPixelArtToCanvas(
   for (let i = 0; i < pixels.length; i++) {
     const color = pixels[i];
     if (color === 'transparent') continue;
-    const x = (i % gridSize) * cellSize + offsetX;
-    const y = Math.floor(i / gridSize) * cellSize + offsetY;
+    const x = (i % gridWidth) * cellSize + offsetX;
+    const y = Math.floor(i / gridWidth) * cellSize + offsetY;
     ctx.fillStyle = color;
     ctx.fillRect(x, y, cellSize, cellSize);
   }
@@ -95,9 +96,10 @@ export function rgbToHex(r: number, g: number, b: number): string {
 
 export function floodFill(
   pixels: string[],
-  gridSize: number,
+  gridWidth: number,
   startIdx: number,
-  fillColor: string
+  fillColor: string,
+  gridHeight: number = gridWidth,
 ): string[] {
   const newPixels = [...pixels];
   const targetColor = newPixels[startIdx];
@@ -115,13 +117,13 @@ export function floodFill(
     visited.add(idx);
     newPixels[idx] = fillColor;
 
-    const x = idx % gridSize;
-    const y = Math.floor(idx / gridSize);
+    const x = idx % gridWidth;
+    const y = Math.floor(idx / gridWidth);
 
     if (x > 0) stack.push(idx - 1);
-    if (x < gridSize - 1) stack.push(idx + 1);
-    if (y > 0) stack.push(idx - gridSize);
-    if (y < gridSize - 1) stack.push(idx + gridSize);
+    if (x < gridWidth - 1) stack.push(idx + 1);
+    if (y > 0) stack.push(idx - gridWidth);
+    if (y < gridHeight - 1) stack.push(idx + gridWidth);
   }
 
   return newPixels;
@@ -130,7 +132,8 @@ export function floodFill(
 export function drawLine(
   x0: number, y0: number,
   x1: number, y1: number,
-  gridSize: number
+  gridWidth: number,
+  gridHeight: number = gridWidth,
 ): number[] {
   const indices: number[] = [];
   const dx = Math.abs(x1 - x0);
@@ -141,8 +144,8 @@ export function drawLine(
 
   let cx = x0, cy = y0;
   while (true) {
-    if (cx >= 0 && cx < gridSize && cy >= 0 && cy < gridSize) {
-      indices.push(cy * gridSize + cx);
+    if (cx >= 0 && cx < gridWidth && cy >= 0 && cy < gridHeight) {
+      indices.push(cy * gridWidth + cx);
     }
     if (cx === x1 && cy === y1) break;
     const e2 = 2 * err;
@@ -155,21 +158,22 @@ export function drawLine(
 export function drawRectangle(
   x0: number, y0: number,
   x1: number, y1: number,
-  gridSize: number
+  gridWidth: number,
+  gridHeight: number = gridWidth,
 ): number[] {
   const indices: number[] = [];
   const minX = Math.max(0, Math.min(x0, x1));
-  const maxX = Math.min(gridSize - 1, Math.max(x0, x1));
+  const maxX = Math.min(gridWidth - 1, Math.max(x0, x1));
   const minY = Math.max(0, Math.min(y0, y1));
-  const maxY = Math.min(gridSize - 1, Math.max(y0, y1));
+  const maxY = Math.min(gridHeight - 1, Math.max(y0, y1));
 
   for (let x = minX; x <= maxX; x++) {
-    indices.push(minY * gridSize + x);
-    indices.push(maxY * gridSize + x);
+    indices.push(minY * gridWidth + x);
+    indices.push(maxY * gridWidth + x);
   }
   for (let y = minY + 1; y < maxY; y++) {
-    indices.push(y * gridSize + minX);
-    indices.push(y * gridSize + maxX);
+    indices.push(y * gridWidth + minX);
+    indices.push(y * gridWidth + maxX);
   }
   return indices;
 }
@@ -177,7 +181,8 @@ export function drawRectangle(
 export function drawCircle(
   cx: number, cy: number,
   radius: number,
-  gridSize: number
+  gridWidth: number,
+  gridHeight: number = gridWidth,
 ): number[] {
   const indices: number[] = [];
   let x = radius;
@@ -192,8 +197,8 @@ export function drawCircle(
       [cx + y, cy - x], [cx + x, cy - y],
     ];
     for (const [px, py] of points) {
-      if (px >= 0 && px < gridSize && py >= 0 && py < gridSize) {
-        indices.push(py * gridSize + px);
+      if (px >= 0 && px < gridWidth && py >= 0 && py < gridHeight) {
+        indices.push(py * gridWidth + px);
       }
     }
     y++;

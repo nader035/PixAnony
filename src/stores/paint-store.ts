@@ -17,6 +17,8 @@ export interface PaintStoreState {
   tool: PaintTool;
   color: string;
   gridSize: GridSize;
+  gridWidth: number;
+  gridHeight: number;
 
   // Viewport
   zoom: number;
@@ -48,6 +50,8 @@ export interface PaintStoreState {
 export interface PaintStoreSnapshot {
   color?: string;
   gridSize: GridSize;
+  gridWidth?: number;
+  gridHeight?: number;
   zoom?: number;
   panX?: number;
   panY?: number;
@@ -67,6 +71,7 @@ export interface PaintStoreActions {
 
   // Grid
   setGridSize: (size: GridSize) => void;
+  setCanvasDimensions: (width: number, height: number) => void;
 
   // Viewport
   setZoom: (zoom: number) => void;
@@ -107,7 +112,7 @@ export interface PaintStoreActions {
 
   // State
   resetState: () => void;
-  initializeCanvas: (gridSize?: GridSize) => void;
+  initializeCanvas: (gridSize?: GridSize, gridHeight?: number) => void;
   restoreSnapshot: (snapshot: PaintStoreSnapshot) => void;
 
   // Drawing state
@@ -118,14 +123,14 @@ export interface PaintStoreActions {
 export type PaintStore = PaintStoreState & PaintStoreActions;
 
 // ===== HELPERS =====
-function createDefaultLayer(gridSize: number, name: string, locked = false): PixelLayer {
+function createDefaultLayer(gridWidth: number, gridHeight: number, name: string, locked = false): PixelLayer {
   return {
     id: generateId(),
     name,
     visible: true,
     opacity: 1,
     locked,
-    pixels: createEmptyPixelArray(gridSize),
+    pixels: createEmptyPixelArray(gridWidth, gridHeight),
   };
 }
 
@@ -136,9 +141,9 @@ function cloneLayers(layers: PixelLayer[]): PixelLayer[] {
   }));
 }
 
-function createInitialLayers(gridSize: number): PixelLayer[] {
-  const bg = createDefaultLayer(gridSize, 'Background', true);
-  const layer1 = createDefaultLayer(gridSize, 'Layer 1');
+function createInitialLayers(gridWidth: number, gridHeight: number = gridWidth): PixelLayer[] {
+  const bg = createDefaultLayer(gridWidth, gridHeight, 'Background', true);
+  const layer1 = createDefaultLayer(gridWidth, gridHeight, 'Layer 1');
   return [bg, layer1];
 }
 
@@ -151,6 +156,8 @@ export const usePaintStore = create<PaintStore>((set, get) => {
     tool: 'pencil',
     color: DEFAULT_COLOR,
     gridSize: DEFAULT_GRID_SIZE,
+    gridWidth: DEFAULT_GRID_SIZE,
+    gridHeight: DEFAULT_GRID_SIZE,
     zoom: DEFAULT_ZOOM,
     panX: 0,
     panY: 0,
@@ -179,11 +186,32 @@ export const usePaintStore = create<PaintStore>((set, get) => {
       const layers = createInitialLayers(gridSize);
       set({
         gridSize,
+        gridWidth: gridSize,
+        gridHeight: gridSize,
         layers,
         activeLayerId: layers[1].id,
         history: [cloneLayers(layers)],
         historyIndex: 0,
         zoom: gridSize <= 16 ? 100 : gridSize <= 32 ? 100 : 100,
+        panX: 0,
+        panY: 0,
+      });
+    },
+
+    setCanvasDimensions: (gridWidth, gridHeight) => {
+      const safeWidth = Math.max(8, Math.min(128, Math.floor(gridWidth)));
+      const safeHeight = Math.max(8, Math.min(128, Math.floor(gridHeight)));
+      if (safeWidth * safeHeight > 16384) return;
+      const layers = createInitialLayers(safeWidth, safeHeight);
+      set({
+        gridSize: safeWidth as GridSize,
+        gridWidth: safeWidth,
+        gridHeight: safeHeight,
+        layers,
+        activeLayerId: layers[1].id,
+        history: [cloneLayers(layers)],
+        historyIndex: 0,
+        zoom: DEFAULT_ZOOM,
         panX: 0,
         panY: 0,
       });
@@ -242,9 +270,9 @@ export const usePaintStore = create<PaintStore>((set, get) => {
 
     // ===== LAYERS =====
     addLayer: () => {
-      const { gridSize, layers } = get();
+      const { gridWidth, gridHeight, layers } = get();
       const layerNum = layers.filter(l => !l.locked).length + 1;
-      const newLayer = createDefaultLayer(gridSize, `Layer ${layerNum}`);
+      const newLayer = createDefaultLayer(gridWidth, gridHeight, `Layer ${layerNum}`);
       set({
         layers: [...layers, newLayer],
         activeLayerId: newLayer.id,
@@ -351,26 +379,26 @@ export const usePaintStore = create<PaintStore>((set, get) => {
 
     // ===== TRANSFORMS =====
     clearCanvas: () => {
-      const { layers, gridSize } = get();
+      const { layers, gridWidth, gridHeight } = get();
       set({
         layers: layers.map(l =>
           l.locked
             ? l
-            : { ...l, pixels: createEmptyPixelArray(gridSize) }
+            : { ...l, pixels: createEmptyPixelArray(gridWidth, gridHeight) }
         ),
       });
       get().pushHistory();
     },
 
     flipHorizontal: () => {
-      const { layers, gridSize } = get();
+      const { layers, gridWidth, gridHeight } = get();
       set({
         layers: layers.map(l => {
           const newPixels = [...l.pixels];
-          for (let y = 0; y < gridSize; y++) {
-            for (let x = 0; x < Math.floor(gridSize / 2); x++) {
-              const left = y * gridSize + x;
-              const right = y * gridSize + (gridSize - 1 - x);
+          for (let y = 0; y < gridHeight; y++) {
+            for (let x = 0; x < Math.floor(gridWidth / 2); x++) {
+              const left = y * gridWidth + x;
+              const right = y * gridWidth + (gridWidth - 1 - x);
               [newPixels[left], newPixels[right]] = [newPixels[right], newPixels[left]];
             }
           }
@@ -381,14 +409,14 @@ export const usePaintStore = create<PaintStore>((set, get) => {
     },
 
     flipVertical: () => {
-      const { layers, gridSize } = get();
+      const { layers, gridWidth, gridHeight } = get();
       set({
         layers: layers.map(l => {
           const newPixels = [...l.pixels];
-          for (let y = 0; y < Math.floor(gridSize / 2); y++) {
-            for (let x = 0; x < gridSize; x++) {
-              const top = y * gridSize + x;
-              const bottom = (gridSize - 1 - y) * gridSize + x;
+          for (let y = 0; y < Math.floor(gridHeight / 2); y++) {
+            for (let x = 0; x < gridWidth; x++) {
+              const top = y * gridWidth + x;
+              const bottom = (gridHeight - 1 - y) * gridWidth + x;
               [newPixels[top], newPixels[bottom]] = [newPixels[bottom], newPixels[top]];
             }
           }
@@ -421,6 +449,8 @@ export const usePaintStore = create<PaintStore>((set, get) => {
         tool: 'pencil',
         color: DEFAULT_COLOR,
         gridSize: DEFAULT_GRID_SIZE,
+        gridWidth: DEFAULT_GRID_SIZE,
+        gridHeight: DEFAULT_GRID_SIZE,
         zoom: DEFAULT_ZOOM,
         panX: 0,
         panY: 0,
@@ -438,11 +468,14 @@ export const usePaintStore = create<PaintStore>((set, get) => {
       });
     },
 
-    initializeCanvas: (gridSize) => {
-      const size = gridSize ?? get().gridSize;
-      const layers = createInitialLayers(size);
+    initializeCanvas: (gridSize, requestedHeight) => {
+      const width = gridSize ?? get().gridSize;
+      const height = requestedHeight ?? width;
+      const layers = createInitialLayers(width, height);
       set({
-        gridSize: size,
+        gridSize: width,
+        gridWidth: width,
+        gridHeight: height,
         layers,
         activeLayerId: layers[1].id,
         history: [cloneLayers(layers)],
@@ -453,12 +486,13 @@ export const usePaintStore = create<PaintStore>((set, get) => {
     },
 
     restoreSnapshot: (snapshot) => {
-      const size = snapshot.gridSize;
-      const expectedLength = size * size;
+      const width = snapshot.gridWidth ?? snapshot.gridSize;
+      const height = snapshot.gridHeight ?? snapshot.gridSize;
+      const expectedLength = width * height;
       const restoredLayers = cloneLayers(snapshot.layers).filter(
         (layer) => layer.pixels.length === expectedLength
       );
-      const layers = restoredLayers.length > 0 ? restoredLayers : createInitialLayers(size);
+      const layers = restoredLayers.length > 0 ? restoredLayers : createInitialLayers(width, height);
       const activeLayer = layers.find((layer) => layer.id === snapshot.activeLayerId)
         ?? layers.find((layer) => !layer.locked)
         ?? layers[0];
@@ -467,7 +501,9 @@ export const usePaintStore = create<PaintStore>((set, get) => {
 
       set({
         color,
-        gridSize: size,
+        gridSize: width as GridSize,
+        gridWidth: width,
+        gridHeight: height,
         zoom: snapshot.zoom ?? DEFAULT_ZOOM,
         panX: snapshot.panX ?? 0,
         panY: snapshot.panY ?? 0,

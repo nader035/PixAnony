@@ -16,6 +16,8 @@ export function normalizeArtwork(row: JoinedArtwork): Artwork {
     title: row.title ? String(row.title) : null,
     caption: row.caption ? String(row.caption) : null,
     grid_size: Number(row.grid_size) as GridSize,
+    grid_width: Number(row.grid_width ?? row.grid_size),
+    grid_height: Number(row.grid_height ?? row.grid_size),
     pixel_data: JSON.stringify(row.pixel_data ?? []),
     layers: JSON.stringify(row.layers ?? []),
     preview_url: row.preview_url ? String(row.preview_url) : null,
@@ -26,6 +28,8 @@ export function normalizeArtwork(row: JoinedArtwork): Artwork {
     comments_count: Number(row.comments_count ?? 0),
     views_count: Number(row.views_count ?? 0),
     created_at: String(row.created_at),
+    artwork_kind: (row.artwork_kind ?? 'standard') as Artwork['artwork_kind'],
+    source_challenge_id: row.source_challenge_id ? String(row.source_challenge_id) : null,
     profile: profile ?? undefined,
   };
 }

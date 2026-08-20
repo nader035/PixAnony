@@ -34,6 +34,7 @@ interface FeedCardProps {
     username: string;
     createdAt: string;
   };
+  showArtwork?: boolean;
 }
 
 const VIEWER_TOKEN_KEY = 'pixanony:artwork-viewer';
@@ -88,7 +89,7 @@ function HeartBurstParticles() {
   );
 }
 
-function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
+function FeedCardInner({ artwork, className, repostContext, showArtwork = true }: FeedCardProps) {
   const supabase = useMemo(() => createClient(), []);
   const { t, locale } = useI18n();
   const cardRef = useRef<HTMLElement>(null);
@@ -324,155 +325,158 @@ function FeedCardInner({ artwork, className, repostContext }: FeedCardProps) {
       )}
 
       {/* ===== ARTWORK ===== */}
-      {pixelData.length > 0 && (
+      {showArtwork && pixelData.length > 0 && (
         <div className="px-4 pb-4 sm:px-5 sm:pb-5">
-          <div
+          <Link
+            href={`/art/${artwork.id}`}
             className={cn(
-              'relative aspect-[16/10] overflow-hidden rounded-[20px] cursor-pointer',
+              'relative block overflow-hidden rounded-[20px] cursor-pointer',
               'bg-card',
               'shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]',
               'transition-shadow duration-300',
               'hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_12px_32px_rgba(58,42,92,0.1)]'
             )}
-            onDoubleClick={() => void handleLike()}
+            style={{ aspectRatio: `${artwork.grid_width} / ${artwork.grid_height}` }}
+            aria-label={artwork.title || t('common.untitled')}
           >
             {/* Inner ring overlay */}
             <div className="pointer-events-none absolute inset-0 z-10 rounded-xl ring-1 ring-inset ring-white/45 sm:rounded-2xl" />
             <PixelArtRenderer
               pixels={pixelData}
               gridSize={artwork.grid_size}
+              gridWidth={artwork.grid_width}
+              gridHeight={artwork.grid_height}
               className="absolute inset-0 h-full w-full !rounded-none"
             />
-          </div>
+          </Link>
         </div>
       )}
 
       {/* ===== INTERACTION BAR ===== */}
-      <div className="flex items-center justify-between px-3 pb-3 sm:px-4 sm:pb-4">
-        <div className="flex min-w-0 items-center gap-0">
-          {/* Like */}
-          <button
-            onClick={() => void handleLike()}
-            className="relative group flex min-h-10 items-center gap-1.5 px-2.5 sm:px-3 rounded-xl hover:bg-red/8 transition-colors"
-            aria-label={liked ? t('feed.unlike') : t('feed.like')}
-            aria-pressed={liked}
-          >
-            <div className="relative">
-              <AnimatePresence>
-                {showBurst && <HeartBurstParticles />}
-              </AnimatePresence>
-              <motion.div
-                animate={liked ? { scale: [1, 1.3, 0.95, 1] } : { scale: 1 }}
-                transition={{ duration: 0.35 }}
-              >
-                <Heart
-                  size={18}
-                  className={cn(
-                    'transition-colors duration-200',
-                    liked ? 'text-red fill-red' : 'text-text-muted group-hover:text-red'
-                  )}
-                />
-              </motion.div>
-            </div>
-            <span
-              className={cn(
-                'text-xs font-semibold tabular-nums transition-colors duration-200',
-                liked ? 'text-red' : 'text-text-muted'
-              )}
-            >
-              {formatNumber(likesCount, locale)}
-            </span>
-          </button>
-
-          {/* Comment */}
-          <Link
-            href={`/art/${artwork.id}`}
-            className="group flex min-h-10 items-center gap-1.5 px-2.5 sm:px-3 rounded-xl hover:bg-cyan/8 transition-colors"
-            aria-label={t('comments.viewCount', { count: formatNumber(artwork.comments_count, locale) })}
-          >
-            <MessageCircle
-              size={18}
-              className="text-text-muted group-hover:text-cyan transition-colors duration-200"
-            />
-            <span className="text-xs font-semibold tabular-nums text-text-muted">
-              {formatNumber(artwork.comments_count, locale)}
-            </span>
-          </Link>
-
-          {/* Repost */}
-          <button
-            onClick={() => void handleRepost()}
-            className="group flex min-h-10 items-center gap-1.5 px-2.5 sm:px-3 rounded-xl hover:bg-green/8 transition-colors"
-            aria-label={reposted ? t('feed.undoRepost') : t('feed.repost')}
-            aria-pressed={reposted}
-          >
+      <div className="grid grid-cols-6 items-center gap-0.5 px-3 pb-3 sm:px-4 sm:pb-4">
+        {/* Like */}
+        <button
+          onClick={() => void handleLike()}
+          className="group relative flex min-h-10 min-w-0 items-center justify-center gap-1 rounded-xl px-1 transition-colors duration-150 hover:bg-red/8 motion-reduce:transition-none"
+          aria-label={liked ? t('feed.unlike') : t('feed.like')}
+          aria-pressed={liked}
+        >
+          <div className="relative shrink-0">
+            <AnimatePresence>
+              {showBurst && <HeartBurstParticles />}
+            </AnimatePresence>
             <motion.div
-              animate={reposted ? { rotate: [0, -15, 15, 0] } : {}}
-              transition={{ duration: 0.3 }}
+              animate={liked ? { scale: [1, 1.3, 0.95, 1] } : { scale: 1 }}
+              transition={{ duration: 0.18 }}
             >
-              <Repeat2
-                size={18}
+              <Heart
+                size={17}
                 className={cn(
-                  'transition-colors duration-200',
-                  reposted ? 'text-green' : 'text-text-muted group-hover:text-green'
+                  'transition-colors duration-150 motion-reduce:transition-none',
+                  liked ? 'fill-red text-red' : 'text-text-muted group-hover:text-red'
                 )}
               />
             </motion.div>
-            <span
-              className={cn(
-                'text-xs font-semibold tabular-nums transition-colors duration-200',
-                reposted ? 'text-green' : 'text-text-muted'
-              )}
-            >
-              {formatNumber(repostsCount, locale)}
-            </span>
-          </button>
-
-          {/* Views */}
-          <div className="flex items-center gap-1.5 px-2 py-1.5 text-text-muted/70" aria-label={t('common.views', { count: formatNumber(viewsCount, locale) })}>
-            <Eye size={15} />
-            <span className="text-[11px] font-medium tabular-nums">{formatNumber(viewsCount, locale)}</span>
           </div>
-        </div>
-
-        <div className="flex items-center gap-0">
-          {/* Bookmark */}
-          <button
-            onClick={() => void handleBookmark()}
-            className="group flex items-center justify-center w-10 h-10 rounded-xl hover:bg-primary/8 transition-colors"
-            aria-label={bookmarked ? t('feed.removeBookmark') : t('feed.bookmark')}
-            aria-pressed={bookmarked}
+          <span
+            className={cn(
+              'min-w-0 truncate text-[11px] font-semibold tabular-nums transition-colors duration-150 motion-reduce:transition-none',
+              liked ? 'text-red' : 'text-text-muted'
+            )}
           >
-            <motion.div
-              animate={bookmarked ? { scale: [1, 1.2, 1] } : {}}
-              transition={{ duration: 0.25 }}
-            >
-              <Bookmark
-                size={18}
-                className={cn(
-                  'transition-colors duration-200',
-                  bookmarked
-                    ? 'text-primary fill-primary'
-                    : 'text-text-muted group-hover:text-primary'
-                )}
-              />
-            </motion.div>
-          </button>
+            {formatNumber(likesCount, locale)}
+          </span>
+        </button>
 
-          {/* Share */}
-          <button
-            onClick={() => setShareOpen(true)}
-            className="group flex h-10 items-center justify-center gap-1.5 rounded-xl px-3 transition-colors hover:bg-cyan/8"
-            aria-label={t('feed.shareArtwork')}
-            aria-haspopup="dialog"
+        {/* Comment */}
+        <Link
+          href={`/art/${artwork.id}`}
+          className="group flex min-h-10 min-w-0 items-center justify-center gap-1 rounded-xl px-1 transition-colors duration-150 hover:bg-cyan/8 motion-reduce:transition-none"
+          aria-label={t('comments.viewCount', { count: formatNumber(artwork.comments_count, locale) })}
+        >
+          <MessageCircle
+            size={17}
+            className="shrink-0 text-text-muted transition-colors duration-150 group-hover:text-cyan motion-reduce:transition-none"
+          />
+          <span className="min-w-0 truncate text-[11px] font-semibold tabular-nums text-text-muted">
+            {formatNumber(artwork.comments_count, locale)}
+          </span>
+        </Link>
+
+        {/* Repost */}
+        <button
+          onClick={() => void handleRepost()}
+          className="group flex min-h-10 min-w-0 items-center justify-center gap-1 rounded-xl px-1 transition-colors duration-150 hover:bg-green/8 motion-reduce:transition-none"
+          aria-label={reposted ? t('feed.undoRepost') : t('feed.repost')}
+          aria-pressed={reposted}
+        >
+          <motion.div
+            className="shrink-0"
+            animate={reposted ? { rotate: [0, -15, 15, 0] } : {}}
+            transition={{ duration: 0.18 }}
           >
-            <Share2
-              size={16}
-              className="text-text-muted group-hover:text-cyan transition-colors duration-200"
+            <Repeat2
+              size={17}
+              className={cn(
+                'transition-colors duration-150 motion-reduce:transition-none',
+                reposted ? 'text-green' : 'text-text-muted group-hover:text-green'
+              )}
             />
-            <span className="hidden text-xs font-semibold text-text-muted transition-colors group-hover:text-text sm:inline">{t('common.share')}</span>
-          </button>
+          </motion.div>
+          <span
+            className={cn(
+              'min-w-0 truncate text-[11px] font-semibold tabular-nums transition-colors duration-150 motion-reduce:transition-none',
+              reposted ? 'text-green' : 'text-text-muted'
+            )}
+          >
+            {formatNumber(repostsCount, locale)}
+          </span>
+        </button>
+
+        {/* Views */}
+        <div
+          className="flex min-h-10 min-w-0 items-center justify-center gap-1 px-1 text-text-muted/70"
+          aria-label={t('common.views', { count: formatNumber(viewsCount, locale) })}
+        >
+          <Eye size={15} className="shrink-0" />
+          <span className="min-w-0 truncate text-[10px] font-medium tabular-nums">{formatNumber(viewsCount, locale)}</span>
         </div>
+
+        {/* Bookmark */}
+        <button
+          onClick={() => void handleBookmark()}
+          className="group flex min-h-10 min-w-0 items-center justify-center rounded-xl px-1 transition-colors duration-150 hover:bg-primary/8 motion-reduce:transition-none"
+          aria-label={bookmarked ? t('feed.removeBookmark') : t('feed.bookmark')}
+          aria-pressed={bookmarked}
+        >
+          <motion.div
+            animate={bookmarked ? { scale: [1, 1.2, 1] } : {}}
+            transition={{ duration: 0.18 }}
+          >
+            <Bookmark
+              size={17}
+              className={cn(
+                'transition-colors duration-150 motion-reduce:transition-none',
+                bookmarked
+                  ? 'fill-primary text-primary'
+                  : 'text-text-muted group-hover:text-primary'
+              )}
+            />
+          </motion.div>
+        </button>
+
+        {/* Share */}
+        <button
+          onClick={() => setShareOpen(true)}
+          className="group flex min-h-10 min-w-0 items-center justify-center rounded-xl px-1 transition-colors duration-150 hover:bg-cyan/8 motion-reduce:transition-none"
+          aria-label={t('feed.shareArtwork')}
+          aria-haspopup="dialog"
+        >
+          <Share2
+            size={17}
+            className="text-text-muted transition-colors duration-150 group-hover:text-cyan motion-reduce:transition-none"
+          />
+        </button>
       </div>
       <ArtworkShareSheet
         artwork={artwork}

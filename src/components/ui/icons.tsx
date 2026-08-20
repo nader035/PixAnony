@@ -15,7 +15,7 @@ import {
   PaintBucket as PaintBucketIcon, Palette as PaletteIcon, PaperPlaneTilt, PencilSimple,
   Plus as PlusIcon, Question, Repeat as RepeatIcon, ShareNetwork, ShieldCheck, Sparkle,
   SpinnerGap, Square as SquareIcon, Star as StarIcon, Sun as SunIcon, SquaresFour,
-  Tray, Trash as TrashIcon, Trophy as TrophyIcon, Translate as TranslateIcon, UploadSimple, User as UserIcon,
+  SidebarSimple as SidebarSimpleIcon, Tray, Trash as TrashIcon, Trophy as TrophyIcon, Translate as TranslateIcon, UploadSimple, User as UserIcon,
   UserCheck as UserCheckIcon, UserPlus as UserPlusIcon, Users as UsersIcon, X as XIcon,
   XLogo,
   ChatCircle, Chats,
@@ -97,6 +97,7 @@ export const Send = PaperPlaneTilt;
 export const Settings = Gear;
 export const Share2 = ShareNetwork;
 export const Shield = ShieldCheck;
+export const SidebarSimple = SidebarSimpleIcon;
 export const Sparkles = Sparkle;
 export const Square = SquareIcon;
 export const Star = StarIcon;

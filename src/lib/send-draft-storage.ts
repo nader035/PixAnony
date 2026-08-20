@@ -1,12 +1,15 @@
-import type { GridSize, PixelLayer } from '@/lib/types';
+import type { PixelLayer } from '@/lib/types';
 
 const SEND_DRAFT_KEY_PREFIX = 'pixanony:send-draft:';
-export const SEND_DRAFT_VERSION = 1;
+export const SEND_DRAFT_VERSION = 2;
 
 export type SendMode = 'anonymous' | 'signed';
 
 export interface SendDraftCanvasState {
-  gridSize: GridSize;
+  /** Kept for compatibility with drafts created before rectangular canvases. */
+  gridSize: number;
+  gridWidth: number;
+  gridHeight: number;
   pixelData: string[];
   layers: PixelLayer[];
   activeLayerId: string;
@@ -48,8 +51,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
-function isGridSize(value: unknown): value is GridSize {
-  return value === 8 || value === 16 || value === 32 || value === 64 || value === 128;
+function isCanvasDimension(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 8 && value <= 128;
 }
 
 function isSymmetryMode(value: unknown): value is SendDraftCanvasState['symmetryMode'] {
@@ -67,10 +70,10 @@ function createDraftLayerId() {
     : Math.random().toString(36).slice(2);
 }
 
-function sanitizeLayers(value: unknown, gridSize: GridSize) {
+function sanitizeLayers(value: unknown, gridWidth: number, gridHeight: number) {
   if (!Array.isArray(value)) return null;
 
-  const expectedLength = gridSize * gridSize;
+  const expectedLength = gridWidth * gridHeight;
   const layers = value
     .map((layer): PixelLayer | null => {
       if (!isRecord(layer)) return null;
@@ -92,8 +95,8 @@ function sanitizeLayers(value: unknown, gridSize: GridSize) {
   return layers.length > 0 ? layers : null;
 }
 
-function compositePixelData(layers: PixelLayer[], gridSize: GridSize) {
-  const pixels = Array(gridSize * gridSize).fill('transparent');
+function compositePixelData(layers: PixelLayer[], gridWidth: number, gridHeight: number) {
+  const pixels = Array(gridWidth * gridHeight).fill('transparent');
   for (const layer of layers) {
     if (!layer.visible) continue;
     for (let i = 0; i < layer.pixels.length; i++) {
@@ -117,13 +120,19 @@ function sanitizeDraft(value: unknown, recipientUsername: string): SendDraft | n
 
   if (storedRecipient !== normalizedRecipient) return null;
 
-  const gridSize = canvas.gridSize;
-  if (!isGridSize(gridSize)) return null;
+  const gridWidth = isCanvasDimension(canvas.gridWidth)
+    ? canvas.gridWidth
+    : canvas.gridSize;
+  const gridHeight = isCanvasDimension(canvas.gridHeight)
+    ? canvas.gridHeight
+    : canvas.gridSize;
+  if (!isCanvasDimension(gridWidth) || !isCanvasDimension(gridHeight)) return null;
+  if (gridWidth * gridHeight > 16_384) return null;
 
-  const layers = sanitizeLayers(canvas.layers, gridSize);
+  const layers = sanitizeLayers(canvas.layers, gridWidth, gridHeight);
   if (!layers) return null;
 
-  const expectedLength = gridSize * gridSize;
+  const expectedLength = gridWidth * gridHeight;
   const storedPixelData = sanitizePixels(canvas.pixelData, expectedLength);
   const activeLayerId = typeof canvas.activeLayerId === 'string'
     && layers.some((layer) => layer.id === canvas.activeLayerId)
@@ -143,8 +152,10 @@ function sanitizeDraft(value: unknown, recipientUsername: string): SendDraft | n
     version: typeof value.version === 'number' ? value.version : SEND_DRAFT_VERSION,
     recipientUsername: normalizedRecipient,
     canvas: {
-      gridSize,
-      pixelData: storedPixelData ?? compositePixelData(layers, gridSize),
+      gridSize: gridWidth,
+      gridWidth,
+      gridHeight,
+      pixelData: storedPixelData ?? compositePixelData(layers, gridWidth, gridHeight),
       layers,
       activeLayerId,
       color,

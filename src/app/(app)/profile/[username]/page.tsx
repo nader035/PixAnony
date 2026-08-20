@@ -13,6 +13,7 @@ import { formatNumber } from '@/lib/utils';
 import type { Artwork } from '@/lib/types';
 import { createPublicPageMetadata } from '@/lib/seo';
 import { getServerI18n } from '@/lib/i18n/server';
+import { MasonryGrid, MasonryItem } from '@/components/ui/masonry-grid';
 
 type TimelineItem = {
   kind: 'artwork' | 'repost';
@@ -104,12 +105,14 @@ export default async function ProfilePage({
       .select('*, profile:profiles!artworks_user_id_fkey(*)')
       .eq('user_id', profile.id)
       .eq('visibility', 'public')
+      .in('artwork_kind', ['standard', 'challenge_submission', 'admin_delivery'])
       .order('created_at', { ascending: false }),
     supabase
       .from('reposts')
       .select('created_at, artwork:artworks!inner(*, profile:profiles!artworks_user_id_fkey(*))')
       .eq('user_id', profile.id)
       .eq('artwork.visibility', 'public')
+      .in('artwork.artwork_kind', ['standard', 'challenge_submission', 'admin_delivery'])
       .order('created_at', { ascending: false }),
     user && user.id !== profile.id
       ? supabase.from('follows').select('id').eq('follower_id', user.id).eq('following_id', profile.id).maybeSingle()
@@ -222,23 +225,24 @@ export default async function ProfilePage({
       </section>
 
       {timeline.length ? (
-        <div className="space-y-4 p-3 sm:p-6">
+        <MasonryGrid columns="compact" className="p-3 sm:p-6">
           {timeline.map((item) => (
-            <FeedCard
-              key={`${item.kind}-${item.eventAt}-${item.artwork.id}`}
-              artwork={item.artwork}
-              repostContext={
-                item.kind === 'repost'
-                  ? {
-                      displayName: profile.display_name || profile.username,
-                      username: profile.username,
-                      createdAt: item.eventAt,
-                    }
-                  : undefined
-              }
-            />
+            <MasonryItem key={`${item.kind}-${item.eventAt}-${item.artwork.id}`}>
+              <FeedCard
+                artwork={item.artwork}
+                repostContext={
+                  item.kind === 'repost'
+                    ? {
+                        displayName: profile.display_name || profile.username,
+                        username: profile.username,
+                        createdAt: item.eventAt,
+                      }
+                    : undefined
+                }
+              />
+            </MasonryItem>
           ))}
-        </div>
+        </MasonryGrid>
       ) : (
         <div className="mx-4 mt-5 flex min-h-64 flex-col items-center justify-center rounded-3xl border border-dashed border-border text-center sm:mx-7">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
